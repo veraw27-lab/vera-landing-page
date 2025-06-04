@@ -491,12 +491,22 @@
 
         /* Mobile */
         @media (max-width: 1023px) {
-            .nav-links {
-                display: none;
+            .nav {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
             }
             
-            .nav-top {
-                justify-content: center;
+            .nav-left {
+                align-items: center;
+            }
+            
+            .nav-hashtags {
+                text-align: center;
+            }
+            
+            .nav-links {
+                display: none;
             }
             
             .hero-grid {
@@ -517,6 +527,9 @@
             .hero-right .profile-container {
                 width: clamp(200px, 40vw, 300px);
                 height: clamp(260px, 50vw, 380px);
+            }
+            
+            .hero-right .profile-photo-wrapper {
                 border-radius: 12px;
             }
             
@@ -585,18 +598,18 @@
 <body>
     <header class="header">
         <nav class="nav container" role="navigation" aria-label="Main navigation">
-            <div class="nav-top">
+            <div class="nav-left">
                 <a href="#" class="logo" aria-label="Vera Wu homepage">VW</a>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#vibes">Content</a></li>
-                    <li><a href="#adventures">Adventures</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
+                <div class="nav-hashtags" aria-label="Personal hashtags">
+                    #LifeBeyondDecks #ChillStrategist #MarketsAndMoments
+                </div>
             </div>
-            <div class="nav-hashtags" aria-label="Personal hashtags">
-                #LifeBeyondDecks #ChillStrategist #MarketsAndMoments
-            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#vibes">Content</a></li>
+                <li><a href="#adventures">Adventures</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
         </nav>
     </header>
 
