@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vera Wu | Not a Guide</title>
+    <title>Vera Wu | Full-time Explorer, Part-time Professional</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         /* CSS Reset */
         * {
@@ -20,7 +20,7 @@
             font-weight: 300;
             line-height: 1.6;
             color: #ffffff;
-            background: #1a1a1a;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
             overflow-x: hidden;
         }
 
@@ -43,27 +43,26 @@
 
         .nav {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: space-between;
+            align-items: flex-start;
             padding: clamp(1rem, 2vw, 1.5rem) 0;
             gap: clamp(0.5rem, 1vw, 1rem);
         }
 
-        .nav-top {
+        .nav-left {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            flex-wrap: wrap;
-            gap: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
         }
 
         .logo {
             font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-            font-weight: 300;
+            font-weight: 400;
             color: #ffffff;
             letter-spacing: 2px;
             text-decoration: none;
+            font-family: 'Caveat', cursive;
         }
 
         .nav-links {
@@ -78,8 +77,7 @@
             font-size: clamp(0.7rem, 1.5vw, 0.8rem);
             font-weight: 300;
             letter-spacing: 0.5px;
-            text-align: center;
-            width: 100%;
+            text-align: left;
         }
 
         .nav-links a {
@@ -87,12 +85,13 @@
             color: #999;
             font-weight: 300;
             font-size: clamp(0.8rem, 1.5vw, 0.9rem);
-            transition: color 0.3s;
+            transition: all 0.3s;
             letter-spacing: 0.5px;
         }
 
         .nav-links a:hover {
-            color: #ffffff;
+            color: #7ca3d1;
+            transform: translateY(-2px);
         }
 
         /* Hero Section */
@@ -101,7 +100,9 @@
             display: flex;
             align-items: center;
             padding-top: clamp(100px, 15vw, 120px);
-            background: #1a1a1a;
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(45, 45, 45, 0.8)),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="80" cy="40" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="40" cy="70" r="1" fill="%23ffffff" opacity="0.02"/><circle cx="60" cy="90" r="1" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            background-size: cover, 200px 200px;
         }
 
         .hero-grid {
@@ -122,24 +123,27 @@
         }
 
         .profile-container {
-            width: clamp(120px, 25vw, 200px);
-            height: clamp(120px, 25vw, 200px);
+            width: clamp(200px, 35vw, 300px);
+            height: clamp(260px, 45vw, 380px);
             margin-bottom: clamp(1.5rem, 3vw, 2rem);
+            position: relative;
         }
 
         .profile-photo-wrapper {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
+            border-radius: 16px;
             overflow: hidden;
             background: #333;
             position: relative;
             transition: all 0.3s ease;
+            border: 3px solid rgba(124, 163, 209, 0.3);
         }
 
         .profile-photo-wrapper:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: translateY(-8px) rotate(1deg);
+            box-shadow: 0 25px 80px rgba(124, 163, 209, 0.2);
+            border-color: rgba(124, 163, 209, 0.6);
         }
 
         .profile-photo {
@@ -161,35 +165,101 @@
             transition: all 0.3s;
         }
 
-        .profile-placeholder:hover {
-            background: linear-gradient(135deg, #444 0%, #555 100%);
-            color: #ccc;
+        .explorer-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #7ca3d1, #5a8bc4);
+            color: white;
+            font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-family: 'Caveat', cursive;
+            font-weight: 500;
+            transform: rotate(15deg);
+            box-shadow: 0 4px 15px rgba(124, 163, 209, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: rotate(15deg) translateY(0px); }
+            50% { transform: rotate(15deg) translateY(-5px); }
         }
 
         .guide-title {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            font-weight: 400;
+            font-size: clamp(2.8rem, 8vw, 5rem);
+            font-weight: 200;
             color: #ffffff;
             line-height: 1.1;
-            margin-bottom: clamp(1rem, 2vw, 2rem);
-            letter-spacing: -1px;
+            margin-bottom: clamp(0.8rem, 2vw, 1.2rem);
+            letter-spacing: -3px;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 50%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+        }
+
+        .guide-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #7ca3d1, transparent);
         }
 
         .guide-tagline {
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
             font-weight: 300;
-            color: #ccc;
+            color: #bbb;
             margin-bottom: clamp(1.5rem, 3vw, 2rem);
             line-height: 1.5;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .guide-tagline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 1px;
+            background: #7ca3d1;
         }
 
         .hero-description {
-            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-size: clamp(1rem, 2.2vw, 1.1rem);
             font-weight: 300;
-            color: #bbb;
+            color: #ddd;
             line-height: 1.7;
             margin-bottom: clamp(1.5rem, 3vw, 2rem);
-            max-width: 600px;
+            max-width: 650px;
+        }
+
+        .hero-quote {
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            font-style: italic;
+            color: #7ca3d1;
+            margin-bottom: clamp(1.5rem, 3vw, 2rem);
+            font-family: 'Caveat', cursive;
+            position: relative;
+        }
+
+        .hero-quote::before {
+            content: '"';
+            font-size: 2em;
+            color: rgba(124, 163, 209, 0.3);
+            position: absolute;
+            left: -20px;
+            top: -10px;
         }
 
         /* Hero Social Links */
@@ -203,80 +273,129 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: clamp(40px, 8vw, 44px);
-            height: clamp(40px, 8vw, 44px);
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
+            width: clamp(45px, 8vw, 50px);
+            height: clamp(45px, 8vw, 50px);
+            background: rgba(124, 163, 209, 0.1);
+            color: #7ca3d1;
             text-decoration: none;
             border-radius: 50%;
-            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
             transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(124, 163, 209, 0.2);
         }
 
         .hero-social-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+            background: rgba(124, 163, 209, 0.2);
+            transform: translateY(-3px) scale(1.1);
             color: #ffffff;
+            box-shadow: 0 8px 25px rgba(124, 163, 209, 0.3);
+        }
+
+        .ig-link {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            color: white !important;
+        }
+
+        .ig-link:hover {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            color: white !important;
         }
 
         /* Content Sections */
         .content-section {
-            padding: clamp(3rem, 8vw, 6rem) 0;
+            padding: clamp(4rem, 8vw, 6rem) 0;
         }
 
         .section-title {
-            font-size: clamp(2rem, 6vw, 3.5rem);
-            font-weight: 100;
+            font-size: clamp(2.2rem, 6vw, 3.5rem);
+            font-weight: 400;
             color: #ffffff;
             margin-bottom: clamp(1.5rem, 3vw, 2rem);
             text-align: center;
-            letter-spacing: -2px;
+            letter-spacing: -1px;
+            font-family: 'Caveat', cursive;
         }
 
-        /* Content Vibes Section */
-        .vibes {
-            background: #1a1a1a;
+        /* Explorer Journey Section */
+        .explorer-journey {
+            background: rgba(45, 45, 45, 0.3);
+            border-radius: 20px;
+            margin: clamp(3rem, 6vw, 5rem) 0;
+            padding: clamp(2rem, 5vw, 3rem);
+            border: 1px solid rgba(124, 163, 209, 0.1);
         }
 
-        .vibes-grid {
+        .journey-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: clamp(1rem, 3vw, 2rem);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: clamp(1.5rem, 3vw, 2rem);
             margin-top: clamp(2rem, 4vw, 3rem);
         }
 
-        .vibe-card {
+        .journey-card {
             background: rgba(255, 255, 255, 0.03);
-            padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
-            border-radius: 12px;
+            padding: clamp(1.5rem, 3vw, 2rem);
+            border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s;
-            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .vibe-card:hover {
+        .journey-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(124, 163, 209, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+
+        .journey-card:hover::before {
+            opacity: 1;
+            animation: shimmer 0.6s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .journey-card:hover {
             background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-8px);
+            border-color: rgba(124, 163, 209, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .vibe-title {
-            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-            font-weight: 400;
+        .journey-icon {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            color: #7ca3d1;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .journey-title {
+            font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+            font-weight: 500;
             color: #ffffff;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            font-family: 'Caveat', cursive;
         }
 
-        .vibe-description {
-            font-size: clamp(0.8rem, 1.8vw, 0.9rem);
-            color: #999;
+        .journey-description {
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            color: #bbb;
             line-height: 1.6;
         }
 
         /* Adventures Gallery */
         .adventures {
-            background: #2a2a2a;
+            background: rgba(26, 26, 26, 0.5);
         }
 
         .adventures-grid {
@@ -289,17 +408,18 @@
         .adventure-card {
             aspect-ratio: 1;
             background: #333;
-            border-radius: 8px;
+            border-radius: 16px;
             overflow: hidden;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+            border: 2px solid rgba(255, 255, 255, 0.05);
             position: relative;
+            cursor: pointer;
         }
 
         .adventure-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-10px) rotate(2deg);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            border-color: rgba(124, 163, 209, 0.3);
         }
 
         .adventure-image {
@@ -318,6 +438,11 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .adventure-card:hover .adventure-image img {
+            transform: scale(1.1);
         }
 
         .adventure-placeholder {
@@ -329,6 +454,7 @@
             color: #666;
             font-size: clamp(0.7rem, 1.5vw, 0.8rem);
             text-align: center;
+            font-family: 'Caveat', cursive;
         }
 
         .adventure-placeholder i {
@@ -337,37 +463,41 @@
             opacity: 0.6;
         }
 
-        /* Icon overlay for adventure cards with images */
+        /* Icon overlay for adventure cards */
         .adventure-icon-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
             border-radius: 50%;
-            width: clamp(40px, 8vw, 50px);
-            height: clamp(40px, 8vw, 50px);
+            width: clamp(45px, 8vw, 55px);
+            height: clamp(45px, 8vw, 55px);
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
-            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
             z-index: 2;
             transition: all 0.3s ease;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            opacity: 0;
         }
 
         .adventure-card:hover .adventure-icon-overlay {
-            background: rgba(0, 0, 0, 0.8);
+            opacity: 1;
             transform: translate(-50%, -50%) scale(1.1);
-            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(124, 163, 209, 0.9);
         }
 
         /* Quote Section */
         .quote {
-            background: #2a2a2a;
+            background: linear-gradient(135deg, rgba(124, 163, 209, 0.1), rgba(90, 139, 196, 0.05));
             text-align: center;
+            border-radius: 20px;
+            margin: clamp(3rem, 6vw, 5rem) 0;
+            border: 1px solid rgba(124, 163, 209, 0.2);
         }
 
         .quote-content {
@@ -376,25 +506,48 @@
         }
 
         .quote-text {
-            font-size: clamp(1.3rem, 4vw, 2rem);
-            font-weight: 200;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 400;
             color: #ffffff;
             line-height: 1.4;
             font-style: italic;
             margin-bottom: clamp(1.5rem, 3vw, 2rem);
             letter-spacing: 0.5px;
+            font-family: 'Caveat', cursive;
         }
 
         .quote-author {
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            color: #999;
-            font-weight: 300;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            color: #7ca3d1;
+            font-weight: 400;
+            font-family: 'Caveat', cursive;
         }
 
         /* Contact Section */
         .contact {
-            background: #1a1a1a;
+            background: rgba(26, 26, 26, 0.3);
             text-align: center;
+        }
+
+        .ig-cta {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            color: white;
+            padding: clamp(1rem, 3vw, 1.5rem) clamp(2rem, 5vw, 3rem);
+            border-radius: 16px;
+            margin: clamp(2rem, 4vw, 3rem) 0;
+            text-decoration: none;
+            display: inline-block;
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: 'Caveat', cursive;
+            border: none;
+            cursor: pointer;
+        }
+
+        .ig-cta:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(240, 148, 51, 0.4);
         }
 
         .contact-links {
@@ -413,22 +566,23 @@
             color: #ffffff;
             padding: 12px 24px;
             text-decoration: none;
-            border-radius: 6px;
+            border-radius: 12px;
             font-weight: 300;
             transition: all 0.3s;
-            font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
             border: 1px solid rgba(255, 255, 255, 0.08);
             min-width: 150px;
         }
 
         .contact-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+            background: rgba(124, 163, 209, 0.2);
+            transform: translateY(-3px);
+            border-color: rgba(124, 163, 209, 0.5);
         }
 
         /* Footer */
         .footer {
-            background: #111;
+            background: rgba(17, 17, 17, 0.8);
             color: #666;
             text-align: center;
             padding: 2rem 0;
@@ -459,33 +613,17 @@
             }
             
             .profile-container {
-                width: 350px;
-                height: 450px;
-                border-radius: 12px;
+                width: 380px;
+                height: 480px;
                 margin-bottom: 0;
             }
             
-            .profile-photo-wrapper {
-                border-radius: 12px;
-            }
-            
-            .vibes-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .adventures-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        /* Tablet Landscape */
-        @media (max-width: 1199px) and (min-width: 768px) {
-            .nav-links {
-                gap: 2rem;
-            }
-            
-            .adventures-grid {
+            .journey-grid {
                 grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .adventures-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -524,15 +662,6 @@
                 justify-content: center;
             }
             
-            .hero-right .profile-container {
-                width: clamp(200px, 40vw, 300px);
-                height: clamp(260px, 50vw, 380px);
-            }
-            
-            .hero-right .profile-photo-wrapper {
-                border-radius: 12px;
-            }
-            
             .adventures-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -545,53 +674,26 @@
 
         /* Small Mobile */
         @media (max-width: 480px) {
-            .adventures-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
+            .journey-grid {
+                grid-template-columns: 1fr;
             }
             
-            .vibe-card {
-                padding: 1rem 0.8rem;
+            .adventures-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
             }
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Animation utilities */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
         }
 
-        .hero-content > * {
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .hero-content > *:nth-child(1) { animation-delay: 0.1s; }
-        .hero-content > *:nth-child(2) { animation-delay: 0.2s; }
-        .hero-content > *:nth-child(3) { animation-delay: 0.3s; }
-        .hero-content > *:nth-child(4) { animation-delay: 0.4s; }
-        .hero-content > *:nth-child(5) { animation-delay: 0.5s; }
-
-        /* Utility Classes */
-        .hidden {
-            display: none;
-        }
-
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -601,14 +703,14 @@
             <div class="nav-left">
                 <a href="#" class="logo" aria-label="Vera Wu homepage">VW</a>
                 <div class="nav-hashtags" aria-label="Personal hashtags">
-                    #LifeBeyondDecks #ChillStrategist #MarketsAndMoments
+                    #FullTimeExplorer #PartTimeProfessional #TravelLife
                 </div>
             </div>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#vibes">Content</a></li>
+                <li><a href="#journey">Journey</a></li>
                 <li><a href="#adventures">Adventures</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#contact">Connect</a></li>
             </ul>
         </nav>
     </header>
@@ -621,13 +723,17 @@
                         <h1 class="guide-title">Not a Guide</h1>
                         <p class="guide-tagline">Chill • Limit Push — Living, not explaining.</p>
                         
+                        <div class="hero-quote">
+                            "Embrace life with boldness, explore the world with curiosity"
+                        </div>
+                        
                         <div class="hero-description">
-                            <p>Usually out wandering — trails, alleys, oceans, playlists. Sometimes at a desk. I work on AI, media, and tech — mostly to support a wide curiosity for life beyond work.</p>
+                            <p>Usually out wandering — trails, alleys, oceans, new cultures. Sometimes at a desk working on AI, media, and tech. Every adventure shapes my perspective, every challenge becomes a story worth sharing.</p>
                         </div>
                         
                         <div class="hero-social">
-                            <a href="https://www.instagram.com/vera_travellife/" class="hero-social-link" target="_blank" 
-                               rel="noopener noreferrer" aria-label="Follow on Instagram">
+                            <a href="https://www.instagram.com/vera_travellife/" class="hero-social-link ig-link" target="_blank" 
+                               rel="noopener noreferrer" aria-label="Follow my adventures on Instagram">
                                 <i class="fab fa-instagram" aria-hidden="true"></i>
                             </a>
                             <a href="mailto:vera.w27@gmail.com" class="hero-social-link" aria-label="Send email">
@@ -638,9 +744,10 @@
                     
                     <div class="hero-right">
                         <div class="profile-container">
+                            <div class="explorer-badge">Explorer</div>
                             <div class="profile-photo-wrapper">
-                                <img src="images/profile.jpeg" alt="Vera Wu profile photo" class="profile-photo" 
-                                     onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Profile Photo</p></div></div>'">
+                                <img src="images/profile.jpeg" alt="Vera Wu - Explorer and adventurer" class="profile-photo" 
+                                     onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-mountain\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Adventure Awaits</p></div></div>'">
                             </div>
                         </div>
                     </div>
@@ -648,111 +755,111 @@
             </div>
         </section>
 
-        <section id="vibes" class="content-section vibes">
+        <section id="journey" class="content-section">
             <div class="container">
-                <h2 class="section-title">Content Vibes</h2>
-                
-                <div class="vibes-grid">
-                    <article class="vibe-card">
-                        <h3 class="vibe-title">Nomad Spots</h3>
-                        <p class="vibe-description">Global paths, 30+ countries. No top 10s, just places that left a mark.</p>
-                    </article>
+                <div class="explorer-journey animate-on-scroll">
+                    <h2 class="section-title">My Explorer Journey</h2>
+                    
+                    <div class="journey-grid">
+                        <article class="journey-card animate-on-scroll">
+                            <i class="fas fa-globe-asia journey-icon" aria-hidden="true"></i>
+                            <h3 class="journey-title">30+ Countries & Counting</h3>
+                            <p class="journey-description">From Nepal's mountain trails to hidden alleyways in old cities. Every destination teaches me something new about the world and myself.</p>
+                        </article>
 
-                    <article class="vibe-card">
-                        <h3 class="vibe-title">Limit Push</h3>
-                        <p class="vibe-description">Endurance, challenge, trial & error. Not to inspire, just to try.</p>
-                    </article>
+                        <article class="journey-card animate-on-scroll">
+                            <i class="fas fa-mountain journey-icon" aria-hidden="true"></i>
+                            <h3 class="journey-title">Adventure Challenges</h3>
+                            <p class="journey-description">Setting personal goals like pull-up challenges, exploring remote trails, and pushing my limits while staying true to who I am.</p>
+                        </article>
 
-                    <article class="vibe-card">
-                        <h3 class="vibe-title">Street Hacks</h3>
-                        <p class="vibe-description">Day-to-day tricks, personal style, fashion bits, and low-effort genius that somehow works.</p>
-                    </article>
-
-                    <article class="vibe-card">
-                        <h3 class="vibe-title">Chill Flair</h3>
-                        <p class="vibe-description">Fragrance, film, music. No review. Just taste.</p>
-                    </article>
+                        <article class="journey-card animate-on-scroll">
+                            <i class="fas fa-palette journey-icon" aria-hidden="true"></i>
+                            <h3 class="journey-title">Creative Expression</h3>
+                            <p class="journey-description">Capturing moments through photography, sketching travel memories, and sharing authentic style that reflects my adventurous spirit.</p>
+                        </article>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section id="adventures" class="content-section adventures">
             <div class="container">
-                <h2 class="section-title">Adventures</h2>
+                <h2 class="section-title animate-on-scroll">Adventure Highlights</h2>
                 
                 <div class="adventures-grid">
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
-                            <img src="images/adventure1.jpeg" alt="Forest trail adventure" 
-                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-tree\'></i><p>Forest</p></div>'">
+                            <img src="images/adventure1.jpeg" alt="Forest exploration and nature trails" 
+                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-tree\'></i><p>Forest Trails</p></div>'">
                             <div class="adventure-icon-overlay" aria-hidden="true">
                                 <i class="fas fa-tree"></i>
                             </div>
                         </div>
                     </article>
 
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
-                            <img src="images/adventure2.jpeg" alt="Running adventure" 
-                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-running\'></i><p>Running</p></div>'">
+                            <img src="images/adventure2.jpeg" alt="Running and fitness challenges" 
+                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-running\'></i><p>Fitness Goals</p></div>'">
                             <div class="adventure-icon-overlay" aria-hidden="true">
                                 <i class="fas fa-running"></i>
                             </div>
                         </div>
                     </article>
 
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
-                            <img src="images/adventure3.jpeg" alt="Photography adventure" 
-                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Photography</p></div>'">
+                            <img src="images/adventure3.jpeg" alt="Street photography and urban exploration" 
+                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Street Photography</p></div>'">
                             <div class="adventure-icon-overlay" aria-hidden="true">
                                 <i class="fas fa-camera"></i>
                             </div>
                         </div>
                     </article>
 
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
-                            <img src="images/adventure4.jpeg" alt="Hiking adventure" 
-                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-hiking\'></i><p>Hiking</p></div>'">
+                            <img src="images/adventure4.jpeg" alt="Mountain hiking and outdoor adventures" 
+                                 onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-hiking\'></i><p>Mountain Hiking</p></div>'">
                             <div class="adventure-icon-overlay" aria-hidden="true">
                                 <i class="fas fa-hiking"></i>
                             </div>
                         </div>
                     </article>
 
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
                             <div class="adventure-placeholder">
-                                <i class="fas fa-running" aria-hidden="true"></i>
-                                <p>Running</p>
+                                <i class="fas fa-plane" aria-hidden="true"></i>
+                                <p>Travel Stories</p>
                             </div>
                         </div>
                     </article>
 
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
                             <div class="adventure-placeholder">
-                                <i class="fas fa-snowflake" aria-hidden="true"></i>
-                                <p>Winter</p>
+                                <i class="fas fa-heart" aria-hidden="true"></i>
+                                <p>Life Moments</p>
                             </div>
                         </div>
                     </article>
 
-                    <article class="adventure-card">
-                        <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-city" aria-hidden="true"></i>
-                                <p>Urban</p>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article class="adventure-card">
+                    <article class="adventure-card animate-on-scroll">
                         <div class="adventure-image">
                             <div class="adventure-placeholder">
                                 <i class="fas fa-compass" aria-hidden="true"></i>
-                                <p>Explore</p>
+                                <p>New Discoveries</p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="adventure-card animate-on-scroll">
+                        <div class="adventure-image">
+                            <div class="adventure-placeholder">
+                                <i class="fas fa-star" aria-hidden="true"></i>
+                                <p>Epic Moments</p>
                             </div>
                         </div>
                     </article>
@@ -762,27 +869,35 @@
 
         <section class="content-section quote">
             <div class="container">
-                <blockquote class="quote-content">
-                    <p class="quote-text">"I do what I like. No reasons. Chill is baseline, push is the game."</p>
-                    <cite class="quote-author">— Vera</cite>
+                <blockquote class="quote-content animate-on-scroll">
+                    <p class="quote-text">"Be true, bold and be yourself — life's too short for anything less"</p>
+                    <cite class="quote-author">— Vera's Life Philosophy</cite>
                 </blockquote>
             </div>
         </section>
 
-        <section id="contact" class="content-section contact">
+        <section id="connect" class="content-section contact">
             <div class="container">
-                <h2 class="section-title">Contact</h2>
+                <h2 class="section-title animate-on-scroll">Let's Connect & Explore Together</h2>
                 
-                <div class="contact-links">
-                    <a href="https://www.instagram.com/vera_travellife/" class="contact-link" target="_blank" 
-                       rel="noopener noreferrer">
-                        <i class="fab fa-instagram" aria-hidden="true"></i>
-                        <span>DM @vera_travellife</span>
+                <div class="animate-on-scroll">
+                    <a href="https://www.instagram.com/vera_travellife/" class="ig-cta" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram"></i> Follow My Adventures on Instagram
                     </a>
-                    
+                    <p style="color: #bbb; margin-top: 1rem; font-size: clamp(0.9rem, 2vw, 1rem);">
+                        Join me for daily doses of exploration, travel tips, fitness challenges, and authentic life moments!
+                    </p>
+                </div>
+                
+                <div class="contact-links animate-on-scroll">
                     <a href="mailto:vera.w27@gmail.com" class="contact-link">
                         <i class="fas fa-envelope" aria-hidden="true"></i>
-                        <span>Email me</span>
+                        <span>Email for Collaborations</span>
+                    </a>
+                    
+                    <a href="https://www.instagram.com/vera_travellife/" class="contact-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                        <span>DM for Quick Chat</span>
                     </a>
                 </div>
             </div>
@@ -791,7 +906,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p>© 2025 Vera Wu. Not a Guide — Living, not explaining.</p>
+            <p>© 2025 Vera Wu. Full-time Explorer, Part-time Professional — Living life bold & true.</p>
         </div>
     </footer>
 
@@ -834,18 +949,25 @@
         const observer = new IntersectionObserver(function(entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+                    entry.target.classList.add('visible');
                 }
             });
         }, observerOptions);
 
-        // Observe cards for animation
-        document.querySelectorAll('.vibe-card, .adventure-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-            observer.observe(card);
+        // Observe elements for scroll animation
+        document.querySelectorAll('.animate-on-scroll').forEach(element => {
+            observer.observe(element);
+        });
+
+        // Add some sparkle to adventure cards
+        document.querySelectorAll('.adventure-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = `translateY(-10px) rotate(${Math.random() * 4 - 2}deg)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) rotate(0deg)';
+            });
         });
 
         // Performance optimization: Debounce resize events
@@ -858,12 +980,16 @@
         }, { passive: true });
 
         // Accessibility: Keyboard navigation for cards
-        document.querySelectorAll('.adventure-card, .vibe-card').forEach(card => {
+        document.querySelectorAll('.adventure-card, .journey-card').forEach(card => {
             card.setAttribute('tabindex', '0');
             card.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    this.click();
+                    // Add click behavior or animation here
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
                 }
             });
         });
@@ -874,6 +1000,28 @@
                 console.warn('Failed to load image:', this.src);
             });
         });
+
+        // Add some life to the page with subtle animations
+        setInterval(() => {
+            const explorerBadge = document.querySelector('.explorer-badge');
+            if (explorerBadge) {
+                explorerBadge.style.animation = 'none';
+                setTimeout(() => {
+                    explorerBadge.style.animation = 'float 3s ease-in-out infinite';
+                }, 10);
+            }
+        }, 10000);
+
+        // Instagram CTA pulse effect
+        const igCTA = document.querySelector('.ig-cta');
+        if (igCTA) {
+            setInterval(() => {
+                igCTA.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    igCTA.style.transform = 'scale(1)';
+                }, 200);
+            }, 8000);
+        }
     </script>
 </body>
 </html>
