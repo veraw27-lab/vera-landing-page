@@ -1,0 +1,48 @@
+name: Update Travel Data
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 每天早上 6 點 UTC（台灣時間下午 2 點）
+  workflow_dispatch:  # 允許手動觸發
+  push:
+    branches: [ main ]
+    paths: 
+      - '.github/workflows/update-travel-data.yml'
+      - 'scripts/**'
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: |
+        cd scripts
+        npm install
+    
+    - name: Fetch Instagram data
+      env:
+        INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+        INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+      run: |
+        cd scripts
+        node fetch-instagram-data.js
+    
+    - name: Commit and push if data changed
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add travel-map/data/
+        git diff --staged --quiet || git commit -m "🗺️ Auto-update travel data $(date)"
+        git push
