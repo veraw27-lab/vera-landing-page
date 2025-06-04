@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vera's World Travel Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,10 +15,9 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e1a;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a2332 50%, #0a0e1a 100%);
             color: #ffffff;
             overflow: hidden;
-            cursor: default;
         }
 
         .header {
@@ -26,7 +27,7 @@
             right: 0;
             background: rgba(10, 14, 26, 0.95);
             backdrop-filter: blur(20px);
-            padding: 20px 40px;
+            padding: 15px 30px;
             z-index: 1000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -40,20 +41,17 @@
         }
 
         .logo {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
             background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .stats {
             display: flex;
-            gap: 30px;
+            gap: 25px;
             font-size: 14px;
         }
 
@@ -63,279 +61,80 @@
 
         .stat-number {
             display: block;
-            font-size: 28px;
+            font-size: 22px;
             font-weight: bold;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            background: linear-gradient(45deg, #667eea, #764ba2);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: numberGlow 3s ease-in-out infinite;
         }
 
         .stat-label {
             color: #8892b0;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .map-container {
-            position: relative;
             width: 100vw;
             height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: radial-gradient(ellipse at center, #1a2332 0%, #0a0e1a 100%);
-            overflow: hidden;
+            position: relative;
         }
 
-        /* 星空背景效果 */
-        .map-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
+        #world-map {
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
-                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.4), transparent),
-                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.7), transparent);
-            background-repeat: repeat;
-            background-size: 200px 100px;
-            animation: twinkle 8s ease-in-out infinite;
-            pointer-events: none;
-            opacity: 0.3;
         }
 
-        .svg-defs {
-            position: absolute;
-            width: 0;
-            height: 0;
-        }
-
-        /* 國家樣式 */
         .country {
             fill: #2d3748;
             stroke: #4a5568;
             stroke-width: 0.5;
             cursor: pointer;
             transition: all 0.3s ease;
-            filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
         }
 
         .country:hover {
             fill: #4a5568;
             stroke: #667eea;
-            stroke-width: 1.5;
-            filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+            stroke-width: 1;
         }
 
         .country.visited {
-            fill: url(#visitedGradient);
+            fill: #667eea;
             stroke: #764ba2;
             stroke-width: 1.5;
-            filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
-            animation: pulse 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.6));
+            animation: pulse 3s ease-in-out infinite;
         }
 
         .country.visited:hover {
-            fill: url(#visitedHoverGradient);
-            stroke: #f093fb;
-            stroke-width: 2;
-            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.8));
+            fill: #764ba2;
+            filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.8));
             transform: scale(1.02);
-            transform-origin: center;
         }
 
-        /* 根據貼文數量的不同顏色 */
-        .country.visited[data-posts="1"] {
-            fill: url(#lowActivityGradient);
+        .country.high-activity {
+            fill: #f093fb;
+            filter: drop-shadow(0 0 12px rgba(240, 147, 251, 0.8));
         }
 
-        .country.visited[data-posts="2"], 
-        .country.visited[data-posts="3"] {
-            fill: url(#mediumActivityGradient);
-        }
-
-        .country.visited[data-posts="4"], 
-        .country.visited[data-posts="5"] {
-            fill: url(#highActivityGradient);
-        }
-
-        .country.visited[data-posts^="6"], 
-        .country.visited[data-posts^="7"], 
-        .country.visited[data-posts^="8"], 
-        .country.visited[data-posts^="9"] {
-            fill: url(#veryHighActivityGradient);
-        }
-
-        /* 工具提示樣式 */
-        .country-tooltip {
-            position: fixed;
-            background: linear-gradient(135deg, rgba(10, 14, 26, 0.95), rgba(45, 55, 72, 0.95));
-            color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            pointer-events: none;
-            z-index: 1002;
-            border: 1px solid rgba(102, 126, 234, 0.5);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transform: translateY(-5px);
-            opacity: 0;
-            animation: tooltipFadeIn 0.3s ease-out forwards;
-        }
-
-        .tooltip-country {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 4px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .tooltip-posts {
-            font-size: 12px;
-            color: #a0aec0;
-        }
-
-        /* 貼文覆蓋層 */
-        .posts-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+        .tooltip {
+            position: absolute;
             background: rgba(10, 14, 26, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            padding: 80px 40px 40px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .posts-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            height: 100%;
-        }
-
-        .posts-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .posts-title {
-            font-size: 32px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .posts-subtitle {
-            color: #8892b0;
-            font-size: 16px;
-        }
-
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .post-card {
-            background: rgba(45, 55, 72, 0.8);
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .post-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-            border-color: rgba(102, 126, 234, 0.5);
-        }
-
-        .post-image {
-            width: 100%;
-            height: 250px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            position: relative;
-        }
-
-        .post-content {
-            padding: 20px;
-        }
-
-        .post-location {
-            color: #667eea;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-
-        .post-date {
-            color: #8892b0;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .post-description {
-            color: #e2e8f0;
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-
-        .post-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .tag {
-            background: rgba(102, 126, 234, 0.2);
-            color: #667eea;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-        }
-
-        .close-btn {
-            position: fixed;
-            top: 120px;
-            right: 40px;
-            background: rgba(45, 55, 72, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 2001;
-            font-size: 20px;
-        }
-
-        .close-btn:hover {
-            background: rgba(102, 126, 234, 0.8);
-            transform: scale(1.1);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1001;
         }
 
         .loading {
@@ -344,140 +143,192 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            z-index: 1001;
-            display: none;
+            z-index: 2000;
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(102, 126, 234, 0.2);
-            border-top: 4px solid #667eea;
-            border-right: 4px solid #764ba2;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-top: 3px solid #667eea;
             border-radius: 50%;
-            animation: complexSpin 1.5s linear infinite;
+            animation: spin 1s linear infinite;
             margin: 0 auto 20px;
-            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
         }
 
-        .instagram-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
+        .posts-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            overflow-y: auto;
+            padding: 80px 20px 20px;
+        }
+
+        .posts-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .posts-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .posts-title {
+            font-size: 28px;
             font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
         }
 
-        /* 動畫定義 */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .post-card {
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            position: relative;
+        }
+
+        .post-content {
+            padding: 15px;
+        }
+
+        .post-location {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .post-date {
+            color: #8892b0;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .post-caption {
+            color: #e2e8f0;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(45, 55, 72, 0.9);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 3001;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(10, 14, 26, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-title {
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @keyframes pulse {
             0%, 100% {
-                filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
+                filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.6));
             }
             50% {
-                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 1)) drop-shadow(0 0 30px rgba(118, 75, 162, 0.8));
+                filter: drop-shadow(0 0 15px rgba(102, 126, 234, 1));
             }
         }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.5; }
-        }
-
-        @keyframes numberGlow {
-            0%, 100% { 
-                filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.5));
-            }
-            50% { 
-                filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.8));
-            }
-        }
-
-        @keyframes complexSpin {
-            0% { 
-                transform: rotate(0deg);
-                filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
-            }
-            50% {
-                filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.8));
-            }
-            100% { 
-                transform: rotate(360deg);
-                filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
-            }
-        }
-
-        @keyframes tooltipFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(-5px);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 響應式設計 */
         @media (max-width: 768px) {
             .header {
-                padding: 15px 20px;
+                padding: 10px 15px;
             }
-
+            
             .header-content {
                 flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stats {
                 gap: 15px;
             }
-
-            .stats {
-                gap: 20px;
+            
+            .logo {
+                font-size: 20px;
             }
-
-            .posts-overlay {
-                padding: 80px 20px 20px;
+            
+            .posts-modal {
+                padding: 60px 15px 15px;
             }
-
+            
             .posts-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .posts-title {
-                font-size: 24px;
-            }
-
-            .close-btn {
-                top: 90px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-            }
-
-            .country-tooltip {
-                font-size: 12px;
-                padding: 8px 12px;
-            }
-            
-            .stat-number {
-                font-size: 24px;
-            }
-            
-            .country.visited:hover {
-                transform: scale(1.01);
+                gap: 15px;
             }
         }
     </style>
@@ -485,254 +336,443 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <div class="logo">
-                🌍 Vera's World
-            </div>
+            <div class="logo">🌍 Vera's World</div>
             <div class="stats">
                 <div class="stat-item">
-                    <span class="stat-number" id="countries-count">-</span>
+                    <span class="stat-number" id="countries-count">0</span>
                     <div class="stat-label">Countries</div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number" id="cities-count">-</span>
+                    <span class="stat-number" id="cities-count">0</span>
                     <div class="stat-label">Cities</div>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number" id="posts-count">-</span>
+                    <span class="stat-number" id="posts-count">0</span>
                     <div class="stat-label">Posts</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="map-container">
-        <!-- SVG 定義區域 -->
-        <svg class="svg-defs">
-            <defs>
-                <!-- 已訪問國家的漸變 -->
-                <linearGradient id="visitedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
-                </linearGradient>
-                
-                <!-- 懸停時的漸變 -->
-                <linearGradient id="visitedHoverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:#f5576c;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#4facfe;stop-opacity:1" />
-                </linearGradient>
-                
-                <!-- 低活動度漸變 (1個貼文) -->
-                <linearGradient id="lowActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.7" />
-                    <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.7" />
-                </linearGradient>
-                
-                <!-- 中等活動度漸變 (2-3個貼文) -->
-                <linearGradient id="mediumActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8" />
-                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.8" />
-                </linearGradient>
-                
-                <!-- 高活動度漸變 (4-5個貼文) -->
-                <linearGradient id="highActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#f093fb;stop-opacity:0.9" />
-                    <stop offset="50%" style="stop-color:#f5576c;stop-opacity:0.9" />
-                    <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.9" />
-                </linearGradient>
-                
-                <!-- 很高活動度漸變 (6+個貼文) -->
-                <linearGradient id="veryHighActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1" />
-                    <stop offset="25%" style="stop-color:#fecfef;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:#fecfef;stop-opacity:1" />
-                    <stop offset="75%" style="stop-color:#fad0c4;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#ffd1ff;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-        </svg>
-        
-        <!-- 主地圖 SVG -->
-        <svg id="worldMap" viewBox="0 0 1000 500" style="width: 100%; height: 100%; cursor: pointer;">
-            <!-- 世界地圖 SVG 路徑將在這裡動態生成 -->
-        </svg>
-        
-        <!-- 地圖圖例 -->
-        <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(10, 14, 26, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px);">
-            <div style="color: white; font-size: 14px; font-weight: bold; margin-bottom: 10px;">🗺️ 旅行足跡</div>
-            <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #4facfe, #00f2fe); border-radius: 3px;"></div>
-                    <span style="color: #a0aec0;">1個貼文</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 3px;"></div>
-                    <span style="color: #a0aec0;">2-3個貼文</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #f093fb, #f5576c); border-radius: 3px;"></div>
-                    <span style="color: #a0aec0;">4-5個貼文</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #ff9a9e, #fad0c4); border-radius: 3px;"></div>
-                    <span style="color: #a0aec0;">6+個貼文</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 旅行統計卡片 -->
-        <div style="position: absolute; top: 100px; right: 20px; background: rgba(10, 14, 26, 0.9); padding: 20px; border-radius: 15px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px); min-width: 200px;">
-            <div style="color: white; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center;">📊 旅行統計</div>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #a0aec0; font-size: 14px;">🌍 國家</span>
-                    <span id="stats-countries" style="color: #667eea; font-weight: bold; font-size: 18px;">-</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #a0aec0; font-size: 14px;">🏙️ 城市</span>
-                    <span id="stats-cities" style="color: #764ba2; font-weight: bold; font-size: 18px;">-</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #a0aec0; font-size: 14px;">📸 貼文</span>
-                    <span id="stats-posts" style="color: #f093fb; font-weight: bold; font-size: 18px;">-</span>
-                </div>
-                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent); margin: 5px 0;"></div>
-                <div style="text-align: center; color: #8892b0; font-size: 12px;" id="last-updated">
-                    最後更新: 正在載入...
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 貼文覆蓋層 -->
-    <div class="posts-overlay" id="postsOverlay">
-        <div class="close-btn" onclick="closePosts()">×</div>
-        <div class="posts-container">
-            <div class="posts-header">
-                <div class="posts-title" id="postsTitle">Posts from Country</div>
-                <div class="posts-subtitle" id="postsSubtitle">Click on any post to view on Instagram</div>
-            </div>
-            <div class="posts-grid" id="postsGrid">
-                <!-- 貼文將在這裡動態生成 -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 載入提示 -->
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
-        <div>Loading travel data...</div>
+        <div>Loading Vera's travel memories...</div>
+    </div>
+
+    <div class="map-container">
+        <svg id="world-map"></svg>
+        
+        <div class="legend">
+            <div class="legend-title">🗺️ Travel Map</div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2d3748;"></div>
+                <span style="color: #a0aec0;">未造訪</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #667eea;"></div>
+                <span style="color: #a0aec0;">已造訪</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f093fb;"></div>
+                <span style="color: #a0aec0;">熱門目的地</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <div class="posts-modal" id="posts-modal">
+        <button class="close-btn" onclick="closePosts()">×</button>
+        <div class="posts-content">
+            <div class="posts-header">
+                <div class="posts-title" id="modal-title">Country Posts</div>
+                <div style="color: #8892b0;" id="modal-subtitle">Click any post to view on Instagram</div>
+            </div>
+            <div class="posts-grid" id="posts-grid"></div>
+        </div>
     </div>
 
     <script>
-        // 全局變量
         let travelData = null;
-        let userProfile = null;
-        let summary = null;
+        let worldData = null;
+        let svg, projection, path;
 
-        // 旅行地圖載入器類
-        class TravelMapLoader {
-            constructor() {
-                this.dataEndpoint = './data/';
-                this.mapContainer = null;
-                this.currentCountry = null;
-            }
-
-            async init() {
-                console.log('🗺️ 初始化旅行地圖...');
-                
-                try {
-                    this.showLoading(true);
-                    await this.loadAllData();
-                    await this.initializeMap();
-                    this.updateUI();
-                    this.showLoading(false);
-                    console.log('✅ 旅行地圖初始化完成');
-                } catch (error) {
-                    console.error('❌ 初始化失敗:', error);
-                    this.showError('載入失敗，請稍後再試');
-                }
-            }
-
-            async loadAllData() {
-                console.log('📊 載入數據...');
-                
-                try {
-                    const [summaryResponse, travelResponse, profileResponse] = await Promise.all([
-                        fetch(`${this.dataEndpoint}summary.json`).catch(() => null),
-                        fetch(`${this.dataEndpoint}travel-data.json`).catch(() => null),
-                        fetch(`${this.dataEndpoint}user-profile.json`).catch(() => null)
-                    ]);
-
-                    if (summaryResponse?.ok) {
-                        summary = await summaryResponse.json();
-                    }
-                    
-                    if (travelResponse?.ok) {
-                        travelData = await travelResponse.json();
-                    }
-                    
-                    if (profileResponse?.ok) {
-                        userProfile = await profileResponse.json();
-                    }
-
-                    console.log('✅ 數據載入完成:', summary);
-                } catch (error) {
-                    console.warn('⚠️ 無法載入後端數據，使用示例數據');
-                    this.loadFallbackData();
-                }
-            }
-
-            loadFallbackData() {
-                // 備用示例數據
-                travelData = {
-                    countries: {
-                        'United States': {
-                            name: '美國',
-                            posts: [
-                                {
-                                    id: '1',
-                                    location: { city: 'New York', country: 'United States' },
-                                    caption: '在紐約感受都市的脈搏',
-                                    timestamp: '2024-01-15T10:30:00+0000',
-                                    permalink: 'https://instagram.com/p/sample1'
-                                }
-                            ],
-                            cities: ['New York']
+        // 從後端 API 載入的旅行數據（示例格式）
+        const sampleTravelData = {
+            countries: {
+                "United States": {
+                    name: "美國",
+                    posts: [
+                        {
+                            id: "1",
+                            location: { city: "New York", country: "United States" },
+                            caption: "在紐約感受都市的脈搏 🏙️ #nyc #travel #citylife",
+                            timestamp: "2024-01-15T10:30:00+0000",
+                            permalink: "https://instagram.com/p/sample1",
+                            media_type: "IMAGE"
                         }
-                    },
-                    cities: ['New York'],
-                    posts: [],
-                    lastUpdated: new Date().toISOString()
-                };
-
-                summary = {
-                    totalCountries: 1,
-                    totalCities: 1,
-                    postsWithLocation: 1,
-                    lastUpdated: new Date().toISOString()
-                };
+                    ],
+                    cities: ["New York"]
+                },
+                "Japan": {
+                    name: "日本",
+                    posts: [
+                        {
+                            id: "2",
+                            location: { city: "Tokyo", country: "Japan" },
+                            caption: "東京櫻花季 🌸 美麗的春天 #tokyo #sakura #japan",
+                            timestamp: "2024-03-20T14:15:00+0000",
+                            permalink: "https://instagram.com/p/sample2",
+                            media_type: "IMAGE"
+                        },
+                        {
+                            id: "3",
+                            location: { city: "Kyoto", country: "Japan" },
+                            caption: "京都古寺的寧靜時光 ⛩️ #kyoto #temple #zen",
+                            timestamp: "2024-03-22T09:45:00+0000",
+                            permalink: "https://instagram.com/p/sample3",
+                            media_type: "IMAGE"
+                        }
+                    ],
+                    cities: ["Tokyo", "Kyoto"]
+                },
+                "France": {
+                    name: "法國",
+                    posts: [
+                        {
+                            id: "4",
+                            location: { city: "Paris", country: "France" },
+                            caption: "巴黎鐵塔的浪漫夜晚 🗼✨ #paris #eiffeltower #romantic",
+                            timestamp: "2024-02-14T20:00:00+0000",
+                            permalink: "https://instagram.com/p/sample4",
+                            media_type: "IMAGE"
+                        }
+                    ],
+                    cities: ["Paris"]
+                },
+                "Thailand": {
+                    name: "泰國",
+                    posts: [
+                        {
+                            id: "5",
+                            location: { city: "Bangkok", country: "Thailand" },
+                            caption: "曼谷夜市的美食之旅 🍜🍲 #bangkok #streetfood #thailand",
+                            timestamp: "2024-04-10T19:30:00+0000",
+                            permalink: "https://instagram.com/p/sample5",
+                            media_type: "IMAGE"
+                        }
+                    ],
+                    cities: ["Bangkok"]
+                },
+                "Taiwan": {
+                    name: "台灣",
+                    posts: [
+                        {
+                            id: "6",
+                            location: { city: "Taipei", country: "Taiwan" },
+                            caption: "台北 101 和夜市小吃 🏢🥟 #taipei #taiwan #nightmarket",
+                            timestamp: "2024-05-01T21:00:00+0000",
+                            permalink: "https://instagram.com/p/sample6",
+                            media_type: "IMAGE"
+                        }
+                    ],
+                    cities: ["Taipei"]
+                },
+                "United Kingdom": {
+                    name: "英國",
+                    posts: [
+                        {
+                            id: "7",
+                            location: { city: "London", country: "United Kingdom" },
+                            caption: "倫敦大本鐘與下午茶時光 🫖⏰ #london #bigben #afternoontea",
+                            timestamp: "2024-06-15T15:30:00+0000",
+                            permalink: "https://instagram.com/p/sample7",
+                            media_type: "IMAGE"
+                        }
+                    ],
+                    cities: ["London"]
+                }
             }
+        };
 
-            async initializeMap() {
-                console.log('🌍 初始化世界地圖...');
+        async function init() {
+            console.log('🚀 初始化 Vera 的世界地圖...');
+            
+            try {
+                // 載入地圖數據和旅行數據
+                await Promise.all([
+                    loadWorldMap(),
+                    loadTravelData()
+                ]);
                 
-                const mapContainer = document.getElementById('worldMap');
-                await this.loadWorldMapSVG();
-                this.renderVisitedCountries();
-                this.setupMapInteractions();
+                // 渲染地圖
+                renderMap();
+                updateStats();
+                
+                // 隱藏載入畫面
+                document.getElementById('loading').style.display = 'none';
+                
+                console.log('✅ 地圖載入完成');
+            } catch (error) {
+                console.error('❌ 載入失敗:', error);
+                showError();
+            }
+        }
+
+        async function loadWorldMap() {
+            // 使用內嵌的簡化世界地圖數據
+            worldData = {
+                type: "Topology",
+                objects: {
+                    countries: {
+                        type: "GeometryCollection",
+                        geometries: generateWorldGeometry()
+                    }
+                }
+            };
+        }
+
+        function generateWorldGeometry() {
+            // 簡化的國家幾何數據
+            const countries = [
+                { id: "840", name: "United States", coords: [[[-180, 71], [-180, 18], [-66, 18], [-66, 71]]] },
+                { id: "392", name: "Japan", coords: [[[129, 46], [146, 46], [146, 30], [129, 30]]] },
+                { id: "250", name: "France", coords: [[[-5, 51], [10, 51], [10, 42], [-5, 42]]] },
+                { id: "764", name: "Thailand", coords: [[[97, 21], [106, 21], [106, 5], [97, 5]]] },
+                { id: "158", name: "Taiwan", coords: [[[119, 26], [122, 26], [122, 21], [119, 21]]] },
+                { id: "826", name: "United Kingdom", coords: [[[-8, 61], [2, 61], [2, 49], [-8, 49]]] }
+            ];
+
+            return countries.map(country => ({
+                type: "Polygon",
+                id: country.id,
+                properties: { NAME: country.name },
+                coordinates: country.coords
+            }));
+        }
+
+        async function loadTravelData() {
+            try {
+                // 嘗試從後端載入數據
+                const response = await fetch('./data/travel-data.json');
+                if (response.ok) {
+                    travelData = await response.json();
+                    console.log('✅ 從後端載入旅行數據');
+                } else {
+                    throw new Error('Backend data not available');
+                }
+            } catch (error) {
+                // 使用示例數據
+                travelData = sampleTravelData;
+                console.log('📝 使用示例旅行數據');
+            }
+        }
+
+        function renderMap() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // 清除現有的 SVG
+            d3.select("#world-map").selectAll("*").remove();
+
+            svg = d3.select("#world-map")
+                .attr("width", width)
+                .attr("height", height);
+
+            // 設置投影
+            projection = d3.geoNaturalEarth1()
+                .scale(Math.min(width, height) / 6)
+                .translate([width / 2, height / 2]);
+
+            path = d3.geoPath().projection(projection);
+
+            // 繪製國家
+            const countries = topojson.feature(worldData, worldData.objects.countries);
+            
+            svg.selectAll(".country")
+                .data(countries.features)
+                .enter().append("path")
+                .attr("class", d => {
+                    const countryName = d.properties.NAME;
+                    let className = "country";
+                    
+                    if (travelData.countries[countryName]) {
+                        className += " visited";
+                        const postCount = travelData.countries[countryName].posts.length;
+                        if (postCount >= 3) {
+                            className += " high-activity";
+                        }
+                    }
+                    
+                    return className;
+                })
+                .attr("d", path)
+                .on("mouseover", handleMouseOver)
+                .on("mouseout", handleMouseOut)
+                .on("click", handleCountryClick);
+
+            // 添加縮放功能
+            const zoom = d3.zoom()
+                .scaleExtent([0.5, 8])
+                .on("zoom", (event) => {
+                    svg.selectAll("path")
+                        .attr("transform", event.transform);
+                });
+
+            svg.call(zoom);
+        }
+
+        function handleMouseOver(event, d) {
+            const countryName = d.properties.NAME;
+            const tooltip = document.getElementById('tooltip');
+            const countryData = travelData.countries[countryName];
+
+            let content = `<strong>${countryName}</strong><br>`;
+            if (countryData) {
+                content += `${countryData.posts.length} posts, ${countryData.cities.length} cities`;
+            } else {
+                content += "Not visited yet";
             }
 
-            async loadWorldMapSVG() {
-                // 簡化的世界地圖路徑
-                const countryPaths = {
-                    'Japan': 'M850,150 L880,150 L885,170 L880,190 L850,190 L845,170 Z',
-                    'France': 'M450,160 L480,160 L485,180 L480,200 L450,200 L445,180 Z',
-                    'United States': 'M150,180 L280,180 L280,240 L150,240 Z',
-                    'Taiwan': 'M820,220 L835,220 L835,245 L820,245 Z',
-                    'United Kingdom': 'M420,140 L450,140 L450,170 L420,170 Z',
-                    'South Korea': 'M840,170 L860,170 L860,200 L840,200 Z',
-                    'Thailand': 'M780,250 L805,250 L805,290 L780,290 Z',
-                    'Indonesia': 'M800,300 L850,300 L850,330 L800,330 Z',
-                    'Nepal': 'M730,200 L760,200 L760,220
+            tooltip.innerHTML = content;
+            tooltip.style.opacity = 1;
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+
+        function handleMouseOut() {
+            document.getElementById('tooltip').style.opacity = 0;
+        }
+
+        function handleCountryClick(event, d) {
+            const countryName = d.properties.NAME;
+            const countryData = travelData.countries[countryName];
+
+            if (countryData) {
+                showCountryPosts(countryName, countryData);
+            }
+        }
+
+        function showCountryPosts(countryName, countryData) {
+            const modal = document.getElementById('posts-modal');
+            const title = document.getElementById('modal-title');
+            const subtitle = document.getElementById('modal-subtitle');
+            const grid = document.getElementById('posts-grid');
+
+            title.textContent = `📍 ${countryData.name || countryName}`;
+            subtitle.textContent = `${countryData.posts.length} posts from Vera's adventures`;
+
+            grid.innerHTML = '';
+            
+            countryData.posts.forEach(post => {
+                const postCard = createPostCard(post);
+                grid.appendChild(postCard);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function createPostCard(post) {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            
+            const location = post.location ? 
+                `${post.location.city || ''}, ${post.location.country || ''}`.replace(/^,\s*/, '') : 
+                'Unknown location';
+            
+            const date = new Date(post.timestamp).toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const caption = post.caption ? 
+                (post.caption.length > 100 ? post.caption.substring(0, 100) + '...' : post.caption) : 
+                'No caption available';
+
+            card.innerHTML = `
+                <div class="post-image">
+                    ${post.media_type === 'VIDEO' ? '🎥' : '📷'}
+                </div>
+                <div class="post-content">
+                    <div class="post-location">${location}</div>
+                    <div class="post-date">${date}</div>
+                    <div class="post-caption">${caption}</div>
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                if (post.permalink) {
+                    window.open(post.permalink, '_blank');
+                }
+            });
+
+            return card;
+        }
+
+        function closePosts() {
+            document.getElementById('posts-modal').style.display = 'none';
+        }
+
+        function updateStats() {
+            const countries = Object.keys(travelData.countries).length;
+            const cities = Object.values(travelData.countries)
+                .reduce((acc, country) => acc + country.cities.length, 0);
+            const posts = Object.values(travelData.countries)
+                .reduce((acc, country) => acc + country.posts.length, 0);
+
+            animateNumber('countries-count', countries);
+            animateNumber('cities-count', cities);
+            animateNumber('posts-count', posts);
+        }
+
+        function animateNumber(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            let currentValue = 0;
+            const increment = Math.ceil(targetValue / 30);
+            
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= targetValue) {
+                    currentValue = targetValue;
+                    clearInterval(timer);
+                }
+                element.textContent = currentValue;
+            }, 50);
+        }
+
+        function showError() {
+            document.getElementById('loading').innerHTML = `
+                <div style="color: #ff6b6b;">❌ 載入失敗</div>
+                <div style="margin-top: 10px;">
+                    <button onclick="location.reload()" style="
+                        background: #667eea; 
+                        color: white; 
+                        border: none; 
+                        padding: 10px 20px; 
+                        border-radius: 5px; 
+                        cursor: pointer;
+                    ">重新載入</button>
+                </div>
+            `;
+        }
+
+        // 響應式調整
+        window.addEventListener('resize', () => {
+            if (svg) {
+                renderMap();
+            }
+        });
+
+        // ESC 關閉 modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePosts();
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
