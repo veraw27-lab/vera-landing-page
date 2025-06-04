@@ -1,721 +1,115 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vera's World Travel Map</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<!-- 將這段代碼添加到你的 travel-map/index.html 中，替換現有的地圖容器部分 -->
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0e1a;
-            color: #ffffff;
-            overflow: hidden;
-            cursor: default;
-        }
-
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 14, 26, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 20px 40px;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stats {
-            display: flex;
-            gap: 30px;
-            font-size: 14px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            display: block;
-            font-size: 20px;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #8892b0;
-            margin-top: 4px;
-        }
-
-        .map-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(ellipse at center, #1a2332 0%, #0a0e1a 100%);
-        }
-
-        #worldMap {
-            width: 100%;
-            height: 100%;
-        }
-
-        .country {
-            fill: #2d3748;
-            stroke: #4a5568;
-            stroke-width: 0.5;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .country:hover {
-            fill: #4a5568;
-            stroke: #667eea;
-            stroke-width: 1;
-        }
-
-        .country.visited {
-            fill: #667eea;
-            stroke: #764ba2;
-            stroke-width: 1;
-            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
-        }
-
-        .country.visited:hover {
-            fill: #764ba2;
-            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.8));
-        }
-
-        .posts-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(10, 14, 26, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            display: none;
-            padding: 100px 40px 40px;
-        }
-
-        .posts-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            height: 100%;
-            overflow-y: auto;
-        }
-
-        .posts-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .posts-title {
-            font-size: 32px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .posts-subtitle {
-            color: #8892b0;
-            font-size: 16px;
-        }
-
-        .posts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .post-card {
-            background: rgba(45, 55, 72, 0.8);
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .post-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-            border-color: rgba(102, 126, 234, 0.5);
-        }
-
-        .post-image {
-            width: 100%;
-            height: 250px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .post-image::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
-        }
-
-        .post-image-icon {
-            position: relative;
-            z-index: 1;
-        }
-
-        .post-content {
-            padding: 20px;
-        }
-
-        .post-location {
-            color: #667eea;
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
-
-        .post-date {
-            color: #8892b0;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .post-description {
-            color: #e2e8f0;
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-
-        .post-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .tag {
-            background: rgba(102, 126, 234, 0.2);
-            color: #667eea;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            border: 1px solid rgba(102, 126, 234, 0.3);
-        }
-
-        .close-btn {
-            position: fixed;
-            top: 120px;
-            right: 40px;
-            background: rgba(45, 55, 72, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 2001;
-            font-size: 20px;
-        }
-
-        .close-btn:hover {
-            background: rgba(102, 126, 234, 0.8);
-            transform: scale(1.1);
-        }
-
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 1001;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(102, 126, 234, 0.3);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        .instagram-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .country-tooltip {
-            position: fixed;
-            background: rgba(10, 14, 26, 0.95);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            pointer-events: none;
-            z-index: 1002;
-            border: 1px solid rgba(102, 126, 234, 0.5);
-            backdrop-filter: blur(10px);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        .country.visited {
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        /* 響應式設計 */
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px 20px;
-            }
-
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .stats {
-                gap: 20px;
-            }
-
-            .posts-overlay {
-                padding: 80px 20px 20px;
-            }
-
-            .posts-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .posts-title {
-                font-size: 24px;
-            }
-
-            .close-btn {
-                top: 90px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <div class="logo">
-                🌍 Vera's World
+<div class="map-container">
+    <!-- SVG 定義區域 -->
+    <svg class="svg-defs">
+        <defs>
+            <!-- 已訪問國家的漸變 -->
+            <linearGradient id="visitedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+            </linearGradient>
+            
+            <!-- 懸停時的漸變 -->
+            <linearGradient id="visitedHoverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#f5576c;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#4facfe;stop-opacity:1" />
+            </linearGradient>
+            
+            <!-- 低活動度漸變 (1個貼文) -->
+            <linearGradient id="lowActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.7" />
+                <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.7" />
+            </linearGradient>
+            
+            <!-- 中等活動度漸變 (2-3個貼文) -->
+            <linearGradient id="mediumActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8" />
+                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.8" />
+            </linearGradient>
+            
+            <!-- 高活動度漸變 (4-5個貼文) -->
+            <linearGradient id="highActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#f093fb;stop-opacity:0.9" />
+                <stop offset="50%" style="stop-color:#f5576c;stop-opacity:0.9" />
+                <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.9" />
+            </linearGradient>
+            
+            <!-- 很高活動度漸變 (6+個貼文) -->
+            <linearGradient id="veryHighActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1" />
+                <stop offset="25%" style="stop-color:#fecfef;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#fecfef;stop-opacity:1" />
+                <stop offset="75%" style="stop-color:#fad0c4;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ffd1ff;stop-opacity:1" />
+            </linearGradient>
+            
+            <!-- 光暈效果 -->
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge> 
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+            
+            <!-- 陰影效果 -->
+            <filter id="dropshadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
+            </filter>
+        </defs>
+    </svg>
+    
+    <!-- 主地圖 SVG -->
+    <svg id="worldMap" viewBox="0 0 1000 500" style="width: 100%; height: 100%; cursor: pointer;">
+        <!-- 世界地圖 SVG 路徑將在這裡動態生成 -->
+    </svg>
+    
+    <!-- 增強的地圖圖例 -->
+    <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(10, 14, 26, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px);">
+        <div style="color: white; font-size: 14px; font-weight: bold; margin-bottom: 10px;">🗺️ 旅行足跡</div>
+        <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #4facfe, #00f2fe); border-radius: 3px;"></div>
+                <span style="color: #a0aec0;">1個貼文</span>
             </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-number" id="countries-count">0</span>
-                    <div class="stat-label">Countries</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number" id="cities-count">0</span>
-                    <div class="stat-label">Cities</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number" id="posts-count">0</span>
-                    <div class="stat-label">Posts</div>
-                </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 3px;"></div>
+                <span style="color: #a0aec0;">2-3個貼文</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #f093fb, #f5576c); border-radius: 3px;"></div>
+                <span style="color: #a0aec0;">4-5個貼文</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #ff9a9e, #fad0c4); border-radius: 3px;"></div>
+                <span style="color: #a0aec0;">6+個貼文</span>
             </div>
         </div>
     </div>
-
-    <div class="map-container">
-        <svg id="worldMap" viewBox="0 0 1000 500">
-            <!-- SVG 世界地圖將在這裡動態生成 -->
-        </svg>
-    </div>
-
-    <div class="loading" id="loading">
-        <div class="loading-spinner"></div>
-        <div>Loading Vera's travel memories...</div>
-    </div>
-
-    <div class="posts-overlay" id="postsOverlay">
-        <div class="close-btn" onclick="closePosts()">×</div>
-        <div class="posts-container">
-            <div class="posts-header">
-                <div class="posts-title" id="postsTitle">Posts from Country</div>
-                <div class="posts-subtitle" id="postsSubtitle">Click on any post to view on Instagram</div>
+    
+    <!-- 旅行統計卡片 -->
+    <div style="position: absolute; top: 100px; right: 20px; background: rgba(10, 14, 26, 0.9); padding: 20px; border-radius: 15px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px); min-width: 200px;">
+        <div style="color: white; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center;">📊 旅行統計</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #a0aec0; font-size: 14px;">🌍 國家</span>
+                <span id="stats-countries" style="color: #667eea; font-weight: bold; font-size: 18px;">6</span>
             </div>
-            <div class="posts-grid" id="postsGrid">
-                <!-- 貼文將在這裡動態生成 -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #a0aec0; font-size: 14px;">🏙️ 城市</span>
+                <span id="stats-cities" style="color: #764ba2; font-weight: bold; font-size: 18px;">7</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #a0aec0; font-size: 14px;">📸 貼文</span>
+                <span id="stats-posts" style="color: #f093fb; font-weight: bold; font-size: 18px;">8</span>
+            </div>
+            <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent); margin: 5px 0;"></div>
+            <div style="text-align: center; color: #8892b0; font-size: 12px;" id="last-updated">
+                最後更新: 正在載入...
             </div>
         </div>
     </div>
-
-    <div class="country-tooltip" id="tooltip" style="display: none;"></div>
-
-    <script>
-        // 示例數據 - 在實際應用中這將從 Instagram API 獲取
-        const veraData = {
-            countries: {
-                'Japan': {
-                    name: '日本',
-                    posts: [
-                        {
-                            id: '1',
-                            location: 'Tokyo, Japan',
-                            city: 'Tokyo',
-                            date: '2024-03-15',
-                            image: '🏯',
-                            description: '櫻花盛開的東京，傳統與現代的完美融合',
-                            tags: ['櫻花', '東京', '日本', '春天'],
-                            instagramUrl: 'https://instagram.com/p/vera_tokyo1'
-                        },
-                        {
-                            id: '2',
-                            location: 'Kyoto, Japan',
-                            city: 'Kyoto',
-                            date: '2024-03-18',
-                            image: '⛩️',
-                            description: '古都京都的寧靜寺廟和竹林',
-                            tags: ['京都', '寺廟', '竹林', '和服'],
-                            instagramUrl: 'https://instagram.com/p/vera_kyoto1'
-                        }
-                    ]
-                },
-                'France': {
-                    name: '法國',
-                    posts: [
-                        {
-                            id: '3',
-                            location: 'Paris, France',
-                            city: 'Paris',
-                            date: '2024-01-20',
-                            image: '🗼',
-                            description: '夜晚的艾菲爾鐵塔，浪漫巴黎的象徵',
-                            tags: ['巴黎', '艾菲爾鐵塔', '夜景', '浪漫'],
-                            instagramUrl: 'https://instagram.com/p/vera_paris1'
-                        },
-                        {
-                            id: '4',
-                            location: 'Louvre Museum, Paris',
-                            city: 'Paris',
-                            date: '2024-01-22',
-                            image: '🖼️',
-                            description: '羅浮宮中的藝術珍品，蒙娜麗莎的微笑',
-                            tags: ['羅浮宮', '藝術', '蒙娜麗莎', '文化'],
-                            instagramUrl: 'https://instagram.com/p/vera_louvre1'
-                        }
-                    ]
-                },
-                'United States': {
-                    name: '美國',
-                    posts: [
-                        {
-                            id: '5',
-                            location: 'New York, USA',
-                            city: 'New York',
-                            date: '2023-12-10',
-                            image: '🏙️',
-                            description: '不夜城紐約的摩天大樓和璀璨夜景',
-                            tags: ['紐約', '摩天大樓', '時代廣場', '都市'],
-                            instagramUrl: 'https://instagram.com/p/vera_nyc1'
-                        }
-                    ]
-                },
-                'Taiwan': {
-                    name: '台灣',
-                    posts: [
-                        {
-                            id: '6',
-                            location: 'Taipei, Taiwan',
-                            city: 'Taipei',
-                            date: '2024-02-14',
-                            image: '🏢',
-                            description: '台北101和美麗的城市夜景',
-                            tags: ['台北', '101', '夜市', '小吃'],
-                            instagramUrl: 'https://instagram.com/p/vera_taipei1'
-                        }
-                    ]
-                },
-                'United Kingdom': {
-                    name: '英國',
-                    posts: [
-                        {
-                            id: '7',
-                            location: 'London, UK',
-                            city: 'London',
-                            date: '2023-11-05',
-                            image: '🏰',
-                            description: '霧都倫敦的大本鐘和泰晤士河',
-                            tags: ['倫敦', '大本鐘', '下午茶', '英式'],
-                            instagramUrl: 'https://instagram.com/p/vera_london1'
-                        }
-                    ]
-                },
-                'South Korea': {
-                    name: '韓國',
-                    posts: [
-                        {
-                            id: '8',
-                            location: 'Seoul, South Korea',
-                            city: 'Seoul',
-                            date: '2024-04-01',
-                            image: '🏯',
-                            description: '首爾的現代化建築和傳統韓屋',
-                            tags: ['首爾', '韓屋', '韓食', 'K-pop'],
-                            instagramUrl: 'https://instagram.com/p/vera_seoul1'
-                        }
-                    ]
-                }
-            }
-        };
-
-        // 簡化的世界地圖 SVG 路徑（實際應用中可以使用更詳細的地圖數據）
-        const worldMapPaths = {
-            'Japan': 'M850,200 L860,200 L865,210 L860,220 L850,220 L845,210 Z',
-            'France': 'M450,180 L470,180 L475,200 L470,210 L450,210 L445,200 Z',
-            'United States': 'M150,200 L250,200 L250,250 L150,250 Z',
-            'Taiwan': 'M800,250 L810,250 L810,270 L800,270 Z',
-            'United Kingdom': 'M420,160 L440,160 L440,180 L420,180 Z',
-            'South Korea': 'M830,200 L840,200 L840,220 L830,220 Z'
-        };
-
-        let currentTooltip = null;
-
-        // 初始化地圖
-        function initMap() {
-            const svg = document.getElementById('worldMap');
-            
-            // 創建國家路徑
-            Object.keys(worldMapPaths).forEach(countryCode => {
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', worldMapPaths[countryCode]);
-                path.setAttribute('class', veraData.countries[countryCode] ? 'country visited' : 'country');
-                path.setAttribute('data-country', countryCode);
-                
-                // 添加事件監聽器
-                path.addEventListener('click', () => showCountryPosts(countryCode));
-                path.addEventListener('mouseenter', (e) => showTooltip(e, countryCode));
-                path.addEventListener('mouseleave', hideTooltip);
-                path.addEventListener('mousemove', updateTooltipPosition);
-                
-                svg.appendChild(path);
-            });
-
-            // 更新統計數據
-            updateStats();
-            
-            // 隱藏載入畫面
-            document.getElementById('loading').style.display = 'none';
-        }
-
-        // 顯示國家貼文
-        function showCountryPosts(countryCode) {
-            const countryData = veraData.countries[countryCode];
-            if (!countryData) return;
-
-            const overlay = document.getElementById('postsOverlay');
-            const title = document.getElementById('postsTitle');
-            const subtitle = document.getElementById('postsSubtitle');
-            const grid = document.getElementById('postsGrid');
-
-            title.textContent = `📍 ${countryData.name}`;
-            subtitle.textContent = `${countryData.posts.length} posts from Vera's adventures`;
-
-            // 清空並重新生成貼文網格
-            grid.innerHTML = '';
-            
-            countryData.posts.forEach((post, index) => {
-                const postCard = createPostCard(post, index);
-                grid.appendChild(postCard);
-            });
-
-            overlay.style.display = 'block';
-        }
-
-        // 創建貼文卡片
-        function createPostCard(post, index) {
-            const card = document.createElement('div');
-            card.className = 'post-card';
-            card.style.animationDelay = `${index * 0.1}s`;
-            
-            card.innerHTML = `
-                <div class="instagram-badge">Instagram</div>
-                <div class="post-image">
-                    <div class="post-image-icon">${post.image}</div>
-                </div>
-                <div class="post-content">
-                    <div class="post-location">${post.location}</div>
-                    <div class="post-date">${formatDate(post.date)}</div>
-                    <div class="post-description">${post.description}</div>
-                    <div class="post-tags">
-                        ${post.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
-                    </div>
-                </div>
-            `;
-
-            card.addEventListener('click', () => {
-                window.open(post.instagramUrl, '_blank');
-            });
-
-            return card;
-        }
-
-        // 關閉貼文覆蓋層
-        function closePosts() {
-            document.getElementById('postsOverlay').style.display = 'none';
-        }
-
-        // 顯示工具提示
-        function showTooltip(event, countryCode) {
-            const tooltip = document.getElementById('tooltip');
-            const countryData = veraData.countries[countryCode];
-            
-            if (countryData) {
-                tooltip.innerHTML = `
-                    <strong>${countryData.name}</strong><br>
-                    ${countryData.posts.length} posts
-                `;
-            } else {
-                tooltip.innerHTML = `
-                    <strong>${countryCode}</strong><br>
-                    Not visited yet
-                `;
-            }
-            
-            tooltip.style.display = 'block';
-            updateTooltipPosition(event);
-        }
-
-        // 隱藏工具提示
-        function hideTooltip() {
-            document.getElementById('tooltip').style.display = 'none';
-        }
-
-        // 更新工具提示位置
-        function updateTooltipPosition(event) {
-            const tooltip = document.getElementById('tooltip');
-            tooltip.style.left = (event.clientX + 15) + 'px';
-            tooltip.style.top = (event.clientY - 15) + 'px';
-        }
-
-        // 更新統計數據
-        function updateStats() {
-            const countries = Object.keys(veraData.countries).length;
-            const cities = Object.values(veraData.countries).reduce((acc, country) => {
-                const uniqueCities = [...new Set(country.posts.map(post => post.city))];
-                return acc + uniqueCities.length;
-            }, 0);
-            const posts = Object.values(veraData.countries).reduce((acc, country) => acc + country.posts.length, 0);
-
-            document.getElementById('countries-count').textContent = countries;
-            document.getElementById('cities-count').textContent = cities;
-            document.getElementById('posts-count').textContent = posts;
-        }
-
-        // 格式化日期
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('zh-TW', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-        }
-
-        // 鍵盤事件
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closePosts();
-            }
-        });
-
-        // 初始化應用
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(initMap, 1000); // 模擬載入時間
-        });
-
-        // 模擬從 Instagram API 載入數據的函數
-        function loadInstagramData() {
-            // 這裡應該是實際的 Instagram API 調用
-            // 由於 Instagram API 的限制，這裡使用示例數據
-            console.log('Loading Instagram data...');
-            
-            // 在實際應用中，你需要：
-            // 1. 設置 Instagram Basic Display API
-            // 2. 獲取 access token
-            // 3. 調用 API 獲取帶有位置信息的媒體
-            // 4. 解析位置數據並映射到地圖上
-        }
-    </script>
-</body>
-</html>
+</div>
