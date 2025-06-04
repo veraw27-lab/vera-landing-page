@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Authorization - Vera's Travel Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status-message {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .code-display {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #E4405F, #F77737);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .error {
+            background: rgba(220, 53, 69, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: rgba(40, 167, 69, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .step {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #E4405F;
+            text-align: left;
+        }
+
+        .countdown {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner" id="spinner"></div>
+        <h1 id="pageTitle">🔐 處理 Instagram 授權</h1>
+        <div class="status-message" id="statusMessage">正在處理您的 Instagram 授權...</div>
+        
+        <div id="contentArea">
+            <!-- 動態內容將在這裡顯示 -->
+        </div>
+
+        <div class="code-display" id="codeDisplay"></div>
+
+        <div id="actionButtons" style="display: none;">
+            <a href="index.html" class="btn">🗺️ 前往地圖</a>
+            <button onclick="location.reload()" class="btn btn-secondary">🔄 重試</button>
+        </div>
+    </div>
+
+    <script>
+        // Instagram API 配置（與主頁面保持一致）
+        const INSTAGRAM_CONFIG = {
+            clientId: 'YOUR_INSTAGRAM_APP_ID', // 需要替換
+            clientSecret: 'YOUR_INSTAGRAM_APP_SECRET', // 需要替換
+            redirectUri: window.location.origin + window.location.pathname,
+            baseURL: 'https://graph.instagram.com'
+        };
+
+        // 授權處理類
+        class AuthHandler {
+            constructor() {
+                this.statusElement = document.getElementById('statusMessage');
+                this.contentElement = document.getElementById('contentArea');
+                this.codeElement = document.getElementById('codeDisplay');
+                this.buttonsElement = document.getElementById('actionButtons');
+                this.spinnerElement = document.getElementById('spinner');
+            }
+
+            updateStatus(message, isError = false) {
+                this.statusElement.textContent = message;
+                if (isError) {
+                    this.statusElement.style.color = '#FFB6C1';
+                } else {
+                    this.statusElement.style.color = 'white';
+                }
+            }
+
+            showError(message, details = '') {
+                this.spinnerElement.style.display = 'none';
+                document.getElementById('pageTitle').textContent = '❌ 授權失敗';
+                
+                this.contentElement.innerHTML = `
+                    <div class="error">
+                        <h3>授權過程中發生錯誤</h3>
+                        <p><strong>錯誤信息：</strong>${message}</p>
+                        ${details ? `<p><strong>詳細信息：</strong>${details}</p>` : ''}
+                    </div>
+                    <div class="step">
+                        <h4>可能的解決方案：</h4>
+                        <ul style="text-align: left; margin-left: 20px;">
+                            <li>確認您的 Instagram 應用配置正確</li>
+                            <li>檢查重定向 URI 是否匹配</li>
+                            <li>確認應用權限設置正確</li>
+                            <li>嘗試重新開始授權流程</li>
+                        </ul>
+                    </div>
+                `;
+                
+                this.buttonsElement.style.display = 'block';
+            }
+
+            showSuccess(tokenData) {
+                this.spinnerElement.style.display = 'none';
+                document.getElementById('pageTitle').textContent = '✅ 授權成功';
+                
+                this.contentElement.innerHTML = `
+                    <div class="success">
+                        <h3>Instagram 授權完成！</h3>
+                        <p>您的訪問令牌已安全保存，現在可以訪問您的 Instagram 數據。</p>
+                    </div>
+                    <div class="step">
+                        <h4>授權信息：</h4>
+                        <p><strong>用戶 ID：</strong>${tokenData.user_id || 'N/A'}</p>
+                        <p><strong>令牌類型：</strong>長期訪問令牌</p>
+                        <p><strong>有效期：</strong>60 天</p>
+                        <p><strong>權限：</strong>用戶資料, 用戶媒體</p>
+                    </div>
+                `;
+
+                // 倒數計時自動跳轉
+                this.startCountdown();
+            }
+
+            startCountdown() {
+                let seconds = 5;
+                const countdownElement = document.createElement('div');
+                countdownElement.className = 'countdown';
+                countdownElement.textContent = `${seconds} 秒後自動跳轉到地圖頁面...`;
+                this.contentElement.appendChild(countdownElement);
+
+                const interval = setInterval(() => {
+                    seconds--;
+                    if (seconds > 0) {
+                        countdownElement.textContent = `${seconds} 秒後自動跳轉到地圖頁面...`;
+                    } else {
+                        clearInterval(interval);
+                        window.location.href = 'index.html';
+                    }
+                }, 1000);
+
+                this.buttonsElement.style.display = 'block';
+            }
+
+            showManualProcess(authCode) {
+                this.spinnerElement.style.display = 'none';
+                document.getElementById('pageTitle').textContent = '📋 手動授權流程';
+                
+                this.contentElement.innerHTML = `
+                    <div class="step">
+                        <h3>授權碼已獲取</h3>
+                        <p>由於安全限制，無法在前端直接完成令牌交換。請按照以下步驟完成授權：</p>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>步驟 1：複製授權碼</h4>
+                        <p>以下是您的 Instagram 授權碼：</p>
+                    </div>
+                `;
+
+                this.codeElement.textContent = authCode;
+                this.codeElement.style.display = 'block';
+
+                this.contentElement.innerHTML += `
+                    <div class="step">
+                        <h4>步驟 2：獲取訪問令牌</h4>
+                        <p>使用以下 curl 命令或後端 API 來交換訪問令牌：</p>
+                    </div>
+                `;
+
+                const curlCommand = `curl -X POST \\
+  https://api.instagram.com/oauth/access_token \\
+  -F client_id=${INSTAGRAM_CONFIG.clientId} \\
+  -F client_secret=${INSTAGRAM_CONFIG.clientSecret} \\
+  -F grant_type=authorization_code \\
+  -F redirect_uri=${INSTAGRAM_CONFIG.redirectUri} \\
+  -F code=${authCode}`;
+
+                const curlElement = document.createElement('div');
+                curlElement.className = 'code-display';
+                curlElement.style.display = 'block';
+                curlElement.textContent = curlCommand;
+                this.contentElement.appendChild(curlElement);
+
+                this.contentElement.innerHTML += `
+                    <div class="step">
+                        <h4>步驟 3：配置訪問令牌</h4>
+                        <p>獲得訪問令牌後，請在主頁面的 config.js 文件中配置您的令牌。</p>
+                    </div>
+                `;
+
+                this.buttonsElement.style.display = 'block';
+            }
+
+            async exchangeCodeForToken(code) {
+                try {
+                    // 注意：這個方法在生產環境中需要後端支持
+                    // 這裡提供一個模擬的實現用於演示
+
+                    this.updateStatus('正在交換訪問令牌...');
+
+                    // 模擬 API 調用延遲
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // 實際實現中，這應該是一個對後端 API 的調用
+                    const formData = new FormData();
+                    formData.append('client_id', INSTAGRAM_CONFIG.clientId);
+                    formData.append('client_secret', INSTAGRAM_CONFIG.clientSecret);
+                    formData.append('grant_type', 'authorization_code');
+                    formData.append('redirect_uri', INSTAGRAM_CONFIG.redirectUri);
+                    formData.append('code', code);
+
+                    // 這個請求會因為 CORS 政策而失敗，這是正常的
+                    const response = await fetch('https://api.instagram.com/oauth/access_token', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const tokenData = await response.json();
+                        return await this.exchangeForLongLivedToken(tokenData.access_token);
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error('令牌交換失敗:', error);
+                    
+                    // 如果自動交換失敗，切換到手動流程
+                    this.showManualProcess(code);
+                    return null;
+                }
+            }
+
+            async exchangeForLongLivedToken(shortLivedToken) {
+                try {
+                    this.updateStatus('正在獲取長期訪問令牌...');
+
+                    const response = await fetch(
+                        `${INSTAGRAM_CONFIG.baseURL}/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CONFIG.clientSecret}&access_token=${shortLivedToken}`
+                    );
+
+                    if (response.ok) {
+                        const tokenData = await response.json();
+                        
+                        // 保存令牌到本地存儲
+                        localStorage.setItem('instagram_access_token', tokenData.access_token);
+                        
+                        const expiryDate = new Date();
+                        expiryDate.setDate(expiryDate.getDate() + Math.floor(tokenData.expires_in / 86400));
+                        localStorage.setItem('instagram_token_expiry', expiryDate.toISOString());
+
+                        return tokenData;
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error('長期令牌交換失敗:', error);
+                    throw error;
+                }
+            }
+        }
+
+        // 初始化授權處理
+        async function initializeAuth() {
+            const authHandler = new AuthHandler();
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // 檢查錯誤參數
+            const error = urlParams.get('error');
+            const errorDescription = urlParams.get('error_description');
+            
+            if (error) {
+                authHandler.showError(error, errorDescription);
+                return;
+            }
+
+            // 檢查授權碼
+            const code = urlParams.get('code');
+            
+            if (!code) {
+                authHandler.showError('沒有收到授權碼', '請確認您已完成 Instagram 授權流程');
+                return;
+            }
+
+            try {
+                authHandler.updateStatus('正在處理授權碼...');
+                
+                // 嘗試自動交換令牌
+                const tokenData = await authHandler.exchangeCodeForToken(code);
+                
+                if (tokenData) {
+                    authHandler.showSuccess(tokenData);
+                }
+                // 如果失敗，exchangeCodeForToken 會自動切換到手動流程
+                
+            } catch (error) {
+                console.error('授權處理失敗:', error);
+                authHandler.showError(error.message);
+            }
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', initializeAuth);
+
+        // 複製授權碼功能
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已複製到剪貼板！');
+            }).catch(err => {
+                console.error('複製失敗:', err);
+                // 備用複製方法
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('已複製到剪貼板！');
+            });
+        }
+
+        // 為代碼區塊添加點擊複製功能
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('code-display')) {
+                copyToClipboard(e.target.textContent);
+            }
+        });
+    </script>
+</body>
+</html>
