@@ -292,13 +292,15 @@
         }
 
         .ig-link {
-            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
-            color: white !important;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436 !important;
+            border: 2px solid rgba(255, 234, 167, 0.5);
         }
 
         .ig-link:hover {
-            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
-            color: white !important;
+            background: linear-gradient(135deg, #fdcb6e 0%, #e84393 100%);
+            color: #ffffff !important;
+            border-color: rgba(253, 203, 110, 0.8);
         }
 
         /* Content Sections */
@@ -530,24 +532,27 @@
         }
 
         .ig-cta {
-            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
-            color: white;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 50%, #e17055 100%);
+            color: #2d3436;
             padding: clamp(1rem, 3vw, 1.5rem) clamp(2rem, 5vw, 3rem);
-            border-radius: 16px;
+            border-radius: 25px;
             margin: clamp(2rem, 4vw, 3rem) 0;
             text-decoration: none;
             display: inline-block;
-            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-            font-weight: 500;
+            font-size: clamp(1rem, 2.2vw, 1.1rem);
+            font-weight: 400;
             transition: all 0.3s ease;
-            font-family: 'Caveat', cursive;
+            font-family: 'Inter', sans-serif;
             border: none;
             cursor: pointer;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 25px rgba(255, 234, 167, 0.3);
         }
 
         .ig-cta:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(240, 148, 51, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(255, 234, 167, 0.4);
+            background: linear-gradient(135deg, #fdcb6e 0%, #e84393 50%, #a29bfe 100%);
         }
 
         .contact-links {
