@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vera's Travel Map - Auto Instagram Integration</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Vera's World Travel Map</title>
     <style>
         * {
             margin: 0;
@@ -13,35 +12,299 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e1a;
+            color: #ffffff;
+            overflow: hidden;
+            cursor: default;
         }
 
-        /* 載入畫面 */
-        .loading-screen {
+        .header {
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #8892b0;
+            margin-top: 4px;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #1a2332 0%, #0a0e1a 100%);
+        }
+
+        #worldMap {
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .country {
+            fill: #2d3748;
+            stroke: #4a5568;
+            stroke-width: 0.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .country:hover {
+            fill: #4a5568;
+            stroke: #667eea;
+            stroke-width: 1;
+        }
+
+        .country.visited {
+            fill: #667eea;
+            stroke: #764ba2;
+            stroke-width: 1;
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+        }
+
+        .country.visited:hover {
+            fill: #764ba2;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.8));
+        }
+
+        .posts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            padding: 100px 40px 40px;
+        }
+
+        .posts-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .posts-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .posts-title {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .posts-subtitle {
+            color: #8892b0;
+            font-size: 16px;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .post-card {
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .post-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 10000;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+        }
+
+        .post-image-icon {
+            position: relative;
+            z-index: 1;
+        }
+
+        .post-content {
+            padding: 20px;
+        }
+
+        .post-location {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .post-date {
+            color: #8892b0;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .post-description {
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 120px;
+            right: 40px;
+            background: rgba(45, 55, 72, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2001;
+            font-size: 20px;
+        }
+
+        .close-btn:hover {
+            background: rgba(102, 126, 234, 0.8);
+            transform: scale(1.1);
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1001;
         }
 
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid rgba(255,255,255,0.3);
-            border-top: 5px solid white;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin: 0 auto 20px;
+        }
+
+        .instagram-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .country-tooltip {
+            position: fixed;
+            background: rgba(10, 14, 26, 0.95);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1002;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            backdrop-filter: blur(10px);
         }
 
         @keyframes spin {
@@ -49,793 +312,410 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            font-size: 18px;
-            text-align: center;
-            margin-bottom: 10px;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .loading-progress {
-            width: 300px;
-            height: 4px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 20px;
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
         }
 
-        .loading-progress-bar {
-            height: 100%;
-            background: white;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        /* 授權畫面 */
-        .auth-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .auth-card {
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 500px;
-            width: 100%;
-        }
-
-        .auth-card h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .auth-card p {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .auth-btn {
-            background: linear-gradient(45deg, #E4405F, #F77737);
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: transform 0.3s ease;
-            box-shadow: 0 10px 30px rgba(228, 64, 95, 0.3);
-        }
-
-        .auth-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(228, 64, 95, 0.4);
-        }
-
-        /* 主要內容 */
-        .main-content {
-            display: none;
-        }
-
-        .header {
-            text-align: center;
-            padding: 20px;
-            color: white;
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .stats-container {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            padding: 20px;
-            color: white;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-
-        .map-container {
-            height: 70vh;
-            margin: 20px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            position: relative;
-        }
-
-        #map {
-            height: 100%;
-            width: 100%;
-        }
-
-        .controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-        }
-
-        .control-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .control-btn:hover {
-            background: white;
-            transform: translateY(-2px);
-        }
-
-        .control-btn.active {
-            background: #E4405F;
-            color: white;
-        }
-
-        /* 彈出窗口樣式 */
-        .custom-popup {
-            max-width: 300px;
-            text-align: center;
-        }
-
-        .popup-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .popup-title {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .popup-description {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
-
-        .popup-meta {
-            font-size: 12px;
-            color: #999;
-            margin-bottom: 12px;
-        }
-
-        .popup-button {
-            background: linear-gradient(45deg, #E4405F, #F77737);
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-
-        .popup-button:hover {
-            transform: scale(1.05);
-        }
-
-        /* 錯誤提示 */
-        .error-message {
-            background: #dc3545;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px;
-            text-align: center;
-            display: none;
+        .country.visited {
+            animation: pulse 3s ease-in-out infinite;
         }
 
         /* 響應式設計 */
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2em;
+            .header {
+                padding: 15px 20px;
             }
-            
-            .stats-container {
+
+            .header-content {
                 flex-direction: column;
+                gap: 15px;
+            }
+
+            .stats {
                 gap: 20px;
             }
-            
-            .map-container {
-                height: 60vh;
-                margin: 10px;
+
+            .posts-overlay {
+                padding: 80px 20px 20px;
             }
 
-            .auth-card {
-                margin: 20px;
-                padding: 30px 20px;
+            .posts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
 
-            .auth-card h1 {
-                font-size: 2em;
+            .posts-title {
+                font-size: 24px;
+            }
+
+            .close-btn {
+                top: 90px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 載入畫面 -->
-    <div class="loading-screen" id="loadingScreen">
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🌍 Vera's World
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="countries-count">0</span>
+                    <div class="stat-label">Countries</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="cities-count">0</span>
+                    <div class="stat-label">Cities</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="posts-count">0</span>
+                    <div class="stat-label">Posts</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="map-container">
+        <svg id="worldMap" viewBox="0 0 1000 500">
+            <!-- SVG 世界地圖將在這裡動態生成 -->
+        </svg>
+    </div>
+
+    <div class="loading" id="loading">
         <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">初始化旅遊地圖...</div>
-        <div class="loading-progress">
-            <div class="loading-progress-bar" id="progressBar"></div>
+        <div>Loading Vera's travel memories...</div>
+    </div>
+
+    <div class="posts-overlay" id="postsOverlay">
+        <div class="close-btn" onclick="closePosts()">×</div>
+        <div class="posts-container">
+            <div class="posts-header">
+                <div class="posts-title" id="postsTitle">Posts from Country</div>
+                <div class="posts-subtitle" id="postsSubtitle">Click on any post to view on Instagram</div>
+            </div>
+            <div class="posts-grid" id="postsGrid">
+                <!-- 貼文將在這裡動態生成 -->
+            </div>
         </div>
     </div>
 
-    <!-- 授權畫面 -->
-    <div class="auth-screen" id="authScreen">
-        <div class="auth-card">
-            <h1>🌍 Connect Instagram</h1>
-            <p>要顯示你的旅遊足跡，我們需要連接到你的 Instagram 帳戶來獲取帶有地點標記的貼文。</p>
-            <p>點擊下方按鈕來安全地授權訪問你的 Instagram 數據。</p>
-            <a href="#" id="authButton" class="auth-btn">
-                📱 Connect Instagram Account
-            </a>
-            <p style="font-size: 0.9em; margin-top: 20px; opacity: 0.7;">
-                我們只會讀取你的公開貼文，不會進行任何修改或發布操作。
-            </p>
-        </div>
-    </div>
+    <div class="country-tooltip" id="tooltip" style="display: none;"></div>
 
-    <!-- 錯誤訊息 -->
-    <div class="error-message" id="errorMessage"></div>
-
-    <!-- 主要內容 -->
-    <div class="main-content" id="mainContent">
-        <div class="header">
-            <h1>🌍 Vera's Travel Adventures</h1>
-            <p>透過 Instagram 探索我的旅行足跡</p>
-        </div>
-
-        <div class="stats-container">
-            <div class="stat">
-                <span class="stat-number" id="countriesCount">-</span>
-                <span class="stat-label">Countries</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number" id="citiesCount">-</span>
-                <span class="stat-label">Cities</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number" id="postsCount">-</span>
-                <span class="stat-label">Posts</span>
-            </div>
-        </div>
-
-        <div class="map-container">
-            <div class="controls">
-                <button class="control-btn active" id="streetView">Street View</button>
-                <button class="control-btn" id="satelliteView">Satellite</button>
-                <button class="control-btn" id="refreshData">🔄 Refresh</button>
-            </div>
-            <div id="map"></div>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 配置 Instagram API
-        const INSTAGRAM_CONFIG = {
-            clientId: 'YOUR_INSTAGRAM_APP_ID', // 需要替換
-            redirectUri: window.location.origin + window.location.pathname.replace('index.html', '') + 'auth-callback.html',
-            scope: 'user_profile,user_media',
-            baseURL: 'https://graph.instagram.com'
+        // 示例數據 - 在實際應用中這將從 Instagram API 獲取
+        const veraData = {
+            countries: {
+                'Japan': {
+                    name: '日本',
+                    posts: [
+                        {
+                            id: '1',
+                            location: 'Tokyo, Japan',
+                            city: 'Tokyo',
+                            date: '2024-03-15',
+                            image: '🏯',
+                            description: '櫻花盛開的東京，傳統與現代的完美融合',
+                            tags: ['櫻花', '東京', '日本', '春天'],
+                            instagramUrl: 'https://instagram.com/p/vera_tokyo1'
+                        },
+                        {
+                            id: '2',
+                            location: 'Kyoto, Japan',
+                            city: 'Kyoto',
+                            date: '2024-03-18',
+                            image: '⛩️',
+                            description: '古都京都的寧靜寺廟和竹林',
+                            tags: ['京都', '寺廟', '竹林', '和服'],
+                            instagramUrl: 'https://instagram.com/p/vera_kyoto1'
+                        }
+                    ]
+                },
+                'France': {
+                    name: '法國',
+                    posts: [
+                        {
+                            id: '3',
+                            location: 'Paris, France',
+                            city: 'Paris',
+                            date: '2024-01-20',
+                            image: '🗼',
+                            description: '夜晚的艾菲爾鐵塔，浪漫巴黎的象徵',
+                            tags: ['巴黎', '艾菲爾鐵塔', '夜景', '浪漫'],
+                            instagramUrl: 'https://instagram.com/p/vera_paris1'
+                        },
+                        {
+                            id: '4',
+                            location: 'Louvre Museum, Paris',
+                            city: 'Paris',
+                            date: '2024-01-22',
+                            image: '🖼️',
+                            description: '羅浮宮中的藝術珍品，蒙娜麗莎的微笑',
+                            tags: ['羅浮宮', '藝術', '蒙娜麗莎', '文化'],
+                            instagramUrl: 'https://instagram.com/p/vera_louvre1'
+                        }
+                    ]
+                },
+                'United States': {
+                    name: '美國',
+                    posts: [
+                        {
+                            id: '5',
+                            location: 'New York, USA',
+                            city: 'New York',
+                            date: '2023-12-10',
+                            image: '🏙️',
+                            description: '不夜城紐約的摩天大樓和璀璨夜景',
+                            tags: ['紐約', '摩天大樓', '時代廣場', '都市'],
+                            instagramUrl: 'https://instagram.com/p/vera_nyc1'
+                        }
+                    ]
+                },
+                'Taiwan': {
+                    name: '台灣',
+                    posts: [
+                        {
+                            id: '6',
+                            location: 'Taipei, Taiwan',
+                            city: 'Taipei',
+                            date: '2024-02-14',
+                            image: '🏢',
+                            description: '台北101和美麗的城市夜景',
+                            tags: ['台北', '101', '夜市', '小吃'],
+                            instagramUrl: 'https://instagram.com/p/vera_taipei1'
+                        }
+                    ]
+                },
+                'United Kingdom': {
+                    name: '英國',
+                    posts: [
+                        {
+                            id: '7',
+                            location: 'London, UK',
+                            city: 'London',
+                            date: '2023-11-05',
+                            image: '🏰',
+                            description: '霧都倫敦的大本鐘和泰晤士河',
+                            tags: ['倫敦', '大本鐘', '下午茶', '英式'],
+                            instagramUrl: 'https://instagram.com/p/vera_london1'
+                        }
+                    ]
+                },
+                'South Korea': {
+                    name: '韓國',
+                    posts: [
+                        {
+                            id: '8',
+                            location: 'Seoul, South Korea',
+                            city: 'Seoul',
+                            date: '2024-04-01',
+                            image: '🏯',
+                            description: '首爾的現代化建築和傳統韓屋',
+                            tags: ['首爾', '韓屋', '韓食', 'K-pop'],
+                            instagramUrl: 'https://instagram.com/p/vera_seoul1'
+                        }
+                    ]
+                }
+            }
         };
 
-        // 全域變數
-        let map = null;
-        let markers = [];
-        let travelData = [];
+        // 簡化的世界地圖 SVG 路徑（實際應用中可以使用更詳細的地圖數據）
+        const worldMapPaths = {
+            'Japan': 'M850,200 L860,200 L865,210 L860,220 L850,220 L845,210 Z',
+            'France': 'M450,180 L470,180 L475,200 L470,210 L450,210 L445,200 Z',
+            'United States': 'M150,200 L250,200 L250,250 L150,250 Z',
+            'Taiwan': 'M800,250 L810,250 L810,270 L800,270 Z',
+            'United Kingdom': 'M420,160 L440,160 L440,180 L420,180 Z',
+            'South Korea': 'M830,200 L840,200 L840,220 L830,220 Z'
+        };
 
-        // Instagram API 類別
-        class InstagramTravelAPI {
-            constructor(config) {
-                this.config = config;
-                this.accessToken = localStorage.getItem('instagram_access_token');
-                this.tokenExpiry = localStorage.getItem('instagram_token_expiry');
-            }
-
-            // 檢查令牌是否有效
-            isTokenValid() {
-                if (!this.accessToken || !this.tokenExpiry) return false;
-                return new Date() < new Date(this.tokenExpiry);
-            }
-
-            // 獲取授權 URL
-            getAuthorizationUrl() {
-                const params = new URLSearchParams({
-                    client_id: this.config.clientId,
-                    redirect_uri: this.config.redirectUri,
-                    scope: this.config.scope,
-                    response_type: 'code'
-                });
-                
-                return `https://api.instagram.com/oauth/authorize?${params.toString()}`;
-            }
-
-            // 處理授權回調
-            async handleAuthCallback(code) {
-                try {
-                    updateLoadingText('交換訪問令牌...');
-                    
-                    // 這裡需要後端 API 來安全地交換令牌
-                    // 因為 Instagram API 需要 client_secret，不能在前端暴露
-                    const response = await this.exchangeCodeForToken(code);
-                    
-                    if (response.access_token) {
-                        this.accessToken = response.access_token;
-                        const expiryDate = new Date();
-                        expiryDate.setDate(expiryDate.getDate() + 60); // 60天後過期
-                        
-                        localStorage.setItem('instagram_access_token', this.accessToken);
-                        localStorage.setItem('instagram_token_expiry', expiryDate.toISOString());
-                        
-                        return true;
-                    }
-                } catch (error) {
-                    console.error('授權處理失敗:', error);
-                    return false;
-                }
-            }
-
-            // 交換授權碼為訪問令牌（需要後端支持）
-            async exchangeCodeForToken(code) {
-                // 注意：這個函數需要後端 API 支持
-                // 前端不能直接調用 Instagram 的令牌交換 API
-                throw new Error('需要後端 API 支持來安全地交換令牌');
-            }
-
-            // 獲取用戶媒體
-            async getUserMedia(limit = 25) {
-                if (!this.accessToken) {
-                    throw new Error('沒有有效的訪問令牌');
-                }
-
-                const response = await fetch(
-                    `${this.config.baseURL}/me/media?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp&limit=${limit}&access_token=${this.accessToken}`
-                );
-
-                if (!response.ok) {
-                    throw new Error(`API 請求失敗: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.data || [];
-            }
-
-            // 從說明文字提取地點
-            extractLocationInfo(caption) {
-                if (!caption) return null;
-
-                const locationPatterns = [
-                    /📍\s*([^•\n\r#@]+)/i,
-                    /Location:\s*([^\n\r#@]+)/i,
-                    /地點[:：]\s*([^\n\r#@]+)/i,
-                    /at\s+([A-Z][a-zA-Z\s,.-]+?)(?=\s*[#@\n\r]|$)/,
-                    /([A-Za-z\s]+Base\s+Camp)/i,
-                    /(Everest|Annapurna|Manaslu)\s*([A-Za-z\s]*)/i,
-                    /(Tokyo|Kyoto|Osaka|Hokkaido|Hiroshima)/i
-                ];
-
-                for (const pattern of locationPatterns) {
-                    const match = caption.match(pattern);
-                    if (match && match[1]) {
-                        let location = match[1].trim();
-                        location = location.replace(/[•\.]+$/, '').trim();
-                        if (location.length > 3 && location.length < 100) {
-                            return location;
-                        }
-                    }
-                }
-
-                return null;
-            }
-
-            // 地理編碼
-            async geocodeLocation(locationName) {
-                try {
-                    const response = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}&limit=1&addressdetails=1`
-                    );
-                    
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        const result = data[0];
-                        return {
-                            lat: parseFloat(result.lat),
-                            lng: parseFloat(result.lon),
-                            city: result.address?.city || result.address?.town || result.name || locationName,
-                            country: result.address?.country || 'Unknown'
-                        };
-                    }
-                } catch (error) {
-                    console.warn('地理編碼失敗:', error);
-                }
-
-                return this.fallbackGeocode(locationName);
-            }
-
-            // 備用地理編碼
-            fallbackGeocode(locationName) {
-                const knownLocations = {
-                    'everest base camp': { lat: 28.0026, lng: 86.8528, city: 'Everest Base Camp', country: 'Nepal' },
-                    'annapurna base camp': { lat: 28.5314, lng: 83.8731, city: 'Annapurna Base Camp', country: 'Nepal' },
-                    'tokyo': { lat: 35.6762, lng: 139.6503, city: 'Tokyo', country: 'Japan' },
-                    'kyoto': { lat: 35.0116, lng: 135.7681, city: 'Kyoto', country: 'Japan' },
-                    'hokkaido': { lat: 43.0642, lng: 141.3469, city: 'Sapporo', country: 'Japan' }
-                };
-
-                const normalized = locationName.toLowerCase().trim();
-                for (const [key, coords] of Object.entries(knownLocations)) {
-                    if (normalized.includes(key) || key.includes(normalized)) {
-                        return coords;
-                    }
-                }
-
-                return null;
-            }
-
-            // 處理所有數據
-            async processInstagramData() {
-                updateLoadingText('獲取 Instagram 貼文...');
-                updateProgress(20);
-
-                const media = await this.getUserMedia(50);
-                const processedData = [];
-                const totalPosts = media.length;
-
-                updateLoadingText(`處理 ${totalPosts} 篇貼文...`);
-                updateProgress(40);
-
-                for (let i = 0; i < media.length; i++) {
-                    const item = media[i];
-                    updateLoadingText(`處理貼文 ${i + 1}/${totalPosts}...`);
-                    updateProgress(40 + (i / totalPosts) * 40);
-
-                    const locationName = this.extractLocationInfo(item.caption);
-                    
-                    if (locationName) {
-                        const coordinates = await this.geocodeLocation(locationName);
-                        
-                        if (coordinates) {
-                            processedData.push({
-                                id: item.id,
-                                title: this.generateTitle(locationName, item.caption),
-                                description: this.cleanDescription(item.caption),
-                                image: item.media_type === 'VIDEO' ? 
-                                       (item.thumbnail_url || item.media_url) : 
-                                       item.media_url,
-                                instagramUrl: item.permalink,
-                                date: item.timestamp.split('T')[0],
-                                lat: coordinates.lat,
-                                lng: coordinates.lng,
-                                city: coordinates.city,
-                                country: coordinates.country,
-                                mediaType: item.media_type
-                            });
-                        }
-                    }
-
-                    // 延遲避免 API 限制
-                    if (i < media.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                }
-
-                updateLoadingText('初始化地圖...');
-                updateProgress(90);
-
-                return processedData;
-            }
-
-            generateTitle(locationName, caption) {
-                if (caption) {
-                    const firstLine = caption.split('\n')[0].trim();
-                    if (firstLine.length > 5 && firstLine.length < 80 && !firstLine.startsWith('#')) {
-                        return firstLine;
-                    }
-                }
-                return locationName;
-            }
-
-            cleanDescription(caption) {
-                if (!caption) return '';
-                
-                let cleaned = caption
-                    .replace(/#\w+/g, '')
-                    .replace(/\n+/g, ' ')
-                    .replace(/\s+/g, ' ')
-                    .trim();
-                
-                if (cleaned.length > 150) {
-                    cleaned = cleaned.substring(0, 147) + '...';
-                }
-                
-                return cleaned;
-            }
-        }
-
-        // 初始化 Instagram API
-        const instagramAPI = new InstagramTravelAPI(INSTAGRAM_CONFIG);
-
-        // UI 控制函數
-        function updateLoadingText(text) {
-            document.getElementById('loadingText').textContent = text;
-        }
-
-        function updateProgress(percent) {
-            document.getElementById('progressBar').style.width = percent + '%';
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function showAuthScreen() {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('authScreen').style.display = 'flex';
-        }
-
-        function showMainContent() {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-        }
+        let currentTooltip = null;
 
         // 初始化地圖
-        function initializeMap(data) {
-            updateProgress(95);
+        function initMap() {
+            const svg = document.getElementById('worldMap');
             
-            if (map) {
-                map.remove();
-            }
-
-            map = L.map('map').setView([25.0, 100.0], 3);
-
-            const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+            // 創建國家路徑
+            Object.keys(worldMapPaths).forEach(countryCode => {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', worldMapPaths[countryCode]);
+                path.setAttribute('class', veraData.countries[countryCode] ? 'country visited' : 'country');
+                path.setAttribute('data-country', countryCode);
+                
+                // 添加事件監聽器
+                path.addEventListener('click', () => showCountryPosts(countryCode));
+                path.addEventListener('mouseenter', (e) => showTooltip(e, countryCode));
+                path.addEventListener('mouseleave', hideTooltip);
+                path.addEventListener('mousemove', updateTooltipPosition);
+                
+                svg.appendChild(path);
             });
 
-            const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '© Esri'
+            // 更新統計數據
+            updateStats();
+            
+            // 隱藏載入畫面
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // 顯示國家貼文
+        function showCountryPosts(countryCode) {
+            const countryData = veraData.countries[countryCode];
+            if (!countryData) return;
+
+            const overlay = document.getElementById('postsOverlay');
+            const title = document.getElementById('postsTitle');
+            const subtitle = document.getElementById('postsSubtitle');
+            const grid = document.getElementById('postsGrid');
+
+            title.textContent = `📍 ${countryData.name}`;
+            subtitle.textContent = `${countryData.posts.length} posts from Vera's adventures`;
+
+            // 清空並重新生成貼文網格
+            grid.innerHTML = '';
+            
+            countryData.posts.forEach((post, index) => {
+                const postCard = createPostCard(post, index);
+                grid.appendChild(postCard);
             });
 
-            streetLayer.addTo(map);
+            overlay.style.display = 'block';
+        }
 
-            // 清除現有標記
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
-
-            // 自定義圖標
-            const customIcon = L.icon({
-                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
-                        <circle cx="12" cy="12" r="10" fill="#E4405F" stroke="#fff" stroke-width="2"/>
-                        <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-family="Arial">📍</text>
-                    </svg>
-                `),
-                iconSize: [30, 30],
-                iconAnchor: [15, 30],
-                popupAnchor: [0, -30]
-            });
-
-            // 添加標記
-            data.forEach(location => {
-                const marker = L.marker([location.lat, location.lng], { icon: customIcon })
-                    .addTo(map);
-
-                const popupContent = `
-                    <div class="custom-popup">
-                        <img src="${location.image}" alt="${location.title}" class="popup-image">
-                        <div class="popup-title">${location.title}</div>
-                        <div class="popup-description">${location.description}</div>
-                        <div class="popup-meta">${location.city}, ${location.country} • ${location.date}</div>
-                        <a href="${location.instagramUrl}" target="_blank" class="popup-button">
-                            View on Instagram
-                        </a>
+        // 創建貼文卡片
+        function createPostCard(post, index) {
+            const card = document.createElement('div');
+            card.className = 'post-card';
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            card.innerHTML = `
+                <div class="instagram-badge">Instagram</div>
+                <div class="post-image">
+                    <div class="post-image-icon">${post.image}</div>
+                </div>
+                <div class="post-content">
+                    <div class="post-location">${post.location}</div>
+                    <div class="post-date">${formatDate(post.date)}</div>
+                    <div class="post-description">${post.description}</div>
+                    <div class="post-tags">
+                        ${post.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
                     </div>
-                `;
+                </div>
+            `;
 
-                marker.bindPopup(popupContent, {
-                    maxWidth: 300,
-                    className: 'custom-popup-container'
-                });
-
-                marker.on('mouseover', function() {
-                    this.openPopup();
-                });
-
-                markers.push(marker);
+            card.addEventListener('click', () => {
+                window.open(post.instagramUrl, '_blank');
             });
 
-            // 控制按鈕
-            document.getElementById('streetView').addEventListener('click', function() {
-                map.removeLayer(satelliteLayer);
-                map.addLayer(streetLayer);
-                this.classList.add('active');
-                document.getElementById('satelliteView').classList.remove('active');
-            });
+            return card;
+        }
 
-            document.getElementById('satelliteView').addEventListener('click', function() {
-                map.removeLayer(streetLayer);
-                map.addLayer(satelliteLayer);
-                this.classList.add('active');
-                document.getElementById('streetView').classList.remove('active');
-            });
+        // 關閉貼文覆蓋層
+        function closePosts() {
+            document.getElementById('postsOverlay').style.display = 'none';
+        }
 
-            // 更新統計
-            updateStats(data);
-            updateProgress(100);
+        // 顯示工具提示
+        function showTooltip(event, countryCode) {
+            const tooltip = document.getElementById('tooltip');
+            const countryData = veraData.countries[countryCode];
             
-            setTimeout(() => {
-                showMainContent();
-            }, 500);
+            if (countryData) {
+                tooltip.innerHTML = `
+                    <strong>${countryData.name}</strong><br>
+                    ${countryData.posts.length} posts
+                `;
+            } else {
+                tooltip.innerHTML = `
+                    <strong>${countryCode}</strong><br>
+                    Not visited yet
+                `;
+            }
+            
+            tooltip.style.display = 'block';
+            updateTooltipPosition(event);
+        }
+
+        // 隱藏工具提示
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+
+        // 更新工具提示位置
+        function updateTooltipPosition(event) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = (event.clientX + 15) + 'px';
+            tooltip.style.top = (event.clientY - 15) + 'px';
         }
 
         // 更新統計數據
-        function updateStats(data) {
-            const countries = [...new Set(data.map(item => item.country))];
-            const cities = [...new Set(data.map(item => item.city))];
-            
-            document.getElementById('countriesCount').textContent = countries.length;
-            document.getElementById('citiesCount').textContent = cities.length;
-            document.getElementById('postsCount').textContent = data.length;
+        function updateStats() {
+            const countries = Object.keys(veraData.countries).length;
+            const cities = Object.values(veraData.countries).reduce((acc, country) => {
+                const uniqueCities = [...new Set(country.posts.map(post => post.city))];
+                return acc + uniqueCities.length;
+            }, 0);
+            const posts = Object.values(veraData.countries).reduce((acc, country) => acc + country.posts.length, 0);
+
+            document.getElementById('countries-count').textContent = countries;
+            document.getElementById('cities-count').textContent = cities;
+            document.getElementById('posts-count').textContent = posts;
         }
 
-        // 檢查 URL 參數（授權回調）
-        function checkAuthCallback() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const error = urlParams.get('error');
-
-            if (error) {
-                showError('Instagram 授權失敗: ' + error);
-                showAuthScreen();
-                return false;
-            }
-
-            if (code) {
-                updateLoadingText('處理 Instagram 授權...');
-                return instagramAPI.handleAuthCallback(code);
-            }
-
-            return false;
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-TW', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
         }
 
-        // 應用程式初始化
-        async function initializeApp() {
-            updateLoadingText('檢查授權狀態...');
-            updateProgress(10);
-
-            // 檢查是否是授權回調
-            const isAuthCallback = checkAuthCallback();
-            if (isAuthCallback) {
-                return;
-            }
-
-            // 檢查現有令牌
-            if (!instagramAPI.isTokenValid()) {
-                setTimeout(() => {
-                    showAuthScreen();
-                }, 1000);
-                return;
-            }
-
-            try {
-                // 處理 Instagram 數據
-                travelData = await instagramAPI.processInstagramData();
-                
-                if (travelData.length === 0) {
-                    showError('沒有找到帶有地點信息的貼文。請確保你的 Instagram 貼文包含地點標記。');
-                    showAuthScreen();
-                    return;
-                }
-
-                // 緩存數據
-                localStorage.setItem('travel_data', JSON.stringify(travelData));
-                localStorage.setItem('travel_data_updated', new Date().toISOString());
-
-                // 初始化地圖
-                initializeMap(travelData);
-
-            } catch (error) {
-                console.error('初始化失敗:', error);
-                showError('載入失敗: ' + error.message);
-                showAuthScreen();
-            }
-        }
-
-        // 設置授權按鈕
-        document.getElementById('authButton').addEventListener('click', function(e) {
-            e.preventDefault();
-            const authUrl = instagramAPI.getAuthorizationUrl();
-            window.location.href = authUrl;
-        });
-
-        // 刷新數據
-        document.getElementById('refreshData').addEventListener('click', async function() {
-            this.textContent = '⏳ Loading...';
-            this.disabled = true;
-            
-            try {
-                travelData = await instagramAPI.processInstagramData();
-                initializeMap(travelData);
-                localStorage.setItem('travel_data', JSON.stringify(travelData));
-                localStorage.setItem('travel_data_updated', new Date().toISOString());
-            } catch (error) {
-                showError('刷新失敗: ' + error.message);
-            } finally {
-                this.textContent = '🔄 Refresh';
-                this.disabled = false;
+        // 鍵盤事件
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePosts();
             }
         });
 
-        // 頁面載入時初始化
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        // 初始化應用
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initMap, 1000); // 模擬載入時間
+        });
+
+        // 模擬從 Instagram API 載入數據的函數
+        function loadInstagramData() {
+            // 這裡應該是實際的 Instagram API 調用
+            // 由於 Instagram API 的限制，這裡使用示例數據
+            console.log('Loading Instagram data...');
+            
+            // 在實際應用中，你需要：
+            // 1. 設置 Instagram Basic Display API
+            // 2. 獲取 access token
+            // 3. 調用 API 獲取帶有位置信息的媒體
+            // 4. 解析位置數據並映射到地圖上
+        }
     </script>
 </body>
 </html>
