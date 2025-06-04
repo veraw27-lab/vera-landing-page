@@ -292,6 +292,32 @@
             border-radius: 2px;
         }
 
+        .photo-burst {
+            position: absolute;
+            pointer-events: none;
+            left: 0; top: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2001;
+        }
+        .photo-burst-img {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(124,163,209,0.18);
+            object-fit: cover;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: all 0.5s cubic-bezier(.4,2,.6,1);
+            border: 2px solid #fff2;
+            background: #222;
+        }
+        .photo-burst-img.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -354,7 +380,7 @@
 
     <div class="map-container">
         <svg id="world-map"></svg>
-        
+        <div class="photo-burst" id="photo-burst"></div>
         <div class="legend">
             <div class="legend-title">Legend</div>
             <div class="legend-item">
@@ -558,6 +584,9 @@
             // 清除現有內容
             svg.selectAll("*").remove();
 
+            // 清除放射狀照片
+            clearPhotoBurst();
+
             // 繪製國家
             Object.keys(worldGeometry).forEach(countryName => {
                 const pathData = worldGeometry[countryName];
@@ -577,10 +606,49 @@
                     .attr("class", className)
                     .attr("data-country", countryName)
                     .attr("data-posts", postCount)
-                    .on("mouseover", handleMouseOver)
-                    .on("mouseout", handleMouseOut)
+                    .on("mouseover", function(event) {
+                        handleMouseOver(event);
+                        showPhotoBurst(event, countryName);
+                    })
+                    .on("mouseout", function(event) {
+                        handleMouseOut();
+                        clearPhotoBurst();
+                    })
                     .on("click", handleCountryClick);
             });
+        }
+
+        // 放射狀照片顯示
+        function showPhotoBurst(event, countryName) {
+            clearPhotoBurst();
+            const countryData = travelData.countries[countryName];
+            if (!countryData || !countryData.posts || countryData.posts.length === 0) return;
+            const burst = document.getElementById('photo-burst');
+            const svgRect = document.getElementById('world-map').getBoundingClientRect();
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            const centerX = mouseX;
+            const centerY = mouseY;
+            const photos = countryData.posts.slice(0, 8); // 最多8張
+            const radius = 120;
+            const angleStep = (2 * Math.PI) / photos.length;
+            photos.forEach((post, i) => {
+                const angle = i * angleStep - Math.PI/2;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const img = document.createElement('img');
+                img.className = 'photo-burst-img';
+                img.src = post.media_url || post.thumbnail_url || 'https://via.placeholder.com/90?text=Photo';
+                img.alt = post.caption || '';
+                img.style.left = (x - 45) + 'px';
+                img.style.top = (y - 45) + 'px';
+                setTimeout(() => img.classList.add('visible'), 10 + i*60);
+                burst.appendChild(img);
+            });
+        }
+        function clearPhotoBurst() {
+            const burst = document.getElementById('photo-burst');
+            if (burst) burst.innerHTML = '';
         }
 
         function handleMouseOver(event, d) {
@@ -636,38 +704,37 @@
         function createPostCard(post) {
             const card = document.createElement('div');
             card.className = 'post-card';
-            
+            // 若有圖片，顯示縮圖
+            let imgHtml = '';
+            if (post.media_url || post.thumbnail_url) {
+                imgHtml = `<img src="${post.media_url || post.thumbnail_url}" alt="" style="width:100%;height:180px;object-fit:cover;">`;
+            } else {
+                imgHtml = `<div class="post-image">${post.media_type === 'VIDEO' ? '🎥' : '📷'}</div>`;
+            }
             const location = post.location ? 
                 `${post.location.city || ''}, ${post.location.country || ''}`.replace(/^,\s*/, '') : 
                 'Unknown location';
-            
             const date = new Date(post.timestamp).toLocaleDateString('zh-TW', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
             });
-
             const caption = post.caption ? 
                 (post.caption.length > 80 ? post.caption.substring(0, 80) + '...' : post.caption) : 
                 'No caption available';
-
             card.innerHTML = `
-                <div class="post-image">
-                    ${post.media_type === 'VIDEO' ? '🎥' : '📷'}
-                </div>
+                ${imgHtml}
                 <div class="post-content">
                     <div class="post-location">${location}</div>
                     <div class="post-date">${date}</div>
                     <div class="post-caption">${caption}</div>
                 </div>
             `;
-
             card.addEventListener('click', () => {
                 if (post.permalink) {
                     window.open(post.permalink, '_blank');
                 }
             });
-
             return card;
         }
 
