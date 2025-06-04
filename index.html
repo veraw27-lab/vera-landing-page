@@ -1,8 +1,4 @@
-.nav-links {
-            display: flex;
-            list-style: none;
-            gap: 3rem;
-        }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -48,6 +44,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 0;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
 
         .logo {
@@ -61,8 +66,7 @@
         .nav-links {
             display: flex;
             list-style: none;
-            gap: 2rem;
-            align-items: center;
+            gap: 3rem;
         }
 
         .nav-hashtags {
@@ -70,6 +74,8 @@
             font-size: 0.8rem;
             font-weight: 300;
             letter-spacing: 0.5px;
+            text-align: left;
+            width: 100%;
         }
 
         .nav-links a {
@@ -90,7 +96,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding-top: 80px;
+            padding-top: 120px;
             background: #1a1a1a;
         }
 
@@ -144,13 +150,6 @@
             line-height: 1.7;
             margin-bottom: 2rem;
             max-width: 500px;
-        }
-
-        .hero-hashtags {
-            font-size: 0.95rem;
-            color: #7ca3d1;
-            font-weight: 400;
-            letter-spacing: 0.5px;
         }
 
         /* Profile Photo - Simple Style */
@@ -385,66 +384,6 @@
             opacity: 0.6;
         }
 
-        /* Links/Logos Section */
-        .links {
-            background: #1a1a1a;
-        }
-
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 1.5rem;
-            margin-top: 3rem;
-        }
-
-        .link-card {
-            aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-            text-decoration: none;
-            color: #999;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .link-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-3px);
-            color: #fff;
-        }
-
-        .link-card i {
-            font-size: 1.5rem;
-        }
-
-        .link-card img {
-            width: 60%;
-            height: 60%;
-            object-fit: contain;
-            filter: grayscale(100%) opacity(0.7);
-            transition: filter 0.3s;
-        }
-
-        .link-card:hover img {
-            filter: grayscale(0%) opacity(1);
-        }
-
-        /* Upload for links */
-        .link-upload {
-            border: 2px dashed rgba(255, 255, 255, 0.1);
-            background: transparent;
-        }
-
-        .link-upload:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
         /* Quote Section */
         .quote {
             background: #2a2a2a;
@@ -523,10 +462,6 @@
             .adventures-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
-
-            .links-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
         }
 
         @media (max-width: 1024px) {
@@ -550,10 +485,6 @@
 
             .adventures-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-
-            .links-grid {
-                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -598,10 +529,6 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
-            .links-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
             .contact-links {
                 flex-direction: column;
                 align-items: center;
@@ -610,25 +537,11 @@
             .quote-text {
                 font-size: 1.5rem;
             }
-
-            .guide-tag {
-                font-size: 1.1rem;
-                padding: 10px 20px;
-            }
-
-            .guide-subtitle {
-                font-size: 0.9rem;
-                padding: 6px 14px;
-            }
         }
 
         @media (max-width: 480px) {
             .adventures-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .links-grid {
-                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -699,12 +612,8 @@
                     <div class="hero-right">
                         <div class="profile-container">
                             <div class="profile-photo-wrapper" id="profile-wrapper" onclick="document.getElementById('profile-upload').click()">
-                                <div class="profile-placeholder" id="profile-placeholder">
-                                    <div>
-                                        <i class="fas fa-user" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
-                                        <p>Click to upload your photo</p>
-                                    </div>
-                                </div>
+                                <!-- 替換成您的照片路徑 -->
+                                <img src="images/profile.jpg" alt="Vera Wu" class="profile-photo" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Click to upload your photo</p></div></div>'">
                             </div>
                             <div class="upload-btn" onclick="document.getElementById('profile-upload').click()">
                                 <i class="fas fa-camera"></i>
@@ -761,73 +670,50 @@
                 <div class="adventures-grid" id="adventures-grid">
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-mountain"></i>
-                                <p>Mountains</p>
-                            </div>
+                            <!-- 替換成您的照片路徑 -->
+                            <img src="images/adventure1.jpg" alt="Adventure 1" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-mountain\'></i><p>Mountains</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-bicycle"></i>
-                                <p>Cycling</p>
-                            </div>
+                            <img src="images/adventure2.jpg" alt="Adventure 2" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-bicycle\'></i><p>Cycling</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-camera"></i>
-                                <p>Street</p>
-                            </div>
+                            <img src="images/adventure3.jpg" alt="Adventure 3" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Street</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-plane"></i>
-                                <p>Travel</p>
-                            </div>
+                            <img src="images/adventure4.jpg" alt="Adventure 4" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-plane\'></i><p>Travel</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-running"></i>
-                                <p>Running</p>
-                            </div>
+                            <img src="images/adventure5.jpg" alt="Adventure 5" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-running\'></i><p>Running</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-snowflake"></i>
-                                <p>Winter</p>
-                            </div>
+                            <img src="images/adventure6.jpg" alt="Adventure 6" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-snowflake\'></i><p>Winter</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-city"></i>
-                                <p>Urban</p>
-                            </div>
+                            <img src="images/adventure7.jpg" alt="Adventure 7" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-city\'></i><p>Urban</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <div class="adventure-placeholder">
-                                <i class="fas fa-compass"></i>
-                                <p>Explore</p>
-                            </div>
+                            <img src="images/adventure8.jpg" alt="Adventure 8" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-compass\'></i><p>Explore</p></div>'">
                         </div>
                     </div>
                 </div>
@@ -853,7 +739,7 @@
                         <span>DM @vera_travellife</span>
                     </a>
                     
-                    <a href="mailto:vera.w27@gmail.com" class="contact-link">
+                    <a href="mailto:vera@example.com" class="contact-link">
                         <i class="fas fa-envelope"></i>
                         <span>Email me</span>
                     </a>
@@ -906,7 +792,7 @@
             }
         });
 
-                                // Gallery upload
+        // Gallery upload
         document.getElementById('gallery-upload').addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
             const grid = document.getElementById('adventures-grid');
@@ -952,3 +838,24 @@
                 }
             }
         });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.vibe-card, .adventure-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
