@@ -352,16 +352,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #666;
-            font-size: 2rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.4rem;
             z-index: 2;
             transition: all 0.3s ease;
-            opacity: 0.6;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         .adventure-card:hover .adventure-icon-overlay {
-            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.8);
             transform: translate(-50%, -50%) scale(1.1);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         /* Quote Section */
@@ -695,7 +704,7 @@
                         <div class="adventure-image">
                             <img src="images/adventure1.jpeg" alt="Adventure 1" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-mountain\'></i><p>Mountains</p></div>'">
                             <div class="adventure-icon-overlay">
-                                <i class="fas fa-mountain"></i>
+                                <i class="fas fa-tree"></i>
                             </div>
                         </div>
                     </div>
@@ -704,7 +713,7 @@
                         <div class="adventure-image">
                             <img src="images/adventure2.jpeg" alt="Adventure 2" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-bicycle\'></i><p>Cycling</p></div>'">
                             <div class="adventure-icon-overlay">
-                                <i class="fas fa-bicycle"></i>
+                                <i class="fas fa-running"></i>
                             </div>
                         </div>
                     </div>
@@ -722,7 +731,7 @@
                         <div class="adventure-image">
                             <img src="images/adventure4.jpeg" alt="Adventure 4" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-plane\'></i><p>Travel</p></div>'">
                             <div class="adventure-icon-overlay">
-                                <i class="fas fa-plane"></i>
+                                <i class="fas fa-hiking"></i>
                             </div>
                         </div>
                     </div>
