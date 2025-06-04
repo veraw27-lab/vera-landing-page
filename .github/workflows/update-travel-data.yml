@@ -1,5 +1,9 @@
 name: Update Travel Data
 
+permissions:
+  contents: write
+  actions: read
+  
 on:
   schedule:
     - cron: '0 6 * * *'  # 每天早上 6 點 UTC（台灣時間下午 2 點）
