@@ -437,16 +437,25 @@
 
         /* Responsive Breakpoints */
         
-        /* Desktop Large */
-        @media (min-width: 1200px) {
+        /* Desktop */
+        @media (min-width: 1024px) {
             .hero-grid {
                 grid-template-columns: 1fr 1fr;
-                text-align: left;
+                align-items: center;
+                gap: 4rem;
             }
             
             .hero-content {
                 align-items: flex-start;
                 text-align: left;
+                order: 1;
+            }
+            
+            .hero-right {
+                order: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .profile-container {
@@ -454,7 +463,6 @@
                 height: 450px;
                 border-radius: 12px;
                 margin-bottom: 0;
-                order: 2;
             }
             
             .profile-photo-wrapper {
@@ -482,13 +490,34 @@
         }
 
         /* Mobile */
-        @media (max-width: 767px) {
+        @media (max-width: 1023px) {
             .nav-links {
                 display: none;
             }
             
             .nav-top {
                 justify-content: center;
+            }
+            
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .hero-content {
+                order: 2;
+            }
+            
+            .hero-right {
+                order: 1;
+                display: flex;
+                justify-content: center;
+            }
+            
+            .hero-right .profile-container {
+                width: clamp(200px, 40vw, 300px);
+                height: clamp(260px, 50vw, 380px);
+                border-radius: 12px;
             }
             
             .adventures-grid {
@@ -576,13 +605,6 @@
             <div class="container">
                 <div class="hero-grid">
                     <div class="hero-content">
-                        <div class="profile-container">
-                            <div class="profile-photo-wrapper">
-                                <img src="images/profile.jpeg" alt="Vera Wu profile photo" class="profile-photo" 
-                                     onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Profile Photo</p></div></div>'">
-                            </div>
-                        </div>
-                        
                         <h1 class="guide-title">Not a Guide</h1>
                         <p class="guide-tagline">Chill • Limit Push — Living, not explaining.</p>
                         
@@ -598,6 +620,15 @@
                             <a href="mailto:vera.w27@gmail.com" class="hero-social-link" aria-label="Send email">
                                 <i class="fas fa-envelope" aria-hidden="true"></i>
                             </a>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-right">
+                        <div class="profile-container">
+                            <div class="profile-photo-wrapper">
+                                <img src="images/profile.jpeg" alt="Vera Wu profile photo" class="profile-photo" 
+                                     onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Profile Photo</p></div></div>'">
+                            </div>
                         </div>
                     </div>
                 </div>
