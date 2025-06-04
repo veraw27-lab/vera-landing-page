@@ -1,0 +1,15 @@
+{
+  "name": "vera-travel-map-backend",
+  "version": "1.0.0",
+  "description": "Instagram data fetcher for Vera's travel map",
+  "main": "fetch-instagram-data.js",
+  "scripts": {
+    "fetch": "node fetch-instagram-data.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
