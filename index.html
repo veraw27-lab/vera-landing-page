@@ -91,7 +91,7 @@
             color: #ffffff;
         }
 
-        /* Hero Section - Dark Background Layout */
+        /* Hero Section */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -100,7 +100,6 @@
             background: #1a1a1a;
         }
 
-        /* Hero Grid Layout */
         .hero-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -152,7 +151,7 @@
             max-width: 500px;
         }
 
-        /* Profile Photo - Simple Style */
+        /* Profile Photo */
         .profile-container {
             position: relative;
             width: 350px;
@@ -180,9 +179,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* 優化圖片載入 */
-            loading: lazy;
-            image-rendering: optimizeQuality;
         }
 
         .profile-placeholder {
@@ -368,9 +364,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* 優化圖片載入 */
-            loading: lazy;
-            image-rendering: optimizeQuality;
         }
 
         .adventure-placeholder {
@@ -522,13 +515,11 @@
                 font-size: 2.5rem;
             }
 
-            /* 手機版大頭照縮小 */
             .profile-container {
                 width: 200px;
                 height: 260px;
             }
 
-            /* 手機版 Vibes 顯示 2x2 */
             .vibes-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1rem;
@@ -550,7 +541,6 @@
                 font-size: 0.8rem;
             }
 
-            /* 手機版 Adventures 顯示 3x3 */
             .adventures-grid {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.8rem;
@@ -567,13 +557,11 @@
         }
 
         @media (max-width: 480px) {
-            /* 小螢幕保持 3x3 */
             .adventures-grid {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
             }
 
-            /* 極小螢幕時大頭照再縮小 */
             .profile-container {
                 width: 160px;
                 height: 200px;
@@ -663,8 +651,7 @@
                     <div class="hero-right">
                         <div class="profile-container">
                             <div class="profile-photo-wrapper" id="profile-wrapper" onclick="document.getElementById('profile-upload').click()">
-                                <!-- 使用您上傳的大頭照 -->
-                                <img src="profile.jpg" alt="Vera Wu" class="profile-photo" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Click to upload your photo</p></div></div>'">
+                                <img src="images/profile.jpeg" alt="Vera Wu" class="profile-photo" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Click to upload your photo</p></div></div>'">
                             </div>
                             <div class="upload-btn" onclick="document.getElementById('profile-upload').click()">
                                 <i class="fas fa-camera"></i>
@@ -721,26 +708,25 @@
                 <div class="adventures-grid" id="adventures-grid">
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <!-- 使用您實際的檔案名稱 -->
-                            <img src="adventure1.JPG" alt="Adventure 1" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-mountain\'></i><p>Mountains</p></div>'">
+                            <img src="images/adventure1.jpeg" alt="Adventure 1" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-mountain\'></i><p>Mountains</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <img src="adventure2.JPG" alt="Adventure 2" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-bicycle\'></i><p>Cycling</p></div>'">
+                            <img src="images/adventure2.jpeg" alt="Adventure 2" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-bicycle\'></i><p>Cycling</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <img src="adventure5.jpg" alt="Adventure 3" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Street</p></div>'">
+                            <img src="images/adventure3.jpeg" alt="Adventure 3" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Street</p></div>'">
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
-                            <img src="adventure13.JPG" alt="Adventure 4" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-plane\'></i><p>Travel</p></div>'">
+                            <img src="images/adventure4.jpeg" alt="Adventure 4" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-plane\'></i><p>Travel</p></div>'">
                         </div>
                     </div>
 
@@ -777,45 +763,6 @@
                                 <i class="fas fa-compass"></i>
                                 <p>Explore</p>
                             </div>
-                        </div>
-                    </div>
-                </div> 2" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-bicycle\'></i><p>Cycling</p></div>'">
-                        </div>
-                    </div>
-
-                    <div class="adventure-card">
-                        <div class="adventure-image">
-                            <img src="images/adventure3.jpg" alt="Adventure 3" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Street</p></div>'">
-                        </div>
-                    </div>
-
-                    <div class="adventure-card">
-                        <div class="adventure-image">
-                            <img src="images/adventure4.jpg" alt="Adventure 4" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-plane\'></i><p>Travel</p></div>'">
-                        </div>
-                    </div>
-
-                    <div class="adventure-card">
-                        <div class="adventure-image">
-                            <img src="images/adventure5.jpg" alt="Adventure 5" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-running\'></i><p>Running</p></div>'">
-                        </div>
-                    </div>
-
-                    <div class="adventure-card">
-                        <div class="adventure-image">
-                            <img src="images/adventure6.jpg" alt="Adventure 6" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-snowflake\'></i><p>Winter</p></div>'">
-                        </div>
-                    </div>
-
-                    <div class="adventure-card">
-                        <div class="adventure-image">
-                            <img src="images/adventure7.jpg" alt="Adventure 7" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-city\'></i><p>Urban</p></div>'">
-                        </div>
-                    </div>
-
-                    <div class="adventure-card">
-                        <div class="adventure-image">
-                            <img src="images/adventure8.jpg" alt="Adventure 8" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-compass\'></i><p>Explore</p></div>'">
                         </div>
                     </div>
                 </div>
@@ -899,7 +846,6 @@
             const files = Array.from(e.target.files);
             const grid = document.getElementById('adventures-grid');
             
-            // Find existing placeholder cards to replace
             const placeholders = grid.querySelectorAll('.adventure-placeholder');
             let placeholderIndex = 0;
             
@@ -919,7 +865,6 @@
                 }
             });
 
-            // If more files than placeholders, add new cards
             if (files.length > placeholders.length) {
                 for (let i = placeholders.length; i < files.length; i++) {
                     const file = files[i];
