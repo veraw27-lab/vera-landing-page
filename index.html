@@ -180,6 +180,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            /* 優化圖片載入 */
+            loading: lazy;
+            image-rendering: optimizeQuality;
         }
 
         .profile-placeholder {
@@ -365,6 +368,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            /* 優化圖片載入 */
+            loading: lazy;
+            image-rendering: optimizeQuality;
         }
 
         .adventure-placeholder {
@@ -516,17 +522,38 @@
                 font-size: 2.5rem;
             }
 
+            /* 手機版大頭照縮小 */
             .profile-container {
-                width: 250px;
-                height: 320px;
+                width: 200px;
+                height: 260px;
             }
 
+            /* 手機版 Vibes 顯示 2x2 */
             .vibes-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
             }
 
+            .vibe-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .vibe-emoji {
+                font-size: 2rem;
+            }
+
+            .vibe-title {
+                font-size: 1.1rem;
+            }
+
+            .vibe-description {
+                font-size: 0.8rem;
+            }
+
+            /* 手機版 Adventures 顯示 3x3 */
             .adventures-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.8rem;
             }
 
             .contact-links {
@@ -540,8 +567,32 @@
         }
 
         @media (max-width: 480px) {
+            /* 小螢幕保持 3x3 */
             .adventures-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+
+            /* 極小螢幕時大頭照再縮小 */
+            .profile-container {
+                width: 160px;
+                height: 200px;
+            }
+
+            .vibe-card {
+                padding: 1rem 0.8rem;
+            }
+
+            .vibe-emoji {
+                font-size: 1.8rem;
+            }
+
+            .vibe-title {
+                font-size: 1rem;
+            }
+
+            .vibe-description {
+                font-size: 0.75rem;
             }
         }
 
@@ -613,7 +664,7 @@
                         <div class="profile-container">
                             <div class="profile-photo-wrapper" id="profile-wrapper" onclick="document.getElementById('profile-upload').click()">
                                 <!-- 使用您上傳的大頭照 -->
-                                <img src="profile.jpg" alt="Vera Wu" class="profile-photo" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Click to upload your photo</p></div></div>'">
+                                <img src="profile.jpg" alt="Vera Wu" class="profile-photo" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Click to upload your photo</p></div></div>'">
                             </div>
                             <div class="upload-btn" onclick="document.getElementById('profile-upload').click()">
                                 <i class="fas fa-camera"></i>
