@@ -1,115 +1,738 @@
-<!-- 將這段代碼添加到你的 travel-map/index.html 中，替換現有的地圖容器部分 -->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vera's World Travel Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<div class="map-container">
-    <!-- SVG 定義區域 -->
-    <svg class="svg-defs">
-        <defs>
-            <!-- 已訪問國家的漸變 -->
-            <linearGradient id="visitedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
-            </linearGradient>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e1a;
+            color: #ffffff;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 20px 40px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: numberGlow 3s ease-in-out infinite;
+        }
+
+        .stat-label {
+            color: #8892b0;
+            margin-top: 4px;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #1a2332 0%, #0a0e1a 100%);
+            overflow: hidden;
+        }
+
+        /* 星空背景效果 */
+        .map-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.7), transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 8s ease-in-out infinite;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .svg-defs {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        /* 國家樣式 */
+        .country {
+            fill: #2d3748;
+            stroke: #4a5568;
+            stroke-width: 0.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
+        }
+
+        .country:hover {
+            fill: #4a5568;
+            stroke: #667eea;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+        }
+
+        .country.visited {
+            fill: url(#visitedGradient);
+            stroke: #764ba2;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .country.visited:hover {
+            fill: url(#visitedHoverGradient);
+            stroke: #f093fb;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.8));
+            transform: scale(1.02);
+            transform-origin: center;
+        }
+
+        /* 根據貼文數量的不同顏色 */
+        .country.visited[data-posts="1"] {
+            fill: url(#lowActivityGradient);
+        }
+
+        .country.visited[data-posts="2"], 
+        .country.visited[data-posts="3"] {
+            fill: url(#mediumActivityGradient);
+        }
+
+        .country.visited[data-posts="4"], 
+        .country.visited[data-posts="5"] {
+            fill: url(#highActivityGradient);
+        }
+
+        .country.visited[data-posts^="6"], 
+        .country.visited[data-posts^="7"], 
+        .country.visited[data-posts^="8"], 
+        .country.visited[data-posts^="9"] {
+            fill: url(#veryHighActivityGradient);
+        }
+
+        /* 工具提示樣式 */
+        .country-tooltip {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(10, 14, 26, 0.95), rgba(45, 55, 72, 0.95));
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            pointer-events: none;
+            z-index: 1002;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transform: translateY(-5px);
+            opacity: 0;
+            animation: tooltipFadeIn 0.3s ease-out forwards;
+        }
+
+        .tooltip-country {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tooltip-posts {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+
+        /* 貼文覆蓋層 */
+        .posts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 14, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            padding: 80px 40px 40px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .posts-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100%;
+        }
+
+        .posts-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .posts-title {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .posts-subtitle {
+            color: #8892b0;
+            font-size: 16px;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .post-card {
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .post-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .post-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
+        }
+
+        .post-content {
+            padding: 20px;
+        }
+
+        .post-location {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .post-date {
+            color: #8892b0;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .post-description {
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 120px;
+            right: 40px;
+            background: rgba(45, 55, 72, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2001;
+            font-size: 20px;
+        }
+
+        .close-btn:hover {
+            background: rgba(102, 126, 234, 0.8);
+            transform: scale(1.1);
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1001;
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-right: 4px solid #764ba2;
+            border-radius: 50%;
+            animation: complexSpin 1.5s linear infinite;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+        }
+
+        .instagram-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af, #515bd4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* 動畫定義 */
+        @keyframes pulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 12px rgba(102, 126, 234, 0.6));
+            }
+            50% {
+                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 1)) drop-shadow(0 0 30px rgba(118, 75, 162, 0.8));
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes numberGlow {
+            0%, 100% { 
+                filter: drop-shadow(0 0 5px rgba(102, 126, 234, 0.5));
+            }
+            50% { 
+                filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.8));
+            }
+        }
+
+        @keyframes complexSpin {
+            0% { 
+                transform: rotate(0deg);
+                filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.8));
+            }
+            100% { 
+                transform: rotate(360deg);
+                filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+            }
+        }
+
+        @keyframes tooltipFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stats {
+                gap: 20px;
+            }
+
+            .posts-overlay {
+                padding: 80px 20px 20px;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .posts-title {
+                font-size: 24px;
+            }
+
+            .close-btn {
+                top: 90px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
+            }
+
+            .country-tooltip {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
             
-            <!-- 懸停時的漸變 -->
-            <linearGradient id="visitedHoverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#f5576c;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#4facfe;stop-opacity:1" />
-            </linearGradient>
+            .stat-number {
+                font-size: 24px;
+            }
             
-            <!-- 低活動度漸變 (1個貼文) -->
-            <linearGradient id="lowActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.7" />
-                <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.7" />
-            </linearGradient>
-            
-            <!-- 中等活動度漸變 (2-3個貼文) -->
-            <linearGradient id="mediumActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8" />
-                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.8" />
-            </linearGradient>
-            
-            <!-- 高活動度漸變 (4-5個貼文) -->
-            <linearGradient id="highActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#f093fb;stop-opacity:0.9" />
-                <stop offset="50%" style="stop-color:#f5576c;stop-opacity:0.9" />
-                <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.9" />
-            </linearGradient>
-            
-            <!-- 很高活動度漸變 (6+個貼文) -->
-            <linearGradient id="veryHighActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1" />
-                <stop offset="25%" style="stop-color:#fecfef;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#fecfef;stop-opacity:1" />
-                <stop offset="75%" style="stop-color:#fad0c4;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#ffd1ff;stop-opacity:1" />
-            </linearGradient>
-            
-            <!-- 光暈效果 -->
-            <filter id="glow">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                <feMerge> 
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-            </filter>
-            
-            <!-- 陰影效果 -->
-            <filter id="dropshadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
-            </filter>
-        </defs>
-    </svg>
-    
-    <!-- 主地圖 SVG -->
-    <svg id="worldMap" viewBox="0 0 1000 500" style="width: 100%; height: 100%; cursor: pointer;">
-        <!-- 世界地圖 SVG 路徑將在這裡動態生成 -->
-    </svg>
-    
-    <!-- 增強的地圖圖例 -->
-    <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(10, 14, 26, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px);">
-        <div style="color: white; font-size: 14px; font-weight: bold; margin-bottom: 10px;">🗺️ 旅行足跡</div>
-        <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #4facfe, #00f2fe); border-radius: 3px;"></div>
-                <span style="color: #a0aec0;">1個貼文</span>
+            .country.visited:hover {
+                transform: scale(1.01);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🌍 Vera's World
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 3px;"></div>
-                <span style="color: #a0aec0;">2-3個貼文</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #f093fb, #f5576c); border-radius: 3px;"></div>
-                <span style="color: #a0aec0;">4-5個貼文</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #ff9a9e, #fad0c4); border-radius: 3px;"></div>
-                <span style="color: #a0aec0;">6+個貼文</span>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="countries-count">-</span>
+                    <div class="stat-label">Countries</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="cities-count">-</span>
+                    <div class="stat-label">Cities</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="posts-count">-</span>
+                    <div class="stat-label">Posts</div>
+                </div>
             </div>
         </div>
     </div>
-    
-    <!-- 旅行統計卡片 -->
-    <div style="position: absolute; top: 100px; right: 20px; background: rgba(10, 14, 26, 0.9); padding: 20px; border-radius: 15px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px); min-width: 200px;">
-        <div style="color: white; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center;">📊 旅行統計</div>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #a0aec0; font-size: 14px;">🌍 國家</span>
-                <span id="stats-countries" style="color: #667eea; font-weight: bold; font-size: 18px;">6</span>
+
+    <div class="map-container">
+        <!-- SVG 定義區域 -->
+        <svg class="svg-defs">
+            <defs>
+                <!-- 已訪問國家的漸變 -->
+                <linearGradient id="visitedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+                </linearGradient>
+                
+                <!-- 懸停時的漸變 -->
+                <linearGradient id="visitedHoverGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#f093fb;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#f5576c;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#4facfe;stop-opacity:1" />
+                </linearGradient>
+                
+                <!-- 低活動度漸變 (1個貼文) -->
+                <linearGradient id="lowActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#4facfe;stop-opacity:0.7" />
+                    <stop offset="100%" style="stop-color:#00f2fe;stop-opacity:0.7" />
+                </linearGradient>
+                
+                <!-- 中等活動度漸變 (2-3個貼文) -->
+                <linearGradient id="mediumActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.8" />
+                </linearGradient>
+                
+                <!-- 高活動度漸變 (4-5個貼文) -->
+                <linearGradient id="highActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#f093fb;stop-opacity:0.9" />
+                    <stop offset="50%" style="stop-color:#f5576c;stop-opacity:0.9" />
+                    <stop offset="100%" style="stop-color:#4facfe;stop-opacity:0.9" />
+                </linearGradient>
+                
+                <!-- 很高活動度漸變 (6+個貼文) -->
+                <linearGradient id="veryHighActivityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1" />
+                    <stop offset="25%" style="stop-color:#fecfef;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#fecfef;stop-opacity:1" />
+                    <stop offset="75%" style="stop-color:#fad0c4;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ffd1ff;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+        </svg>
+        
+        <!-- 主地圖 SVG -->
+        <svg id="worldMap" viewBox="0 0 1000 500" style="width: 100%; height: 100%; cursor: pointer;">
+            <!-- 世界地圖 SVG 路徑將在這裡動態生成 -->
+        </svg>
+        
+        <!-- 地圖圖例 -->
+        <div style="position: absolute; bottom: 20px; left: 20px; background: rgba(10, 14, 26, 0.9); padding: 15px; border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px);">
+            <div style="color: white; font-size: 14px; font-weight: bold; margin-bottom: 10px;">🗺️ 旅行足跡</div>
+            <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #4facfe, #00f2fe); border-radius: 3px;"></div>
+                    <span style="color: #a0aec0;">1個貼文</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 3px;"></div>
+                    <span style="color: #a0aec0;">2-3個貼文</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #f093fb, #f5576c); border-radius: 3px;"></div>
+                    <span style="color: #a0aec0;">4-5個貼文</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 15px; height: 15px; background: linear-gradient(45deg, #ff9a9e, #fad0c4); border-radius: 3px;"></div>
+                    <span style="color: #a0aec0;">6+個貼文</span>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #a0aec0; font-size: 14px;">🏙️ 城市</span>
-                <span id="stats-cities" style="color: #764ba2; font-weight: bold; font-size: 18px;">7</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #a0aec0; font-size: 14px;">📸 貼文</span>
-                <span id="stats-posts" style="color: #f093fb; font-weight: bold; font-size: 18px;">8</span>
-            </div>
-            <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent); margin: 5px 0;"></div>
-            <div style="text-align: center; color: #8892b0; font-size: 12px;" id="last-updated">
-                最後更新: 正在載入...
+        </div>
+        
+        <!-- 旅行統計卡片 -->
+        <div style="position: absolute; top: 100px; right: 20px; background: rgba(10, 14, 26, 0.9); padding: 20px; border-radius: 15px; border: 1px solid rgba(102, 126, 234, 0.3); backdrop-filter: blur(10px); min-width: 200px;">
+            <div style="color: white; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center;">📊 旅行統計</div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #a0aec0; font-size: 14px;">🌍 國家</span>
+                    <span id="stats-countries" style="color: #667eea; font-weight: bold; font-size: 18px;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #a0aec0; font-size: 14px;">🏙️ 城市</span>
+                    <span id="stats-cities" style="color: #764ba2; font-weight: bold; font-size: 18px;">-</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #a0aec0; font-size: 14px;">📸 貼文</span>
+                    <span id="stats-posts" style="color: #f093fb; font-weight: bold; font-size: 18px;">-</span>
+                </div>
+                <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.5), transparent); margin: 5px 0;"></div>
+                <div style="text-align: center; color: #8892b0; font-size: 12px;" id="last-updated">
+                    最後更新: 正在載入...
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- 貼文覆蓋層 -->
+    <div class="posts-overlay" id="postsOverlay">
+        <div class="close-btn" onclick="closePosts()">×</div>
+        <div class="posts-container">
+            <div class="posts-header">
+                <div class="posts-title" id="postsTitle">Posts from Country</div>
+                <div class="posts-subtitle" id="postsSubtitle">Click on any post to view on Instagram</div>
+            </div>
+            <div class="posts-grid" id="postsGrid">
+                <!-- 貼文將在這裡動態生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 載入提示 -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div>Loading travel data...</div>
+    </div>
+
+    <script>
+        // 全局變量
+        let travelData = null;
+        let userProfile = null;
+        let summary = null;
+
+        // 旅行地圖載入器類
+        class TravelMapLoader {
+            constructor() {
+                this.dataEndpoint = './data/';
+                this.mapContainer = null;
+                this.currentCountry = null;
+            }
+
+            async init() {
+                console.log('🗺️ 初始化旅行地圖...');
+                
+                try {
+                    this.showLoading(true);
+                    await this.loadAllData();
+                    await this.initializeMap();
+                    this.updateUI();
+                    this.showLoading(false);
+                    console.log('✅ 旅行地圖初始化完成');
+                } catch (error) {
+                    console.error('❌ 初始化失敗:', error);
+                    this.showError('載入失敗，請稍後再試');
+                }
+            }
+
+            async loadAllData() {
+                console.log('📊 載入數據...');
+                
+                try {
+                    const [summaryResponse, travelResponse, profileResponse] = await Promise.all([
+                        fetch(`${this.dataEndpoint}summary.json`).catch(() => null),
+                        fetch(`${this.dataEndpoint}travel-data.json`).catch(() => null),
+                        fetch(`${this.dataEndpoint}user-profile.json`).catch(() => null)
+                    ]);
+
+                    if (summaryResponse?.ok) {
+                        summary = await summaryResponse.json();
+                    }
+                    
+                    if (travelResponse?.ok) {
+                        travelData = await travelResponse.json();
+                    }
+                    
+                    if (profileResponse?.ok) {
+                        userProfile = await profileResponse.json();
+                    }
+
+                    console.log('✅ 數據載入完成:', summary);
+                } catch (error) {
+                    console.warn('⚠️ 無法載入後端數據，使用示例數據');
+                    this.loadFallbackData();
+                }
+            }
+
+            loadFallbackData() {
+                // 備用示例數據
+                travelData = {
+                    countries: {
+                        'United States': {
+                            name: '美國',
+                            posts: [
+                                {
+                                    id: '1',
+                                    location: { city: 'New York', country: 'United States' },
+                                    caption: '在紐約感受都市的脈搏',
+                                    timestamp: '2024-01-15T10:30:00+0000',
+                                    permalink: 'https://instagram.com/p/sample1'
+                                }
+                            ],
+                            cities: ['New York']
+                        }
+                    },
+                    cities: ['New York'],
+                    posts: [],
+                    lastUpdated: new Date().toISOString()
+                };
+
+                summary = {
+                    totalCountries: 1,
+                    totalCities: 1,
+                    postsWithLocation: 1,
+                    lastUpdated: new Date().toISOString()
+                };
+            }
+
+            async initializeMap() {
+                console.log('🌍 初始化世界地圖...');
+                
+                const mapContainer = document.getElementById('worldMap');
+                await this.loadWorldMapSVG();
+                this.renderVisitedCountries();
+                this.setupMapInteractions();
+            }
+
+            async loadWorldMapSVG() {
+                // 簡化的世界地圖路徑
+                const countryPaths = {
+                    'Japan': 'M850,150 L880,150 L885,170 L880,190 L850,190 L845,170 Z',
+                    'France': 'M450,160 L480,160 L485,180 L480,200 L450,200 L445,180 Z',
+                    'United States': 'M150,180 L280,180 L280,240 L150,240 Z',
+                    'Taiwan': 'M820,220 L835,220 L835,245 L820,245 Z',
+                    'United Kingdom': 'M420,140 L450,140 L450,170 L420,170 Z',
+                    'South Korea': 'M840,170 L860,170 L860,200 L840,200 Z',
+                    'Thailand': 'M780,250 L805,250 L805,290 L780,290 Z',
+                    'Indonesia': 'M800,300 L850,300 L850,330 L800,330 Z',
+                    'Nepal': 'M730,200 L760,200 L760,220
