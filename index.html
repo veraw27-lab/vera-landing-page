@@ -167,7 +167,6 @@
             background: #333;
             position: relative;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
 
         .profile-photo-wrapper:hover {
@@ -191,39 +190,12 @@
             color: #999;
             font-size: 1rem;
             text-align: center;
-            cursor: pointer;
             transition: all 0.3s;
         }
 
         .profile-placeholder:hover {
             background: linear-gradient(135deg, #444 0%, #555 100%);
             color: #ccc;
-        }
-
-        .upload-btn {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .upload-btn:hover {
-            background: #ffffff;
-            transform: scale(1.1);
-        }
-
-        .upload-btn i {
-            color: #333;
-            font-size: 1.1rem;
         }
 
         .photo-upload {
@@ -295,36 +267,6 @@
             background: #2a2a2a;
         }
 
-        .upload-section {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .upload-label {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.05);
-            color: #ffffff;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 300;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .upload-label:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .upload-input {
-            display: none;
-        }
-
         .adventures-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -381,6 +323,30 @@
             font-size: 2rem;
             margin-bottom: 1rem;
             opacity: 0.6;
+        }
+
+        /* Icon overlay for adventure cards with images */
+        .adventure-icon-overlay {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.2rem;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .adventure-card:hover .adventure-icon-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            transform: scale(1.1);
         }
 
         /* Quote Section */
@@ -554,6 +520,14 @@
             .quote-text {
                 font-size: 1.5rem;
             }
+
+            .adventure-icon-overlay {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+                bottom: 8px;
+                right: 8px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -581,6 +555,14 @@
 
             .vibe-description {
                 font-size: 0.75rem;
+            }
+
+            .adventure-icon-overlay {
+                width: 28px;
+                height: 28px;
+                font-size: 0.9rem;
+                bottom: 6px;
+                right: 6px;
             }
         }
 
@@ -650,11 +632,8 @@
                     
                     <div class="hero-right">
                         <div class="profile-container">
-                            <div class="profile-photo-wrapper" id="profile-wrapper" onclick="document.getElementById('profile-upload').click()">
-                                <img src="images/profile.jpeg" alt="Vera Wu" class="profile-photo" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Click to upload your photo</p></div></div>'">
-                            </div>
-                            <div class="upload-btn" onclick="document.getElementById('profile-upload').click()">
-                                <i class="fas fa-camera"></i>
+                            <div class="profile-photo-wrapper" id="profile-wrapper">
+                                <img src="images/profile.jpeg" alt="Vera Wu" class="profile-photo" onerror="this.parentElement.innerHTML='<div class=\'profile-placeholder\'><div><i class=\'fas fa-user\' style=\'font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;\'></i><p>Profile Photo</p></div></div>'">
                             </div>
                             <input type="file" id="profile-upload" class="photo-upload" accept="image/*">
                         </div>
@@ -697,36 +676,42 @@
 
         <section id="adventures" class="content-section adventures">
             <div class="container">
-                <div class="upload-section">
-                    <p style="color: #999; margin-bottom: 1rem;">Add your adventure photos</p>
-                    <input type="file" id="gallery-upload" class="upload-input" accept="image/*" multiple>
-                    <label for="gallery-upload" class="upload-label">
-                        <i class="fas fa-images"></i> Upload Images
-                    </label>
-                </div>
-
+                <h2 class="section-title">Adventures</h2>
+                
                 <div class="adventures-grid" id="adventures-grid">
                     <div class="adventure-card">
                         <div class="adventure-image">
                             <img src="images/adventure1.jpeg" alt="Adventure 1" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-mountain\'></i><p>Mountains</p></div>'">
+                            <div class="adventure-icon-overlay">
+                                <i class="fas fa-mountain"></i>
+                            </div>
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
                             <img src="images/adventure2.jpeg" alt="Adventure 2" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-bicycle\'></i><p>Cycling</p></div>'">
+                            <div class="adventure-icon-overlay">
+                                <i class="fas fa-bicycle"></i>
+                            </div>
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
                             <img src="images/adventure3.jpeg" alt="Adventure 3" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-camera\'></i><p>Street</p></div>'">
+                            <div class="adventure-icon-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
                         </div>
                     </div>
 
                     <div class="adventure-card">
                         <div class="adventure-image">
                             <img src="images/adventure4.jpeg" alt="Adventure 4" onerror="this.parentElement.innerHTML='<div class=\'adventure-placeholder\'><i class=\'fas fa-plane\'></i><p>Travel</p></div>'">
+                            <div class="adventure-icon-overlay">
+                                <i class="fas fa-plane"></i>
+                            </div>
                         </div>
                     </div>
 
@@ -825,64 +810,6 @@
                 header.style.background = 'rgba(26, 26, 26, 0.98)';
             } else {
                 header.style.background = 'rgba(26, 26, 26, 0.95)';
-            }
-        });
-
-        // Profile photo upload
-        document.getElementById('profile-upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const wrapper = document.getElementById('profile-wrapper');
-                    wrapper.innerHTML = `<img src="${e.target.result}" alt="Vera Wu" class="profile-photo">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Gallery upload
-        document.getElementById('gallery-upload').addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            const grid = document.getElementById('adventures-grid');
-            
-            const placeholders = grid.querySelectorAll('.adventure-placeholder');
-            let placeholderIndex = 0;
-            
-            files.forEach(file => {
-                if (file.type.startsWith('image/') && placeholderIndex < placeholders.length) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const card = placeholders[placeholderIndex].closest('.adventure-card');
-                        card.innerHTML = `
-                            <div class="adventure-image">
-                                <img src="${e.target.result}" alt="Adventure">
-                            </div>
-                        `;
-                        placeholderIndex++;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            if (files.length > placeholders.length) {
-                for (let i = placeholders.length; i < files.length; i++) {
-                    const file = files[i];
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const card = document.createElement('div');
-                            card.className = 'adventure-card';
-                            card.innerHTML = `
-                                <div class="adventure-image">
-                                    <img src="${e.target.result}" alt="Adventure">
-                                </div>
-                            `;
-                            grid.appendChild(card);
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                }
             }
         });
 
