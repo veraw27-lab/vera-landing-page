@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vera's Travel Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .map-container {
+            height: 70vh;
+            margin: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .custom-popup {
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .popup-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .popup-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .popup-button {
+            background: linear-gradient(45deg, #E4405F, #F77737);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .popup-button:hover {
+            transform: scale(1.05);
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 20px;
+            color: white;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .toggle-view {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .toggle-view button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .toggle-view button.active {
+            background: #764ba2;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .map-container {
+                height: 60vh;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌍 Vera's Travel Adventures</h1>
+        <p>Explore the world through my Instagram journey</p>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat">
+            <span class="stat-number" id="countriesCount">12</span>
+            <span class="stat-label">Countries</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number" id="citiesCount">25</span>
+            <span class="stat-label">Cities</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number" id="postsCount">48</span>
+            <span class="stat-label">Posts</span>
+        </div>
+    </div>
+
+    <div class="map-container">
+        <div class="toggle-view">
+            <button id="streetView" class="active">Street View</button>
+            <button id="satelliteView">Satellite</button>
+        </div>
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // 旅遊數據 - 基於你的 Instagram 內容
+        const travelData = [
+            {
+                id: 1,
+                city: "Everest Base Camp",
+                country: "Nepal",
+                lat: 28.0026,
+                lng: 86.8528,
+                title: "Everest Base Camp Adventure",
+                description: "Amazing journey to Everest Base Camp at 5364m altitude. The breathtaking views of the world's highest peaks made every step worth it!",
+                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop",
+                instagramUrl: "https://www.instagram.com/vera_travellife/",
+                date: "2024-03-17"
+            },
+            {
+                id: 2,
+                city: "Tokyo",
+                country: "Japan",
+                lat: 35.6762,
+                lng: 139.6503,
+                title: "Tokyo Urban Exploration",
+                description: "Cycling through the vibrant streets of Tokyo, experiencing the perfect blend of traditional and modern culture.",
+                image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=200&fit=crop",
+                instagramUrl: "https://www.instagram.com/vera_travellife/",
+                date: "2024-02-15"
+            },
+            {
+                id: 3,
+                city: "Annapurna Base Camp",
+                country: "Nepal",
+                lat: 28.5314,
+                lng: 83.8731,
+                title: "Annapurna Base Camp Trek",
+                description: "Incredible trekking experience with stunning mountain views and rich cultural encounters along the way.",
+                image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=200&fit=crop",
+                instagramUrl: "https://www.instagram.com/vera_travellife/",
+                date: "2024-01-20"
+            },
+            {
+                id: 4,
+                city: "Kyoto",
+                country: "Japan",
+                lat: 35.0116,
+                lng: 135.7681,
+                title: "Kyoto Winter Wonderland",
+                description: "Peaceful moments in snow-covered Kyoto, exploring ancient temples and traditional Japanese gardens.",
+                image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=200&fit=crop",
+                instagramUrl: "https://www.instagram.com/vera_travellife/",
+                date: "2024-01-10"
+            },
+            {
+                id: 5,
+                city: "Hokkaido",
+                country: "Japan",
+                lat: 43.2203,
+                lng: 142.8635,
+                title: "Hokkaido Snow Adventures",
+                description: "Playing in the pristine snow of Hokkaido, enjoying winter sports and the magical snowy landscapes.",
+                image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=200&fit=crop",
+                instagramUrl: "https://www.instagram.com/vera_travellife/",
+                date: "2023-12-28"
+            }
+        ];
+
+        // 初始化地圖
+        const map = L.map('map').setView([25.0, 100.0], 3);
+
+        // 地圖圖層
+        const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        });
+
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri'
+        });
+
+        streetLayer.addTo(map);
+
+        // 自定義圖標
+        const customIcon = L.icon({
+            iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30">
+                    <circle cx="12" cy="12" r="10" fill="#E4405F" stroke="#fff" stroke-width="2"/>
+                    <text x="12" y="16" text-anchor="middle" fill="white" font-size="12" font-family="Arial">📍</text>
+                </svg>
+            `),
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+
+        // 添加標記點
+        travelData.forEach(location => {
+            const marker = L.marker([location.lat, location.lng], { icon: customIcon })
+                .addTo(map);
+
+            const popupContent = `
+                <div class="custom-popup">
+                    <img src="${location.image}" alt="${location.title}" class="popup-image">
+                    <div class="popup-title">${location.title}</div>
+                    <div class="popup-description">${location.description}</div>
+                    <a href="${location.instagramUrl}" target="_blank" class="popup-button">
+                        View on Instagram
+                    </a>
+                </div>
+            `;
+
+            marker.bindPopup(popupContent, {
+                maxWidth: 300,
+                className: 'custom-popup-container'
+            });
+
+            // 鼠標懸停效果
+            marker.on('mouseover', function() {
+                this.openPopup();
+            });
+        });
+
+        // 視圖切換功能
+        document.getElementById('streetView').addEventListener('click', function() {
+            map.removeLayer(satelliteLayer);
+            map.addLayer(streetLayer);
+            this.classList.add('active');
+            document.getElementById('satelliteView').classList.remove('active');
+        });
+
+        document.getElementById('satelliteView').addEventListener('click', function() {
+            map.removeLayer(streetLayer);
+            map.addLayer(satelliteLayer);
+            this.classList.add('active');
+            document.getElementById('streetView').classList.remove('active');
+        });
+
+        // 更新統計數據
+        function updateStats() {
+            const countries = [...new Set(travelData.map(item => item.country))];
+            const cities = [...new Set(travelData.map(item => item.city))];
+            
+            document.getElementById('countriesCount').textContent = countries.length;
+            document.getElementById('citiesCount').textContent = cities.length;
+            document.getElementById('postsCount').textContent = travelData.length;
+        }
+
+        updateStats();
+
+        // 響應式地圖調整
+        function resizeMap() {
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        }
+
+        window.addEventListener('resize', resizeMap);
+    </script>
+</body>
+</html>
