@@ -1,0 +1,961 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2761
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 .nav-links \{\
+            display: flex;\
+            list-style: none;\
+            gap: 3rem;\
+        \}<!DOCTYPE html>\
+<html lang="zh-TW">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>Vera Wu | Not a Guide</title>\
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">\
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600&display=swap" rel="stylesheet">\
+    <style>\
+        * \{\
+            margin: 0;\
+            padding: 0;\
+            box-sizing: border-box;\
+        \}\
+\
+        body \{\
+            font-family: 'Inter', sans-serif;\
+            font-weight: 300;\
+            line-height: 1.6;\
+            color: #ffffff;\
+            background: #1a1a1a;\
+            overflow-x: hidden;\
+        \}\
+\
+        .container \{\
+            max-width: 1200px;\
+            margin: 0 auto;\
+            padding: 0 40px;\
+        \}\
+\
+        /* Header */\
+        .header \{\
+            background: rgba(26, 26, 26, 0.95);\
+            backdrop-filter: blur(20px);\
+            position: fixed;\
+            top: 0;\
+            width: 100%;\
+            z-index: 1000;\
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);\
+        \}\
+\
+        .nav \{\
+            display: flex;\
+            justify-content: space-between;\
+            align-items: center;\
+            padding: 1.5rem 0;\
+        \}\
+\
+        .logo \{\
+            font-size: 1.5rem;\
+            font-weight: 300;\
+            color: #ffffff;\
+            letter-spacing: 2px;\
+            text-decoration: none;\
+        \}\
+\
+        .nav-links \{\
+            display: flex;\
+            list-style: none;\
+            gap: 2rem;\
+            align-items: center;\
+        \}\
+\
+        .nav-hashtags \{\
+            color: #7ca3d1;\
+            font-size: 0.8rem;\
+            font-weight: 300;\
+            letter-spacing: 0.5px;\
+        \}\
+\
+        .nav-links a \{\
+            text-decoration: none;\
+            color: #999;\
+            font-weight: 300;\
+            font-size: 0.9rem;\
+            transition: color 0.3s;\
+            letter-spacing: 0.5px;\
+        \}\
+\
+        .nav-links a:hover \{\
+            color: #ffffff;\
+        \}\
+\
+        /* Hero Section - Dark Background Layout */\
+        .hero \{\
+            min-height: 100vh;\
+            display: flex;\
+            align-items: center;\
+            padding-top: 80px;\
+            background: #1a1a1a;\
+        \}\
+\
+        /* Hero Grid Layout */\
+        .hero-grid \{\
+            display: grid;\
+            grid-template-columns: 1fr 1fr;\
+            gap: 4rem;\
+            min-height: 80vh;\
+            width: 100%;\
+            align-items: center;\
+        \}\
+\
+        .hero-left \{\
+            display: flex;\
+            flex-direction: column;\
+            justify-content: center;\
+            padding: 2rem 0;\
+            color: #ffffff;\
+        \}\
+\
+        .hero-right \{\
+            display: flex;\
+            align-items: center;\
+            justify-content: center;\
+            position: relative;\
+            padding: 2rem 0;\
+        \}\
+\
+        .guide-title \{\
+            font-size: 4rem;\
+            font-weight: 400;\
+            color: #ffffff;\
+            line-height: 1.1;\
+            margin-bottom: 2rem;\
+            letter-spacing: -1px;\
+        \}\
+\
+        .guide-tagline \{\
+            font-size: 1.2rem;\
+            font-weight: 300;\
+            color: #ccc;\
+            margin-bottom: 3rem;\
+            line-height: 1.5;\
+        \}\
+\
+        .hero-description \{\
+            font-size: 1rem;\
+            font-weight: 300;\
+            color: #bbb;\
+            line-height: 1.7;\
+            margin-bottom: 2rem;\
+            max-width: 500px;\
+        \}\
+\
+        .hero-hashtags \{\
+            font-size: 0.95rem;\
+            color: #7ca3d1;\
+            font-weight: 400;\
+            letter-spacing: 0.5px;\
+        \}\
+\
+        /* Profile Photo - Simple Style */\
+        .profile-container \{\
+            position: relative;\
+            width: 350px;\
+            height: 450px;\
+            margin: 0 auto;\
+        \}\
+\
+        .profile-photo-wrapper \{\
+            width: 100%;\
+            height: 100%;\
+            border-radius: 12px;\
+            overflow: hidden;\
+            background: #333;\
+            position: relative;\
+            transition: all 0.3s ease;\
+            cursor: pointer;\
+        \}\
+\
+        .profile-photo-wrapper:hover \{\
+            transform: translateY(-5px);\
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);\
+        \}\
+\
+        .profile-photo \{\
+            width: 100%;\
+            height: 100%;\
+            object-fit: cover;\
+        \}\
+\
+        .profile-placeholder \{\
+            width: 100%;\
+            height: 100%;\
+            display: flex;\
+            align-items: center;\
+            justify-content: center;\
+            background: linear-gradient(135deg, #333 0%, #444 100%);\
+            color: #999;\
+            font-size: 1rem;\
+            text-align: center;\
+            cursor: pointer;\
+            transition: all 0.3s;\
+        \}\
+\
+        .profile-placeholder:hover \{\
+            background: linear-gradient(135deg, #444 0%, #555 100%);\
+            color: #ccc;\
+        \}\
+\
+        .upload-btn \{\
+            position: absolute;\
+            bottom: 15px;\
+            right: 15px;\
+            width: 50px;\
+            height: 50px;\
+            background: rgba(255, 255, 255, 0.9);\
+            border-radius: 50%;\
+            display: flex;\
+            align-items: center;\
+            justify-content: center;\
+            cursor: pointer;\
+            transition: all 0.3s;\
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);\
+        \}\
+\
+        .upload-btn:hover \{\
+            background: #ffffff;\
+            transform: scale(1.1);\
+        \}\
+\
+        .upload-btn i \{\
+            color: #333;\
+            font-size: 1.1rem;\
+        \}\
+\
+        .photo-upload \{\
+            display: none;\
+        \}\
+\
+        /* Content Sections */\
+        .content-section \{\
+            padding: 6rem 0;\
+        \}\
+\
+        .section-title \{\
+            font-size: 3.5rem;\
+            font-weight: 100;\
+            color: #ffffff;\
+            margin-bottom: 2rem;\
+            text-align: center;\
+            letter-spacing: -2px;\
+        \}\
+\
+        /* Content Vibes Section */\
+        .vibes \{\
+            background: #1a1a1a;\
+        \}\
+\
+        .vibes-grid \{\
+            display: grid;\
+            grid-template-columns: repeat(4, 1fr);\
+            gap: 2rem;\
+            margin-top: 3rem;\
+        \}\
+\
+        .vibe-card \{\
+            background: rgba(255, 255, 255, 0.03);\
+            padding: 2.5rem 2rem;\
+            border-radius: 12px;\
+            border: 1px solid rgba(255, 255, 255, 0.05);\
+            transition: all 0.3s;\
+            text-align: center;\
+        \}\
+\
+        .vibe-card:hover \{\
+            background: rgba(255, 255, 255, 0.05);\
+            transform: translateY(-5px);\
+            border-color: rgba(255, 255, 255, 0.1);\
+        \}\
+\
+        .vibe-title \{\
+            font-size: 1.3rem;\
+            font-weight: 400;\
+            color: #ffffff;\
+            margin-bottom: 1rem;\
+        \}\
+\
+        .vibe-emoji \{\
+            font-size: 2.5rem;\
+            margin-bottom: 1rem;\
+            display: block;\
+        \}\
+\
+        .vibe-description \{\
+            font-size: 0.9rem;\
+            color: #999;\
+            line-height: 1.6;\
+        \}\
+\
+        /* Adventures Gallery */\
+        .adventures \{\
+            background: #2a2a2a;\
+        \}\
+\
+        .upload-section \{\
+            background: rgba(255, 255, 255, 0.02);\
+            border: 1px dashed rgba(255, 255, 255, 0.1);\
+            border-radius: 12px;\
+            padding: 2rem;\
+            text-align: center;\
+            margin-bottom: 3rem;\
+        \}\
+\
+        .upload-label \{\
+            display: inline-block;\
+            background: rgba(255, 255, 255, 0.05);\
+            color: #ffffff;\
+            padding: 12px 24px;\
+            border-radius: 6px;\
+            cursor: pointer;\
+            font-weight: 300;\
+            transition: all 0.3s;\
+            font-size: 0.9rem;\
+            border: 1px solid rgba(255, 255, 255, 0.1);\
+        \}\
+\
+        .upload-label:hover \{\
+            background: rgba(255, 255, 255, 0.1);\
+        \}\
+\
+        .upload-input \{\
+            display: none;\
+        \}\
+\
+        .adventures-grid \{\
+            display: grid;\
+            grid-template-columns: repeat(4, 1fr);\
+            gap: 1.5rem;\
+            margin-top: 3rem;\
+        \}\
+\
+        .adventure-card \{\
+            aspect-ratio: 1;\
+            background: #333;\
+            border-radius: 8px;\
+            overflow: hidden;\
+            transition: all 0.3s;\
+            border: 1px solid rgba(255, 255, 255, 0.05);\
+            position: relative;\
+        \}\
+\
+        .adventure-card:hover \{\
+            transform: translateY(-5px);\
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);\
+            border-color: rgba(255, 255, 255, 0.1);\
+        \}\
+\
+        .adventure-image \{\
+            width: 100%;\
+            height: 100%;\
+            background: #333;\
+            display: flex;\
+            align-items: center;\
+            justify-content: center;\
+            color: #666;\
+            position: relative;\
+            overflow: hidden;\
+        \}\
+\
+        .adventure-image img \{\
+            width: 100%;\
+            height: 100%;\
+            object-fit: cover;\
+        \}\
+\
+        .adventure-placeholder \{\
+            display: flex;\
+            flex-direction: column;\
+            align-items: center;\
+            justify-content: center;\
+            height: 100%;\
+            color: #666;\
+            font-size: 0.8rem;\
+            text-align: center;\
+        \}\
+\
+        .adventure-placeholder i \{\
+            font-size: 2rem;\
+            margin-bottom: 1rem;\
+            opacity: 0.6;\
+        \}\
+\
+        /* Links/Logos Section */\
+        .links \{\
+            background: #1a1a1a;\
+        \}\
+\
+        .links-grid \{\
+            display: grid;\
+            grid-template-columns: repeat(6, 1fr);\
+            gap: 1.5rem;\
+            margin-top: 3rem;\
+        \}\
+\
+        .link-card \{\
+            aspect-ratio: 1;\
+            background: rgba(255, 255, 255, 0.03);\
+            border-radius: 8px;\
+            display: flex;\
+            align-items: center;\
+            justify-content: center;\
+            transition: all 0.3s;\
+            border: 1px solid rgba(255, 255, 255, 0.05);\
+            cursor: pointer;\
+            text-decoration: none;\
+            color: #999;\
+            position: relative;\
+            overflow: hidden;\
+        \}\
+\
+        .link-card:hover \{\
+            background: rgba(255, 255, 255, 0.06);\
+            transform: translateY(-3px);\
+            color: #fff;\
+        \}\
+\
+        .link-card i \{\
+            font-size: 1.5rem;\
+        \}\
+\
+        .link-card img \{\
+            width: 60%;\
+            height: 60%;\
+            object-fit: contain;\
+            filter: grayscale(100%) opacity(0.7);\
+            transition: filter 0.3s;\
+        \}\
+\
+        .link-card:hover img \{\
+            filter: grayscale(0%) opacity(1);\
+        \}\
+\
+        /* Upload for links */\
+        .link-upload \{\
+            border: 2px dashed rgba(255, 255, 255, 0.1);\
+            background: transparent;\
+        \}\
+\
+        .link-upload:hover \{\
+            border-color: rgba(255, 255, 255, 0.2);\
+        \}\
+\
+        /* Quote Section */\
+        .quote \{\
+            background: #2a2a2a;\
+            text-align: center;\
+        \}\
+\
+        .quote-content \{\
+            max-width: 800px;\
+            margin: 0 auto;\
+        \}\
+\
+        .quote-text \{\
+            font-size: 2rem;\
+            font-weight: 200;\
+            color: #ffffff;\
+            line-height: 1.4;\
+            font-style: italic;\
+            margin-bottom: 2rem;\
+            letter-spacing: 0.5px;\
+        \}\
+\
+        .quote-author \{\
+            font-size: 1rem;\
+            color: #999;\
+            font-weight: 300;\
+        \}\
+\
+        /* Contact Section */\
+        .contact \{\
+            background: #1a1a1a;\
+            text-align: center;\
+        \}\
+\
+        .contact-links \{\
+            display: flex;\
+            justify-content: center;\
+            gap: 2rem;\
+            margin-top: 2rem;\
+        \}\
+\
+        .contact-link \{\
+            display: inline-flex;\
+            align-items: center;\
+            gap: 0.8rem;\
+            background: rgba(255, 255, 255, 0.05);\
+            color: #ffffff;\
+            padding: 12px 24px;\
+            text-decoration: none;\
+            border-radius: 6px;\
+            font-weight: 300;\
+            transition: all 0.3s;\
+            font-size: 0.9rem;\
+            border: 1px solid rgba(255, 255, 255, 0.08);\
+        \}\
+\
+        .contact-link:hover \{\
+            background: rgba(255, 255, 255, 0.1);\
+            transform: translateY(-2px);\
+        \}\
+\
+        /* Footer */\
+        .footer \{\
+            background: #111;\
+            color: #666;\
+            text-align: center;\
+            padding: 2rem 0;\
+            font-size: 0.8rem;\
+        \}\
+\
+        /* Responsive */\
+        @media (max-width: 1200px) \{\
+            .vibes-grid \{\
+                grid-template-columns: repeat(2, 1fr);\
+            \}\
+            \
+            .adventures-grid \{\
+                grid-template-columns: repeat(3, 1fr);\
+            \}\
+\
+            .links-grid \{\
+                grid-template-columns: repeat(4, 1fr);\
+            \}\
+        \}\
+\
+        @media (max-width: 1024px) \{\
+            .hero-grid \{\
+                grid-template-columns: 1fr;\
+            \}\
+\
+            .hero-left \{\
+                text-align: center;\
+                padding: 3rem 2rem;\
+            \}\
+\
+            .profile-container \{\
+                width: 280px;\
+                height: 380px;\
+            \}\
+\
+            .vibes-grid \{\
+                grid-template-columns: repeat(2, 1fr);\
+            \}\
+\
+            .adventures-grid \{\
+                grid-template-columns: repeat(2, 1fr);\
+            \}\
+\
+            .links-grid \{\
+                grid-template-columns: repeat(3, 1fr);\
+            \}\
+        \}\
+\
+        @media (max-width: 768px) \{\
+            .container \{\
+                padding: 0 20px;\
+            \}\
+\
+            .nav \{\
+                flex-direction: column;\
+                gap: 1rem;\
+            \}\
+\
+            .nav-top \{\
+                flex-direction: column;\
+                gap: 1rem;\
+                text-align: center;\
+            \}\
+\
+            .nav-links \{\
+                display: none;\
+            \}\
+\
+            .nav-hashtags \{\
+                text-align: center;\
+            \}\
+\
+            .guide-title \{\
+                font-size: 2.5rem;\
+            \}\
+\
+            .profile-container \{\
+                width: 250px;\
+                height: 320px;\
+            \}\
+\
+            .vibes-grid \{\
+                grid-template-columns: 1fr;\
+            \}\
+\
+            .adventures-grid \{\
+                grid-template-columns: repeat(2, 1fr);\
+            \}\
+\
+            .links-grid \{\
+                grid-template-columns: repeat(3, 1fr);\
+            \}\
+\
+            .contact-links \{\
+                flex-direction: column;\
+                align-items: center;\
+            \}\
+\
+            .quote-text \{\
+                font-size: 1.5rem;\
+            \}\
+\
+            .guide-tag \{\
+                font-size: 1.1rem;\
+                padding: 10px 20px;\
+            \}\
+\
+            .guide-subtitle \{\
+                font-size: 0.9rem;\
+                padding: 6px 14px;\
+            \}\
+        \}\
+\
+        @media (max-width: 480px) \{\
+            .adventures-grid \{\
+                grid-template-columns: 1fr;\
+            \}\
+\
+            .links-grid \{\
+                grid-template-columns: repeat(2, 1fr);\
+            \}\
+        \}\
+\
+        /* Animations */\
+        @keyframes fadeInUp \{\
+            from \{\
+                opacity: 0;\
+                transform: translateY(20px);\
+            \}\
+            to \{\
+                opacity: 1;\
+                transform: translateY(0);\
+            \}\
+        \}\
+\
+        .hero-left > * \{\
+            animation: fadeInUp 0.8s ease-out;\
+        \}\
+\
+        .hero-left > *:nth-child(1) \{\
+            animation-delay: 0.1s;\
+        \}\
+\
+        .hero-left > *:nth-child(2) \{\
+            animation-delay: 0.2s;\
+        \}\
+\
+        .hero-left > *:nth-child(3) \{\
+            animation-delay: 0.3s;\
+        \}\
+\
+        .hero-left > *:nth-child(4) \{\
+            animation-delay: 0.4s;\
+        \}\
+    </style>\
+</head>\
+<body>\
+    <header class="header">\
+        <nav class="nav container">\
+            <div class="nav-top">\
+                <a href="#" class="logo">VW</a>\
+                <ul class="nav-links">\
+                    <li><a href="#home">Home</a></li>\
+                    <li><a href="#vibes">Content</a></li>\
+                    <li><a href="#adventures">Adventures</a></li>\
+                    <li><a href="#contact">Contact</a></li>\
+                </ul>\
+            </div>\
+            <div class="nav-hashtags">\
+                #LifeBeyondDecks #ChillStrategist #MarketsAndMoments\
+            </div>\
+        </nav>\
+    </header>\
+\
+    <main>\
+        <section id="home" class="hero">\
+            <div class="container">\
+                <div class="hero-grid">\
+                    <div class="hero-left">\
+                        <h1 class="guide-title">Not a Guide</h1>\
+                        <p class="guide-tagline">Chill \'95 Limit Push \'97 Living, not explaining.</p>\
+                        \
+                        <div class="hero-description">\
+                            <p>Usually out wandering \'97 trails, alleys, oceans, playlists. Sometimes at a desk. I work on AI, media, and tech \'97 mostly to support a wide curiosity for life beyond work.</p>\
+                        </div>\
+                    </div>\
+                    \
+                    <div class="hero-right">\
+                        <div class="profile-container">\
+                            <div class="profile-photo-wrapper" id="profile-wrapper" onclick="document.getElementById('profile-upload').click()">\
+                                <div class="profile-placeholder" id="profile-placeholder">\
+                                    <div>\
+                                        <i class="fas fa-user" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>\
+                                        <p>Click to upload your photo</p>\
+                                    </div>\
+                                </div>\
+                            </div>\
+                            <div class="upload-btn" onclick="document.getElementById('profile-upload').click()">\
+                                <i class="fas fa-camera"></i>\
+                            </div>\
+                            <input type="file" id="profile-upload" class="photo-upload" accept="image/*">\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </section>\
+\
+        <section id="vibes" class="content-section vibes">\
+            <div class="container">\
+                <h2 class="section-title">Content Vibes</h2>\
+                \
+                <div class="vibes-grid">\
+                    <div class="vibe-card">\
+                        <span class="vibe-emoji">\uc0\u55356 \u57101 </span>\
+                        <h3 class="vibe-title">Nomad Spots</h3>\
+                        <p class="vibe-description">Global paths, 30+ countries. No top 10s, just places that left a mark.</p>\
+                    </div>\
+\
+                    <div class="vibe-card">\
+                        <span class="vibe-emoji">\uc0\u55357 \u56960 </span>\
+                        <h3 class="vibe-title">Limit Push</h3>\
+                        <p class="vibe-description">Endurance, challenge, trial & error. Not to inspire, just to try.</p>\
+                    </div>\
+\
+                    <div class="vibe-card">\
+                        <span class="vibe-emoji">\uc0\u9889 </span>\
+                        <h3 class="vibe-title">Street Hacks</h3>\
+                        <p class="vibe-description">Day-to-day tricks, personal style, fashion bits, and low-effort genius that somehow works.</p>\
+                    </div>\
+\
+                    <div class="vibe-card">\
+                        <span class="vibe-emoji">\uc0\u10024 </span>\
+                        <h3 class="vibe-title">Chill Flair</h3>\
+                        <p class="vibe-description">Fragrance, film, music. No review. Just taste.</p>\
+                    </div>\
+                </div>\
+            </div>\
+        </section>\
+\
+        <section id="adventures" class="content-section adventures">\
+            <div class="container">\
+                <div class="upload-section">\
+                    <p style="color: #999; margin-bottom: 1rem;">Add your adventure photos</p>\
+                    <input type="file" id="gallery-upload" class="upload-input" accept="image/*" multiple>\
+                    <label for="gallery-upload" class="upload-label">\
+                        <i class="fas fa-images"></i> Upload Images\
+                    </label>\
+                </div>\
+\
+                <div class="adventures-grid" id="adventures-grid">\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-mountain"></i>\
+                                <p>Mountains</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-bicycle"></i>\
+                                <p>Cycling</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-camera"></i>\
+                                <p>Street</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-plane"></i>\
+                                <p>Travel</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-running"></i>\
+                                <p>Running</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-snowflake"></i>\
+                                <p>Winter</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-city"></i>\
+                                <p>Urban</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+\
+                    <div class="adventure-card">\
+                        <div class="adventure-image">\
+                            <div class="adventure-placeholder">\
+                                <i class="fas fa-compass"></i>\
+                                <p>Explore</p>\
+                            </div>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </section>\
+\
+        <section class="content-section quote">\
+            <div class="container">\
+                <div class="quote-content">\
+                    <p class="quote-text">"I do what I like. No reasons. Chill is baseline, push is the game."</p>\
+                    <p class="quote-author">\'97 Vera</p>\
+                </div>\
+            </div>\
+        </section>\
+\
+        <section id="contact" class="content-section contact">\
+            <div class="container">\
+                <h2 class="section-title">Contact</h2>\
+                \
+                <div class="contact-links">\
+                    <a href="https://www.instagram.com/vera_travellife/" class="contact-link" target="_blank">\
+                        <i class="fab fa-instagram"></i>\
+                        <span>DM @vera_travellife</span>\
+                    </a>\
+                    \
+                    <a href="mailto:vera@example.com" class="contact-link">\
+                        <i class="fas fa-envelope"></i>\
+                        <span>Email me</span>\
+                    </a>\
+                </div>\
+            </div>\
+        </section>\
+    </main>\
+\
+    <footer class="footer">\
+        <div class="container">\
+            <p>\'a9 2025 Vera Wu. Not a Guide \'97 Living, not explaining.</p>\
+        </div>\
+    </footer>\
+\
+    <script>\
+        // Smooth scrolling\
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => \{\
+            anchor.addEventListener('click', function (e) \{\
+                e.preventDefault();\
+                const target = document.querySelector(this.getAttribute('href'));\
+                if (target) \{\
+                    target.scrollIntoView(\{\
+                        behavior: 'smooth',\
+                        block: 'start'\
+                    \});\
+                \}\
+            \});\
+        \});\
+\
+        // Header background on scroll\
+        window.addEventListener('scroll', function() \{\
+            const header = document.querySelector('.header');\
+            if (window.scrollY > 100) \{\
+                header.style.background = 'rgba(26, 26, 26, 0.98)';\
+            \} else \{\
+                header.style.background = 'rgba(26, 26, 26, 0.95)';\
+            \}\
+        \});\
+\
+        // Profile photo upload\
+        document.getElementById('profile-upload').addEventListener('change', function(e) \{\
+            const file = e.target.files[0];\
+            if (file && file.type.startsWith('image/')) \{\
+                const reader = new FileReader();\
+                reader.onload = function(e) \{\
+                    const wrapper = document.getElementById('profile-wrapper');\
+                    wrapper.innerHTML = `<img src="$\{e.target.result\}" alt="Vera Wu" class="profile-photo">`;\
+                \};\
+                reader.readAsDataURL(file);\
+            \}\
+        \});\
+\
+                                // Gallery upload\
+        document.getElementById('gallery-upload').addEventListener('change', function(e) \{\
+            const files = Array.from(e.target.files);\
+            const grid = document.getElementById('adventures-grid');\
+            \
+            // Find existing placeholder cards to replace\
+            const placeholders = grid.querySelectorAll('.adventure-placeholder');\
+            let placeholderIndex = 0;\
+            \
+            files.forEach(file => \{\
+                if (file.type.startsWith('image/') && placeholderIndex < placeholders.length) \{\
+                    const reader = new FileReader();\
+                    reader.onload = function(e) \{\
+                        const card = placeholders[placeholderIndex].closest('.adventure-card');\
+                        card.innerHTML = `\
+                            <div class="adventure-image">\
+                                <img src="$\{e.target.result\}" alt="Adventure">\
+                            </div>\
+                        `;\
+                        placeholderIndex++;\
+                    \};\
+                    reader.readAsDataURL(file);\
+                \}\
+            \});\
+\
+            // If more files than placeholders, add new cards\
+            if (files.length > placeholders.length) \{\
+                for (let i = placeholders.length; i < files.length; i++) \{\
+                    const file = files[i];\
+                    if (file.type.startsWith('image/')) \{\
+                        const reader = new FileReader();\
+                        reader.onload = function(e) \{\
+                            const card = document.createElement('div');\
+                            card.className = 'adventure-card';\
+                            card.innerHTML = `\
+                                <div class="adventure-image">\
+                                    <img src="$\{e.target.result\}" alt="Adventure">\
+                                </div>\
+                            `;\
+                            grid.appendChild(card);\
+                        \};\
+                        reader.readAsDataURL(file);\
+                    \}\
+                \}\
+            \}\
+        \});}
