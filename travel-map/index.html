@@ -308,13 +308,11 @@
             width: 130px;
             height: 130px;
             border-radius: 18px;
-            box-shadow: 0 8px 32px rgba(124,163,209,0.22);
             object-fit: cover;
             opacity: 0;
             transform: scale(0.7);
             transition: all 0.5s cubic-bezier(.4,2,.6,1);
-            border: 2.5px solid #fff3;
-            background: #222;
+            /* 移除 box-shadow、border、background，讓圖片更清晰 */
         }
         .photo-burst-img.visible {
             opacity: 1;
@@ -692,7 +690,7 @@
             // 支援 mediaUrl（後端 key）與 media_url（IG API key）
             const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 8);
             if (photos.length === 0) return;
-            const radius = 180; // 恢復第一版大半徑
+            const radius = 120; // 調整為較近的半徑
             const imgSize = 130; // 恢復第一版大圖
             const angleStep = (2 * Math.PI) / photos.length;
             photos.forEach((post, i) => {

@@ -96,7 +96,6 @@ class InstagramGraphAPIFetcher {
 
     async processTravelData(mediaArray) {
         console.log('🗺️ 處理旅行數據...');
-        
         const travelData = {
             countries: {},
             cities: new Set(),
@@ -107,11 +106,22 @@ class InstagramGraphAPIFetcher {
         };
 
         for (const media of mediaArray) {
-            const locationInfo = this.extractLocationFromCaption(media.caption);
-            
-            if (locationInfo) {
+            // 新增：優先用 media.location（若有），否則用 caption 判斷
+            let locationInfo = null;
+            if (media.location && (media.location.name || media.location.city || media.location.country)) {
+                // IG API location 欄位（需權限）
+                locationInfo = {
+                    city: media.location.city || '',
+                    country: media.location.country || '',
+                    coordinates: media.location.latitude && media.location.longitude ? { lat: media.location.latitude, lng: media.location.longitude } : null,
+                    countryCoordinates: null
+                };
+            } else {
+                locationInfo = this.extractLocationFromCaption(media.caption);
+            }
+
+            if (locationInfo && (locationInfo.city || locationInfo.country)) {
                 travelData.postsWithLocation++;
-                
                 const post = {
                     id: media.id,
                     caption: media.caption || '',
@@ -121,10 +131,7 @@ class InstagramGraphAPIFetcher {
                     location: locationInfo,
                     mediaType: media.media_type
                 };
-
                 travelData.posts.push(post);
-                
-                // 按國家分組
                 const country = locationInfo.country;
                 if (country) {
                     if (!travelData.countries[country]) {
@@ -135,9 +142,7 @@ class InstagramGraphAPIFetcher {
                             coordinates: locationInfo.countryCoordinates || null
                         };
                     }
-                    
                     travelData.countries[country].posts.push(post);
-                    
                     if (locationInfo.city) {
                         travelData.countries[country].cities.add(locationInfo.city);
                         travelData.cities.add(locationInfo.city);
@@ -145,15 +150,12 @@ class InstagramGraphAPIFetcher {
                 }
             }
         }
-
         // 轉換 Set 為 Array
         Object.keys(travelData.countries).forEach(country => {
             travelData.countries[country].cities = Array.from(travelData.countries[country].cities);
         });
         travelData.cities = Array.from(travelData.cities);
-
         console.log(`✅ 處理完成: ${Object.keys(travelData.countries).length} 個國家, ${travelData.cities.length} 個城市, ${travelData.postsWithLocation} 個有地點的貼文`);
-        
         return travelData;
     }
 
@@ -170,6 +172,8 @@ class InstagramGraphAPIFetcher {
             
             // 城市, 國家 模式
             { regex: /([^#@\n\r,]+),\s*(Japan|Nepal|France|UK|United Kingdom|Thailand|Indonesia|Taiwan|Korea|South Korea|USA|United States|Italy|Spain|Germany|Australia|Canada)/i, type: 'city_country' },
+            // 尼泊爾地點
+            { regex: /(Kathmandu|Pokhara|Lukla|Namche|Everest|Annapurna|Manaslu|Nepal|加德滿都|博卡拉|盧卡拉|南崎|聖母峰|安娜普納|馬納斯盧)/i, type: 'nepal_city' },
             
             // 直接的城市名稱
             { regex: /(Tokyo|Kyoto|Osaka|Hiroshima|Paris|London|New York|Bangkok|Bali|Taipei|Seoul|Rome|Barcelona|Berlin|Sydney|Vancouver|Toronto)/i, type: 'city' },
@@ -271,6 +275,16 @@ class InstagramGraphAPIFetcher {
                 country: 'Japan',
                 coordinates: null,
                 countryCoordinates: { lat: 36.2048, lng: 138.2529 }
+            };
+        }
+
+        // 尼泊爾城市處理
+        if (type === 'nepal_city') {
+            return {
+                city: text,
+                country: 'Nepal',
+                coordinates: null,
+                countryCoordinates: { lat: 28.3949, lng: 84.1240 }
             };
         }
 
