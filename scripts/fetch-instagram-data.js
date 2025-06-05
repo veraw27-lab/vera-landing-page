@@ -63,6 +63,16 @@ class InstagramGraphAPIFetcher {
         return profile;
     }
 
+    // 新增：API 請求自動重試
+    async fetchWithRetry(url, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            const response = await fetch(url);
+            if (response.ok) return response;
+            await this.delay(1000 * (i + 1));
+        }
+        throw new Error('API 請求失敗，重試多次仍無法取得資料');
+    }
+
     async fetchAllMedia() {
         console.log('📸 獲取所有媒體數據...');
         
@@ -72,7 +82,7 @@ class InstagramGraphAPIFetcher {
         while (nextUrl) {
             console.log(`📄 正在獲取媒體數據... 已獲取: ${allMedia.length}`);
             
-            const response = await fetch(nextUrl);
+            const response = await this.fetchWithRetry(nextUrl);
             
             if (!response.ok) {
                 throw new Error(`媒體數據獲取失敗: ${response.status} ${response.statusText}`);
