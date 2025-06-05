@@ -1020,13 +1020,26 @@
         // 找該國家地理中心
         const feature = worldGeoData.features.find(f => (f.properties.name || f.properties.NAME) === countryName);
         if (!feature) return;
-        const centroid = path.centroid(feature);
+        // 用 d3.geoCentroid 取得經緯度，再用 projection 轉螢幕座標
+        let center = null;
+        try {
+            const geoCenter = d3.geoCentroid(feature); // [lng, lat]
+            if (Array.isArray(geoCenter) && geoCenter.length === 2 && isFinite(geoCenter[0]) && isFinite(geoCenter[1])) {
+                center = projection(geoCenter);
+            }
+        } catch (e) {
+            center = null;
+        }
+        // fallback: 若 geoCentroid 無效，退回 path.centroid
+        if (!center || !Array.isArray(center) || center.some(v => !isFinite(v))) {
+            center = path.centroid(feature);
+        }
         // 圓形排列
         const r = 22, imgSize = 38;
         photos.forEach((post, i) => {
             const angle = (i / photos.length) * 2 * Math.PI - Math.PI/2;
-            const x = centroid[0] + Math.cos(angle) * r;
-            const y = centroid[1] + Math.sin(angle) * r;
+            const x = center[0] + Math.cos(angle) * r;
+            const y = center[1] + Math.sin(angle) * r;
             const img = document.createElement('img');
             img.src = post.mediaUrl || post.media_url || post.thumbnail_url;
             img.alt = post.caption || '';
