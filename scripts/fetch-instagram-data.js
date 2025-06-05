@@ -264,6 +264,36 @@ class InstagramGraphAPIFetcher {
 
     async extractLocationFromCaption(caption) {
         if (!caption) return null;
+        
+        const lines = caption.split('\n');
+        const firstLine = (lines[0] || '').trim();
+        const secondLine = (lines[1] || '').trim();
+        
+        // 1. 優先處理GPS標記 (📍)
+        const gpsResult = this.extractFromGPS(firstLine);
+        if (gpsResult) {
+            return gpsResult;
+        }
+        
+        // 2. 處理 Country • City 格式 (highest priority)
+        const bulletResult = this.extractFromBulletPattern(firstLine, secondLine);
+        if (bulletResult) {
+            return bulletResult;
+        }
+        
+        // 3. 處理 City 開頭的格式
+        const cityFirstResult = this.extractFromCityFirst(firstLine, secondLine);
+        if (cityFirstResult) {
+            return cityFirstResult;
+        }
+        
+        // 4. 處理直接國家名稱
+        const countryResult = this.extractFromCountryName(firstLine);
+        if (countryResult) {
+            return countryResult;
+        }
+        
+        // 5. Fallback to original pattern matching
         const patterns = this.constructor.getLocationPatterns();
         for (const pattern of patterns) {
             const match = caption.match(pattern.regex);
@@ -271,6 +301,7 @@ class InstagramGraphAPIFetcher {
                 return await this.parseLocationMatch(match, pattern.type);
             }
         }
+        
         return null;
     }
 
@@ -413,9 +444,13 @@ class InstagramGraphAPIFetcher {
             'Indonesia': 'Indonesia',
             'Taiwan': 'Taiwan',
             'Korea': 'South Korea',
+            'Korean': 'South Korea',
             'South Korea': 'South Korea',
+            'Korea, Republic of': 'South Korea',
+            'Republic of Korea': 'South Korea',
             'USA': 'United States',
             'United States': 'United States',
+            'United States of America': 'United States',
             'Italy': 'Italy',
             'Spain': 'Spain',
             'Germany': 'Germany',
@@ -425,12 +460,13 @@ class InstagramGraphAPIFetcher {
             'NZ': 'New Zealand',
             'Switzerland': 'Switzerland',
             'Swiss': 'Switzerland',
+            'Holland': 'Netherlands',
+            'Netherlands': 'Netherlands',
             'Norway': 'Norway',
             'Portugal': 'Portugal',
             'Sweden': 'Sweden',
             'Finland': 'Finland',
             'Denmark': 'Denmark',
-            'Netherlands': 'Netherlands',
             'Belgium': 'Belgium',
             'Austria': 'Austria',
             'Greece': 'Greece',
@@ -460,7 +496,6 @@ class InstagramGraphAPIFetcher {
             'Vatican': 'Vatican',
             'Malta': 'Malta',
             'Cyprus': 'Cyprus',
-            'Monaco': 'Monaco',
             'Montenegro': 'Montenegro',
             'Bosnia': 'Herzegovina',
             'Herzegovina': 'Herzegovina',
@@ -566,6 +601,177 @@ class InstagramGraphAPIFetcher {
         return countryCoords[this.normalizeCountryName(country)] || null;
     }
 
+    // GPS標記提取
+    extractFromGPS(line) {
+        const gpsPattern = /📍\s*([^•\n\r#@]+)/i;
+        const match = line.match(gpsPattern);
+        if (match) {
+            const location = match[1].trim();
+            return this.parseLocationString(location);
+        }
+        return null;
+    }
+
+    // Bullet pattern提取 (Country • City)
+    extractFromBulletPattern(firstLine, secondLine) {
+        const bulletPattern = /([A-Za-z\s]+)\s*•\s*([A-Za-z\s]+)/;
+        const match = firstLine.match(bulletPattern);
+        
+        if (match) {
+            const extractedCountry = match[1].trim();
+            const extractedCity = match[2].trim();
+            
+            // 標準化國家名稱
+            const normalizedCountry = this.normalizeCountryName(extractedCountry);
+            
+            // 檢查是否是有效的國家
+            if (countryList.includes(normalizedCountry) || countryList.includes(extractedCountry)) {
+                return {
+                    city: extractedCity,
+                    country: normalizedCountry,
+                    coordinates: null,
+                    countryCoordinates: this.getCountryCoordinates(normalizedCountry)
+                };
+            }
+            
+            // 如果第一部分不是國家，檢查是否是城市
+            const cityToCountryMap = this.getCityToCountryMap();
+            if (cityToCountryMap[extractedCountry]) {
+                return {
+                    city: extractedCountry,
+                    country: cityToCountryMap[extractedCountry],
+                    coordinates: null,
+                    countryCoordinates: this.getCountryCoordinates(cityToCountryMap[extractedCountry])
+                };
+            }
+        }
+        
+        return null;
+    }
+
+    // City開頭的格式提取
+    extractFromCityFirst(firstLine, secondLine) {
+        const firstWord = firstLine.split(' ')[0];
+        const cityToCountryMap = this.getCityToCountryMap();
+        
+        // 檢查第一個字是否是已知城市
+        if (cityToCountryMap[firstWord]) {
+            return {
+                city: firstWord,
+                country: cityToCountryMap[firstWord],
+                coordinates: null,
+                countryCoordinates: this.getCountryCoordinates(cityToCountryMap[firstWord])
+            };
+        }
+        
+        return null;
+    }
+
+    // 直接國家名稱提取
+    extractFromCountryName(line) {
+        for (const country of countryList) {
+            if (line.toLowerCase().includes(country.toLowerCase())) {
+                const normalizedCountry = this.normalizeCountryName(country);
+                return {
+                    city: '',
+                    country: normalizedCountry,
+                    coordinates: null,
+                    countryCoordinates: this.getCountryCoordinates(normalizedCountry)
+                };
+            }
+        }
+        return null;
+    }
+
+    // 解析位置字符串
+    parseLocationString(location) {
+        // 簡單的city, country解析
+        if (location.includes(',')) {
+            const parts = location.split(',').map(p => p.trim());
+            if (parts.length === 2) {
+                const city = parts[0];
+                const country = this.normalizeCountryName(parts[1]);
+                return {
+                    city,
+                    country,
+                    coordinates: null,
+                    countryCoordinates: this.getCountryCoordinates(country)
+                };
+            }
+        }
+        
+        // 檢查是否是單純的國家名
+        const normalizedLocation = this.normalizeCountryName(location);
+        if (countryList.includes(normalizedLocation)) {
+            return {
+                city: '',
+                country: normalizedLocation,
+                coordinates: null,
+                countryCoordinates: this.getCountryCoordinates(normalizedLocation)
+            };
+        }
+        
+        return null;
+    }
+
+    // 城市到國家映射
+    getCityToCountryMap() {
+        return {
+            // 明確的城市映射
+            'Amsterdam': 'Netherlands',
+            'Seoul': 'South Korea',
+            'Tokyo': 'Japan',
+            'Milan': 'Italy',
+            'NYC': 'United States',
+            'New York': 'United States',
+            'San Francisco': 'United States',
+            'Taipei': 'Taiwan',
+            'YiIlan': 'Taiwan',
+            'Ilan': 'Taiwan',
+            'Yilan': 'Taiwan',
+            
+            // 馬來西亞城市
+            'Kuala Lumpur': 'Malaysia',
+            'KL': 'Malaysia',
+            'Penang': 'Malaysia',
+            'Langkawi': 'Malaysia',
+            'Kapailai': 'Malaysia',
+            'Melaka': 'Malaysia',
+            'Johor Bahru': 'Malaysia',
+            'Kota Kinabalu': 'Malaysia',
+            'George Town': 'Malaysia',
+            
+            // 其他亞洲城市
+            'Singapore': 'Singapore',
+            'Manila': 'Philippines',
+            'Bangkok': 'Thailand',
+            'Ho Chi Minh City': 'Vietnam',
+            'Phnom Penh': 'Cambodia',
+            'Vientiane': 'Laos',
+            'Yangon': 'Myanmar',
+            'Mumbai': 'India',
+            'New Delhi': 'India',
+            'Beijing': 'China',
+            'Shanghai': 'China',
+            'Hong Kong': 'Hong Kong',
+            'Macau': 'Macau',
+            
+            // 南美城市
+            'La Paz': 'Bolivia',
+            'Lima': 'Peru',
+            'Cusco': 'Peru',
+            'Santiago': 'Chile',
+            'Buenos Aires': 'Argentina',
+            'Rio de Janeiro': 'Brazil',
+            'São Paulo': 'Brazil',
+            'Bogotá': 'Colombia',
+            'Caracas': 'Venezuela',
+            'Quito': 'Ecuador',
+            'Montevideo': 'Uruguay',
+            'Asunción': 'Paraguay'
+        };
+    }
+    
     async saveData(userProfile, travelData) {
         console.log('💾 保存數據...');
         
