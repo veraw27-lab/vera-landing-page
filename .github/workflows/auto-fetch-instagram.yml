@@ -22,6 +22,10 @@ jobs:
           cd scripts
           npm install || true
       - name: Fetch Instagram Data
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
         run: node scripts/fetch-instagram-data.js
       - name: Commit and push if changed
         run: |
