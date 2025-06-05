@@ -828,6 +828,16 @@
 
         // 國家名稱正規化，讓 IG country name 能對應到地圖
         function normalizeCountryName(name, post) {
+            // 若有 GPS，優先用經緯度判斷國家
+            if (post && post.location && post.location.coordinates && window.worldGeoData) {
+                const [lng, lat] = [post.location.coordinates.lng, post.location.coordinates.lat];
+                for (const feature of window.worldGeoData.features) {
+                    if (d3.geoContains(feature, [lng, lat])) {
+                        // 直接用地圖的國家英文名
+                        return feature.properties.name || feature.properties.NAME || '';
+                    }
+                }
+            }
             if (!name || name === 'null' || name === 'undefined' || name.trim() === '') {
                 // 嘗試從 caption 推斷國家
                 if (post && post.caption) {
@@ -928,6 +938,7 @@
             if (!res.ok) throw new Error('World map data load failed');
             const topo = await res.json();
             worldGeoData = topojson.feature(topo, topo.objects.countries);
+            window.worldGeoData = worldGeoData; // 讓 normalizeCountryName 可用
         }
 
         function renderMap() {
