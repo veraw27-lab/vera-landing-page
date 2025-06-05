@@ -2982,7 +2982,10 @@
         }
       ],
       "cities": [],
-      "coordinates": null
+      "coordinates": {
+        "lat": 46.2276,
+        "lng": 2.2137
+      }
     },
     "Thailand": {
       "name": "Thailand",
@@ -5157,20 +5160,6 @@
           "mediaType": "IMAGE"
         },
         {
-          "id": "17851103941179651",
-          "caption": "Mexico • Guanajuato (UNESCO)\n墨西哥 • 瓜納華托 （聯合國世界遺產）\n\n我不說 你知道我在墨西哥嗎？\n可能被好萊塢電影給綁架 想像中的墨西哥\n應該是充滿毒梟 街角會有暗號 危險\n朋友也紛紛問我 怎麼敢去墨西哥玩 \n認真說也沒想過怎麼不敢 疑？\n當初出發很隨性 只是想走走沒抱期待\n但沒想到這裡有一個hidden gem \n整趟旅程我最愛的不是坎昆海邊 不是金字塔 不是湖底洞穴\n是這一個可愛的小山城  不大 一天我就可以用雙腳走完整個城\n喔但先說好 姊一天旅程大概可以走半馬以上 \n在聯合廣場拾階而坐 身邊有爭艷的花朵 \n看畫家十分鐘又畫出一座山城  聽著live band 表演  手拿著剛削好的西瓜\nThis is life should be. \n整座城市浸淫在音樂裡\n忽然一班隊伍背著吉他 拉著提琴從你面前走過 \n喔原來這是中古吟遊詩人的時空之旅\n\nI did not have any expectation for my Mexico trip at first . It's just a gateway. BUT! I found this hidden gem!! My favorite part of Mexico is not Cancun or Maya pyramid . Is this small mountain town. Look over the town from the top of mountain , see how amazing it is. You can discover different face of her , from daytime to night. \nIt's walkable city , no car needed and shouldn't drive a car.\nWalking around , having a seat at Union plaza to enjoy the live music. \nPerhaps you will meet the music festival. \nI fall in love with central and South America because of Mexico. Peru and Bolivia enhance such enthusiasm. \n#mexcio #guanajuato #guanajuatocapital #mountaintown #topofmountain #nightseeing #unesco #unescoworldheritagesites #travel #verasworld #adventure #music #lifeshouldbe #hiddengem",
-          "mediaUrl": "https://scontent-sjc3-1.cdninstagram.com/v/t51.2885-15/17126852_1815928928731336_7580451126630154240_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ccb=1-7&_nc_sid=18de74&_nc_ohc=k2Kdlhop5IIQ7kNvwF2dsSl&_nc_oc=AdnY53BIhFOkKf7DuAvDbLHI_N-6m_eHvPrO10XzzrqqXL1A4_cUtSK3DKZ5xSJK8gw&_nc_zt=23&_nc_ht=scontent-sjc3-1.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_AfNN3XqdYyLw56IU29r8FAki7ct9xj8uXGbo96r-jQbJCw&oe=68474131",
-          "permalink": "https://www.instagram.com/p/BRmm_RnjOl3/",
-          "timestamp": "2017-03-14T03:21:46+0000",
-          "location": {
-            "city": "",
-            "country": "Peru",
-            "coordinates": null,
-            "countryCoordinates": null
-          },
-          "mediaType": "CAROUSEL_ALBUM"
-        },
-        {
           "id": "17851057021171369",
           "caption": "Peru • Huayna Picchu \nCould you find where Machu Picchu is?\nIt's so tiny in the back. \nThe most impressive thing in Machu Picchu is climbing Huayna Picchu .\nIt's scary , tough , but breathtaking. \nSo amazing view you can see from the top of the mountain. \nMust do it! \n#Peru #machupicchu #trip #verasworld #vacation #travel #adventure #HuaynaPicchu #mountain #climbing #breathtaking #southamerica #wuaynapichu",
           "mediaUrl": "https://scontent-sjc3-1.cdninstagram.com/v/t51.2885-15/17126121_1848510535406800_797004398080294912_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=103&ccb=1-7&_nc_sid=18de74&_nc_ohc=MB4-JuCqG7AQ7kNvwH6LePo&_nc_oc=AdnSYbL3QN-tOJb8L505_Q_pf8mp1BAR7ewgFGvLHXLauqC80qlG1bpmMp3R3h6q9JU&_nc_zt=23&_nc_ht=scontent-sjc3-1.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_AfMQ_gxVm9UgJO_7sp6PIddZEevZjsNBjfUlHulwunYf4w&oe=68475C6F",
@@ -5663,13 +5652,45 @@
       ],
       "cities": [],
       "coordinates": null
+    },
+    "Mexico": {
+      "posts": [
+        {
+          "id": "17851103941179651",
+          "caption": "Mexico • Guanajuato (UNESCO)\n墨西哥 • 瓜納華托 （聯合國世界遺產）\n\n我不說 你知道我在墨西哥嗎？\n可能被好萊塢電影給綁架 想像中的墨西哥\n應該是充滿毒梟 街角會有暗號 危險\n朋友也紛紛問我 怎麼敢去墨西哥玩 \n認真說也沒想過怎麼不敢 疑？\n當初出發很隨性 只是想走走沒抱期待\n但沒想到這裡有一個hidden gem \n整趟旅程我最愛的不是坎昆海邊 不是金字塔 不是湖底洞穴\n是這一個可愛的小山城  不大 一天我就可以用雙腳走完整個城\n喔但先說好 姊一天旅程大概可以走半馬以上 \n在聯合廣場拾階而坐 身邊有爭艷的花朵 \n看畫家十分鐘又畫出一座山城  聽著live band 表演  手拿著剛削好的西瓜\nThis is life should be. \n整座城市浸淫在音樂裡\n忽然一班隊伍背著吉他 拉著提琴從你面前走過 \n喔原來這是中古吟遊詩人的時空之旅\n\nI did not have any expectation for my Mexico trip at first . It's just a gateway. BUT! I found this hidden gem!! My favorite part of Mexico is not Cancun or Maya pyramid . Is this small mountain town. Look over the town from the top of mountain , see how amazing it is. You can discover different face of her , from daytime to night. \nIt's walkable city , no car needed and shouldn't drive a car.\nWalking around , having a seat at Union plaza to enjoy the live music. \nPerhaps you will meet the music festival. \nI fall in love with central and South America because of Mexico. Peru and Bolivia enhance such enthusiasm. \n#mexcio #guanajuato #guanajuatocapital #mountaintown #topofmountain #nightseeing #unesco #unescoworldheritagesites #travel #verasworld #adventure #music #lifeshouldbe #hiddengem",
+          "mediaUrl": "https://scontent-sjc3-1.cdninstagram.com/v/t51.2885-15/17126852_1815928928731336_7580451126630154240_n.jpg?stp=dst-jpg_e35_tt6&_nc_cat=105&ccb=1-7&_nc_sid=18de74&_nc_ohc=k2Kdlhop5IIQ7kNvwF2dsSl&_nc_oc=AdnY53BIhFOkKf7DuAvDbLHI_N-6m_eHvPrO10XzzrqqXL1A4_cUtSK3DKZ5xSJK8gw&_nc_zt=23&_nc_ht=scontent-sjc3-1.cdninstagram.com&edm=ANo9K5cEAAAA&oh=00_AfNN3XqdYyLw56IU29r8FAki7ct9xj8uXGbo96r-jQbJCw&oe=68474131",
+          "permalink": "https://www.instagram.com/p/BRmm_RnjOl3/",
+          "timestamp": "2017-03-14T03:21:46+0000",
+          "location": {
+            "city": "Guanajuato",
+            "country": "Mexico",
+            "coordinates": {
+              "lat": 21.019,
+              "lng": -101.2574
+            },
+            "countryCoordinates": {
+              "lat": 23.6345,
+              "lng": -102.5528
+            }
+          },
+          "mediaType": "CAROUSEL_ALBUM"
+        }
+      ],
+      "cities": [
+        "Guanajuato"
+      ],
+      "coordinates": {
+        "lat": 23.6345,
+        "lng": -102.5528
+      }
     }
   },
   "cities": [
     "Taipei",
     "宜蘭",
     "only one",
-    "New York"
+    "New York",
+    "Guanajuato"
   ],
   "posts": [
     {
@@ -11004,10 +11025,16 @@
       "permalink": "https://www.instagram.com/p/BRmm_RnjOl3/",
       "timestamp": "2017-03-14T03:21:46+0000",
       "location": {
-        "city": "",
-        "country": "Peru",
-        "coordinates": null,
-        "countryCoordinates": null
+        "city": "Guanajuato",
+        "country": "Mexico",
+        "coordinates": {
+          "lat": 21.019,
+          "lng": -101.2574
+        },
+        "countryCoordinates": {
+          "lat": 23.6345,
+          "lng": -102.5528
+        }
       },
       "mediaType": "CAROUSEL_ALBUM"
     },
@@ -11158,7 +11185,8 @@
       "mediaType": "IMAGE"
     }
   ],
-  "lastUpdated": "2025-06-05T11:56:48.875Z",
+  "lastUpdated": "2025-06-05T14:22:53.073Z",
   "totalPosts": 437,
-  "postsWithLocation": 386
+  "postsWithLocation": 386,
+  "totalCountries": 24
 }
