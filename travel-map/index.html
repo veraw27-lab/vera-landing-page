@@ -1028,98 +1028,35 @@ let countryCenters = {};
                     handleCountryClick(event, d, name);
                 });
 
-    // 新增：在每個有照片的國家預先渲染 2~4 張小縮圖
-    const renderedCountries = new Set();
-    Object.entries(travelData.countries).forEach(([countryName, countryData]) => {
-        if (!countryData.posts || countryData.posts.length === 0) return;
-        // 僅渲染一次美國（排除阿拉斯加、夏威夷等重複）
-        if (countryName === 'United States') {
-            if (renderedCountries.has('United States')) return;
-            // 找出本土（經度 > -130，緯度 < 50）
-            const usMainland = worldGeoData.features.find(f => {
-                const n = (f.properties.name || f.properties.NAME);
-                if (n !== 'United States') return false;
-                const centroid = d3.geoCentroid(f);
-                return centroid[0] > -130 && centroid[1] < 50; // 本土大致範圍
-            });
-            if (!usMainland) return;
-            renderCountryPreview(usMainland, countryName, countryData);
-            renderedCountries.add('United States');
-            return;
-        }
-        // 其他國家正常渲染
-        if (renderedCountries.has(countryName)) return;
-        const feature = worldGeoData.features.find(f => (f.properties.name || f.properties.NAME) === countryName);
-        if (!feature) return;
-        renderCountryPreview(feature, countryName, countryData);
-        renderedCountries.add(countryName);
-    });
+            // 新增：在每個有照片的國家預先渲染 2~4 張小縮圖
+            // --- 移除小圖渲染功能 ---
+            // const renderedCountries = new Set();
+            // Object.entries(travelData.countries).forEach(([countryName, countryData]) => {
+            //     if (!countryData.posts || countryData.posts.length === 0) return;
+            //     // 僅渲染一次美國（排除阿拉斯加、夏威夷等重複）
+            //     if (countryName === 'United States') {
+            //         if (renderedCountries.has('United States')) return;
+            //         // 找出本土（經度 > -130，緯度 < 50）
+            //         const usMainland = worldGeoData.features.find(f => {
+            //             const n = (f.properties.name || f.properties.NAME);
+            //             if (n !== 'United States') return false;
+            //             const centroid = d3.geoCentroid(f);
+            //             return centroid[0] > -130 && centroid[1] < 50; // 本土大致範圍
+            //         });
+            //         if (!usMainland) return;
+            //         renderCountryPreview(usMainland, countryName, countryData);
+            //         renderedCountries.add('United States');
+            //         return;
+            //     }
+            //     // 其他國家正常渲染
+            //     if (renderedCountries.has(countryName)) return;
+            //     const feature = worldGeoData.features.find(f => (f.properties.name || f.properties.NAME) === countryName);
+            //     if (!feature) return;
+            //     renderCountryPreview(feature, countryName, countryData);
+            //     renderedCountries.add(countryName);
+            // });
 
-    function renderCountryPreview(feature, countryName, countryData) {
-        // 取前 3 張有圖的貼文
-        const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 3);
-        if (photos.length === 0) return;
-        // 優先用國家中心表定位
-        let center = null;
-        if (countryCenters && countryCenters[countryName]) {
-            center = projection(countryCenters[countryName]);
-        } else {
-            try {
-                const geoCenter = d3.geoCentroid(feature); // [lng, lat]
-                if (Array.isArray(geoCenter) && geoCenter.length === 2 && isFinite(geoCenter[0]) && isFinite(geoCenter[1])) {
-                    center = projection(geoCenter);
-                }
-            } catch (e) {
-                center = null;
-            }
-            if (!center || !Array.isArray(center) || center.some(v => !isFinite(v))) {
-                center = path.centroid(feature);
-            }
-        }
-        // 預覽縮圖小尺寸
-        const r = 22, imgSize = 38;
-        photos.forEach((post, i) => {
-            const angle = (i / photos.length) * 2 * Math.PI - Math.PI/2;
-            const x = center[0] + Math.cos(angle) * r;
-            const y = center[1] + Math.sin(angle) * r;
-            const img = document.createElement('img');
-            img.src = post.mediaUrl || post.media_url || post.thumbnail_url;
-            img.alt = post.caption || '';
-            img.style.position = 'absolute';
-            img.style.left = (x - imgSize/2) + 'px';
-            img.style.top = (y - imgSize/2) + 'px';
-            img.style.width = img.style.height = imgSize + 'px';
-            img.style.borderRadius = '10px';
-            img.style.boxShadow = '0 2px 8px #000a';
-            img.style.objectFit = 'cover';
-            img.style.border = '2px solid #fff8';
-            img.style.pointerEvents = 'auto';
-            img.style.cursor = 'pointer';
-            img.title = countryName;
-            img.className = 'country-preview-img';
-            img.addEventListener('mouseenter', (e) => {
-                // 預覽縮圖消失，顯示大圖
-                hideAllCountryPreviews();
-                showPhotoBurst({clientX: x, clientY: y}, countryName);
-            });
-            img.addEventListener('mouseleave', (e) => {
-                clearPhotoBurst();
-                showAllCountryPreviews();
-            });
-            img.addEventListener('click', (e) => {
-                e.stopPropagation();
-                showCountryPosts(countryName, countryData);
-            });
-            previewLayer.appendChild(img);
-        });
-    }
-    // 輔助函式：隱藏/顯示所有預覽縮圖
-    function hideAllCountryPreviews() {
-        document.querySelectorAll('.country-preview-img').forEach(img => img.style.display = 'none');
-    }
-    function showAllCountryPreviews() {
-        document.querySelectorAll('.country-preview-img').forEach(img => img.style.display = '');
-    }
+    // function renderCountryPreview(...) { ... } // 整個函式可保留但不會再被呼叫
         }
 
         // 放射狀照片顯示
