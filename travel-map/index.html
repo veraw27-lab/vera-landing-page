@@ -77,14 +77,14 @@
             justify-content: center;
             background: #000000;
             position: relative;
-            padding-top: 60px;
+            padding-top: 80px;
         }
 
         #world-map {
-            width: 100%;
-            height: 100%;
+            width: 85%;
+            height: 75%;
             max-width: 1200px;
-            max-height: 800px;
+            max-height: 700px;
         }
 
         .country {
@@ -317,20 +317,22 @@
         }
         .photo-burst-img {
             position: absolute;
-            width: 130px;
-            height: 130px;
-            border-radius: 18px;
+            width: 90px;
+            height: 90px;
+            border-radius: 15px;
             object-fit: cover;
             opacity: 0;
             transform: scale(0.7);
             transition: all 0.5s cubic-bezier(.4,2,.6,1);
             cursor: pointer;
             pointer-events: auto;
-            /* 移除 box-shadow、border、background，讓圖片更清晰 */
+            box-shadow: 0 6px 20px rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
         }
         .photo-burst-img:hover {
             transform: scale(1.1);
-            box-shadow: 0 8px 25px rgba(255,255,255,0.2);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.2);
+            z-index: 3003;
         }
         .photo-burst-img.visible {
             opacity: 1;
@@ -985,8 +987,8 @@ let countryCenters = {};
 })();
 
         function renderMap() {
-            const width = Math.min(window.innerWidth, 1200);
-            const height = Math.min(window.innerHeight - 100, 700);
+            const width = Math.min(window.innerWidth * 0.7, 900);
+            const height = Math.min(window.innerHeight * 0.65, 600);
             svg = d3.select("#world-map")
                 .attr("width", width)
                 .attr("height", height)
@@ -1007,9 +1009,9 @@ let countryCenters = {};
             previewLayer.style.zIndex = 1002;
             document.querySelector('.map-container').appendChild(previewLayer);
 
-            // 投影
+            // 投影 - 縮小地圖，更簡潔的顯示
             projection = d3.geoMercator()
-                .scale(width / 6.5)
+                .scale(width / 8)
                 .translate([width / 2, height / 1.6]);
             path = d3.geoPath().projection(projection);
 
@@ -1138,7 +1140,7 @@ let countryCenters = {};
         let currentlyHoveredCountry = null; // 新增：追蹤當前滑鼠懸停的國家
 
         function showPhotoBurst(event, countryName) {
-            // 每次懸停都顯示照片爆炸效果，無論是否為同一國家的不同部分
+            // 不規則照片彈射效果，支援35張照片
             clearPhotoBurst();
             const countryData = travelData.countries[countryName];
             if (!countryData || !countryData.posts || countryData.posts.length === 0) return;
@@ -1147,19 +1149,55 @@ let countryCenters = {};
             const burst = document.getElementById('photo-burst');
             const mouseX = event.clientX;
             const mouseY = event.clientY;
-            // 放射中心往上偏移 60px，避免 tooltip 擋住
-            const centerX = mouseX;
-            const centerY = mouseY - 60;
+            
             // 支援 mediaUrl（後端 key）與 media_url（IG API key）
-            const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 8);
+            const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 35);
             if (photos.length === 0) return;
-            const radius = 120; // 調整為較近的半徑
-            const imgSize = 130; // 恢復第一版大圖
-            const angleStep = (2 * Math.PI) / photos.length;
+            
+            const imgSize = 90; // 照片尺寸
+            const usedPositions = []; // 記錄已使用的位置避免重疊
+            const minDistance = 100; // 最小分離距離
+            
             photos.forEach((post, i) => {
-                const angle = i * angleStep - Math.PI/2;
-                const x = centerX + Math.cos(angle) * radius;
-                const y = centerY + Math.sin(angle) * radius;
+                let x, y, attempts = 0;
+                const maxAttempts = 50;
+                
+                do {
+                    // 完全不規則的分布策略
+                    if (i < 8) {
+                        // 內圈：較小範圍
+                        const angle = Math.random() * 2 * Math.PI;
+                        const radius = 80 + Math.random() * 60; // 80-140px
+                        x = mouseX + Math.cos(angle) * radius;
+                        y = mouseY + Math.sin(angle) * radius;
+                    } else if (i < 20) {
+                        // 中圈：中等範圍
+                        const angle = Math.random() * 2 * Math.PI;
+                        const radius = 140 + Math.random() * 80; // 140-220px
+                        x = mouseX + Math.cos(angle) * radius;
+                        y = mouseY + Math.sin(angle) * radius;
+                    } else {
+                        // 外圈：更大範圍
+                        const angle = Math.random() * 2 * Math.PI;
+                        const radius = 220 + Math.random() * 100; // 220-320px
+                        x = mouseX + Math.cos(angle) * radius;
+                        y = mouseY + Math.sin(angle) * radius;
+                    }
+                    
+                    // 添加隨機偏移讓分布更不規則
+                    x += (Math.random() - 0.5) * 60;
+                    y += (Math.random() - 0.5) * 60;
+                    
+                    // 避免照片超出視窗邊界
+                    x = Math.max(imgSize/2, Math.min(window.innerWidth - imgSize/2, x));
+                    y = Math.max(imgSize/2, Math.min(window.innerHeight - imgSize/2, y));
+                    
+                    attempts++;
+                } while (attempts < maxAttempts && isPositionTooClose(x, y, usedPositions, minDistance));
+                
+                // 記錄位置
+                usedPositions.push({x, y});
+                
                 const img = document.createElement('img');
                 img.className = 'photo-burst-img';
                 img.src = post.mediaUrl || post.media_url || post.thumbnail_url;
@@ -1179,7 +1217,7 @@ let countryCenters = {};
                     // Add visual feedback
                     img.style.transform = 'scale(0.95)';
                     setTimeout(() => {
-                        img.style.transform = img.classList.contains('visible') ? 'scale(1)' : 'scale(0.7)';
+                        img.style.transform = img.classList.contains('visible') ? 'scale(1)' : 'scale(0.8)';
                     }, 100);
                     
                     // Clear photo burst and show posts
@@ -1187,8 +1225,18 @@ let countryCenters = {};
                     showCountryPosts(countryName, countryData);
                 });
                 
-                setTimeout(() => img.classList.add('visible'), 10 + i*60);
+                // 隨機延遲出現時間，讓效果更自然
+                const delay = 10 + Math.random() * 80;
+                setTimeout(() => img.classList.add('visible'), delay);
                 burst.appendChild(img);
+            });
+        }
+        
+        // 檢查位置是否與已有位置太接近
+        function isPositionTooClose(x, y, usedPositions, minDistance) {
+            return usedPositions.some(pos => {
+                const distance = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
+                return distance < minDistance;
             });
         }
         function clearPhotoBurst() {
