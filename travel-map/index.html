@@ -549,13 +549,51 @@
             }
         };
 
-        // 頁面載入時預先載入 sample 圖片，加速顯示
+        // 高效能圖片預載入系統
+        const imageCache = new Map();
+        const preloadQueue = [];
+        let isPreloading = false;
+        
         function preloadSampleImages() {
+            // 批次預載入，避免一次性載入造成卡頓
             for (let i = 1; i <= 7; i++) {
-                const img = new window.Image();
-                img.src = `/images/adventure${i}.jpeg`;
+                preloadQueue.push(`/images/adventure${i}.jpeg`);
             }
+            processPreloadQueue();
         }
+        
+        function processPreloadQueue() {
+            if (isPreloading || preloadQueue.length === 0) return;
+            isPreloading = true;
+            
+            const loadBatch = preloadQueue.splice(0, 3); // 每次載入3張
+            const promises = loadBatch.map(src => preloadImage(src));
+            
+            Promise.all(promises).finally(() => {
+                isPreloading = false;
+                if (preloadQueue.length > 0) {
+                    setTimeout(processPreloadQueue, 50); // 延遲50ms載入下一批
+                }
+            });
+        }
+        
+        function preloadImage(src) {
+            return new Promise((resolve, reject) => {
+                if (imageCache.has(src)) {
+                    resolve(imageCache.get(src));
+                    return;
+                }
+                
+                const img = new window.Image();
+                img.onload = () => {
+                    imageCache.set(src, img);
+                    resolve(img);
+                };
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+        
         preloadSampleImages();
 
         // 簡化的世界地圖座標（主要國家輪廓）
@@ -1140,7 +1178,7 @@ let countryCenters = {};
         let currentlyHoveredCountry = null; // 新增：追蹤當前滑鼠懸停的國家
 
         function showPhotoBurst(event, countryName) {
-            // 不規則照片彈射效果，支援35張照片
+            // 不規則照片彈射效果，支援35張照片，更分散的分布
             clearPhotoBurst();
             const countryData = travelData.countries[countryName];
             if (!countryData || !countryData.posts || countryData.posts.length === 0) return;
@@ -1156,37 +1194,41 @@ let countryCenters = {};
             
             const imgSize = 90; // 照片尺寸
             const usedPositions = []; // 記錄已使用的位置避免重疊
-            const minDistance = 100; // 最小分離距離
+            const minDistance = 95; // 稍微減少最小分離距離，讓更多照片能放置
             
             photos.forEach((post, i) => {
                 let x, y, attempts = 0;
-                const maxAttempts = 50;
+                const maxAttempts = 60; // 增加嘗試次數
                 
                 do {
-                    // 完全不規則的分布策略
+                    // 完全不規則的分布策略，再增加5%散布範圍
                     if (i < 8) {
-                        // 內圈：較小範圍
+                        // 內圈：較小範圍 (再增加5%散布)
                         const angle = Math.random() * 2 * Math.PI;
-                        const radius = 80 + Math.random() * 60; // 80-140px
+                        const radius = 88 + Math.random() * 66; // 88-154px (84-147增加5%)
                         x = mouseX + Math.cos(angle) * radius;
                         y = mouseY + Math.sin(angle) * radius;
                     } else if (i < 20) {
-                        // 中圈：中等範圍
+                        // 中圈：中等範圍 (再增加5%散布)
                         const angle = Math.random() * 2 * Math.PI;
-                        const radius = 140 + Math.random() * 80; // 140-220px
+                        const radius = 154 + Math.random() * 88; // 154-242px (147-231增加5%)
                         x = mouseX + Math.cos(angle) * radius;
                         y = mouseY + Math.sin(angle) * radius;
                     } else {
-                        // 外圈：更大範圍
+                        // 外圈：更大範圍 (再增加5%散布)
                         const angle = Math.random() * 2 * Math.PI;
-                        const radius = 220 + Math.random() * 100; // 220-320px
+                        const radius = 242 + Math.random() * 111; // 242-353px (231-336增加5%)
                         x = mouseX + Math.cos(angle) * radius;
                         y = mouseY + Math.sin(angle) * radius;
                     }
                     
-                    // 添加隨機偏移讓分布更不規則
-                    x += (Math.random() - 0.5) * 60;
-                    y += (Math.random() - 0.5) * 60;
+                    // 添加更大的隨機偏移讓分布更不規則 (再增加5%散布)
+                    x += (Math.random() - 0.5) * 66; // 63增加5%
+                    y += (Math.random() - 0.5) * 66; // 63增加5%
+                    
+                    // 添加額外的不規則偏移 (增加更多隨機性)
+                    x += (Math.random() - 0.5) * 50; // 從40增加到50
+                    y += (Math.random() - 0.5) * 50; // 從40增加到50
                     
                     // 避免照片超出視窗邊界
                     x = Math.max(imgSize/2, Math.min(window.innerWidth - imgSize/2, x));
@@ -1225,8 +1267,8 @@ let countryCenters = {};
                     showCountryPosts(countryName, countryData);
                 });
                 
-                // 隨機延遲出現時間，讓效果更自然
-                const delay = 10 + Math.random() * 80;
+                // 照片一個一個依序出現，每張間隔50ms（更快的速度）
+                const delay = i * 50 + 20; // 第一張20ms後出現，之後每張間隔50ms
                 setTimeout(() => img.classList.add('visible'), delay);
                 burst.appendChild(img);
             });
