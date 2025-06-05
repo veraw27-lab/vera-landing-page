@@ -831,12 +831,15 @@
             // 若有 GPS，優先用經緯度判斷國家
             if (post && post.location && post.location.coordinates && window.worldGeoData) {
                 const [lng, lat] = [post.location.coordinates.lng, post.location.coordinates.lat];
+                let foundCountry = '';
                 for (const feature of window.worldGeoData.features) {
                     if (d3.geoContains(feature, [lng, lat])) {
-                        // 直接用地圖的國家英文名
-                        return feature.properties.name || feature.properties.NAME || '';
+                        foundCountry = feature.properties.name || feature.properties.NAME || '';
+                        break;
                     }
                 }
+                if (foundCountry) return foundCountry;
+                // fallback: 若找不到，繼續用原本的 country name/caption 推斷
             }
             if (!name || name === 'null' || name === 'undefined' || name.trim() === '') {
                 // 嘗試從 caption 推斷國家
@@ -856,7 +859,6 @@
                         { key: 'america', value: 'United States' },
                         { key: 'new zealand', value: 'New Zealand' },
                         { key: 'china', value: 'China' },
-                        // ...可擴充
                     ];
                     for (const item of countryKeywords) {
                         if (caption.includes(item.key)) return item.value;
@@ -876,7 +878,6 @@
                 'Mainland China': 'China',
                 'Hong Kong': 'China',
                 'Nepal': 'Nepal',
-                // ...可擴充
             };
             return map[name.trim()] || name.trim();
         }
@@ -1092,9 +1093,29 @@
             } else {
                 imgHtml = `<div class="post-image">${post.media_type === 'VIDEO' ? '🎥' : '📷'}</div>`;
             }
-            const location = post.location ? 
-                `${post.location.city || ''}, ${post.location.country || ''}`.replace(/^,\s*/, '') : 
-                'Unknown location';
+            // 地點顯示優化
+            let location = '';
+            const city = post.location && post.location.city ? post.location.city.trim() : '';
+            const country = post.location && post.location.country ? post.location.country.trim() : '';
+            if (city && country) {
+                location = `${city}, ${country}`;
+            } else if (country) {
+                location = country;
+            } else if (post.location && post.location.coordinates && window.worldGeoData) {
+                // GPS 反查國家
+                const normCountry = normalizeCountryName('', post);
+                if (normCountry) location = normCountry;
+            }
+            if (!location && post.caption) {
+                // 從 caption 推斷
+                const normCountry = normalizeCountryName('', post);
+                if (normCountry) location = normCountry;
+            }
+            if (!location) {
+                location = 'Unknown location';
+            }
+            // 避免多餘逗號、空白
+            location = location.replace(/^,\s*/, '').replace(/,\s*$/, '').replace(/\s+,/g, ',');
             const date = new Date(post.timestamp).toLocaleDateString('zh-TW', {
                 year: 'numeric',
                 month: 'long',
