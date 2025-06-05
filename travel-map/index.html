@@ -1024,40 +1024,13 @@ let countryCenters = {};
                     const name = countryNameMap[d.id]; // General name, e.g., "United States"
                     if (!name) return;
 
-                    if (currentlyHoveredCountry === name) {
-                        return; 
-                    }
-
-                    if (currentlyHoveredCountry && currentlyHoveredCountry !== name) {
-                        let selectionToClear = svg.selectAll("path")
-                            .filter(feature => countryNameMap[feature.id] === currentlyHoveredCountry);
-                        
-                        if (currentlyHoveredCountry === "United States") {
-                            selectionToClear = selectionToClear.filter(feature => feature.properties.name === "United States of America");
-                        } else if (currentlyHoveredCountry === "France") {
-                            selectionToClear = selectionToClear.filter(feature => feature.properties.name === "France");
-                        }
-                        selectionToClear.classed("country-highlight", false);
-                        
-                        if (currentTooltipCountry === currentlyHoveredCountry) {
-                             handleMouseOut(); // Clears tooltip and resets currentTooltipCountry
-                        }
-                        if (currentBurstCountry === currentlyHoveredCountry) {
-                             clearPhotoBurst(); // Clears photo burst and resets currentBurstCountry
-                        }
-                    }
+                    // 清除之前的高亮
+                    svg.selectAll("path").classed("country-highlight", false);
+                    
+                    // 只高亮當前滑鼠懸停的具體地理要素
+                    d3.select(this).classed("country-highlight", true);
                     
                     currentlyHoveredCountry = name;
-
-                    let selectionToHighlight = svg.selectAll("path")
-                        .filter(feature => countryNameMap[feature.id] === name);
-                    
-                    if (name === "United States") {
-                        selectionToHighlight = selectionToHighlight.filter(feature => feature.properties.name === "United States of America");
-                    } else if (name === "France") {
-                        selectionToHighlight = selectionToHighlight.filter(feature => feature.properties.name === "France");
-                    }
-                    selectionToHighlight.classed("country-highlight", true);
                     
                     // Pass the specific feature 'd' and its general mapped name 'name'
                     handleMouseOver(event, d, name); 
@@ -1067,47 +1040,23 @@ let countryCenters = {};
                     const name = countryNameMap[d.id]; // General name of the feature being left
                     if (!name) return;
 
-                    // If the mouse is not moving to another part of the same logical country, then clear
-                    if (currentlyHoveredCountry !== name) {
-                        // This case should ideally not be hit if mouseover correctly sets currentlyHoveredCountry
-                        // and mouseout is for that country. But as a fallback:
-                        let selectionToClear = svg.selectAll("path")
-                            .filter(feature => countryNameMap[feature.id] === name);
-                        if (name === "United States") {
-                            selectionToClear = selectionToClear.filter(feature => feature.properties.name === "United States of America");
-                        } else if (name === "France") {
-                            selectionToClear = selectionToClear.filter(feature => feature.properties.name === "France");
+                    // 檢查滑鼠是否移動到同一國家的另一個地理要素
+                    const relatedTarget = event.relatedTarget;
+                    let movingToSameCountry = false;
+                    
+                    if (relatedTarget && typeof relatedTarget.getAttribute === 'function') {
+                        const targetCountryName = relatedTarget.getAttribute('data-country');
+                        if (targetCountryName === name) {
+                            movingToSameCountry = true;
                         }
-                        selectionToClear.classed("country-highlight", false);
+                    }
+
+                    // 如果不是移動到同一國家的其他部分，則清除高亮和其他效果
+                    if (!movingToSameCountry) {
+                        d3.select(this).classed("country-highlight", false);
+                        
                         handleMouseOut(); 
                         clearPhotoBurst(); 
-                        currentlyHoveredCountry = null; 
-                        return;
-                    }
-
-                    const relatedTarget = event.relatedTarget;
-                    let movingToSameCountrySegment = false;
-                    if (relatedTarget && typeof relatedTarget.getAttribute === 'function') {
-                        const targetCountryDataName = relatedTarget.getAttribute('data-country');
-                        // targetCountryDataName is the general mapped name from data-country attribute
-                        if (targetCountryDataName === name) {
-                            movingToSameCountrySegment = true;
-                        }
-                    }
-
-                    if (!movingToSameCountrySegment) {
-                        let selectionToClear = svg.selectAll("path")
-                            .filter(feature => countryNameMap[feature.id] === name);
-                        
-                        if (name === "United States") {
-                            selectionToClear = selectionToClear.filter(feature => feature.properties.name === "United States of America");
-                        } else if (name === "France") {
-                            selectionToClear = selectionToClear.filter(feature => feature.properties.name === "France");
-                        }
-                        selectionToClear.classed("country-highlight", false);
-                        
-                        handleMouseOut(); // Clears tooltip and resets currentTooltipCountry
-                        clearPhotoBurst(); // Clears photo burst and resets currentBurstCountry
                         
                         currentlyHoveredCountry = null; 
                     }
@@ -1158,9 +1107,7 @@ let countryCenters = {};
         let currentlyHoveredCountry = null; // 新增：追蹤當前滑鼠懸停的國家
 
         function showPhotoBurst(event, countryName) {
-            // 如果已經在顯示同一個國家的照片，則不重複顯示
-            if (currentBurstCountry === countryName) return;
-            
+            // 每次懸停都顯示照片爆炸效果，無論是否為同一國家的不同部分
             clearPhotoBurst();
             const countryData = travelData.countries[countryName];
             if (!countryData || !countryData.posts || countryData.posts.length === 0) return;
@@ -1203,10 +1150,7 @@ let countryCenters = {};
         let currentTooltipCountry = null; // 追蹤當前顯示tooltip的國家
 
         function handleMouseOver(event, d, countryName) {
-            // 避免同一國家重複顯示tooltip
-            if (!countryName || currentTooltipCountry === countryName) return;
-            
-            currentTooltipCountry = countryName;
+            // 每次懸停都顯示tooltip，無論是否為同一國家的不同部分
             const tooltip = document.getElementById('tooltip');
             const countryData = travelData.countries[countryName];
             let content = `<strong>${countryName}</strong><br>`;
@@ -1219,6 +1163,8 @@ let countryCenters = {};
             tooltip.style.opacity = 1;
             tooltip.style.left = (event.pageX + 10) + 'px';
             tooltip.style.top = (event.pageY - 10) + 'px';
+            
+            currentTooltipCountry = countryName;
         }
 
         function handleMouseOut() {
