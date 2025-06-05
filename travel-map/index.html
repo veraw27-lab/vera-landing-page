@@ -432,7 +432,7 @@
                             timestamp: "2024-01-15T10:30:00+0000",
                             permalink: "https://instagram.com/p/sample1",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure1.jpeg"
+                            media_url: "/images/adventure1.jpeg"
                         }
                     ],
                     cities: ["New York"]
@@ -447,7 +447,7 @@
                             timestamp: "2024-03-20T14:15:00+0000",
                             permalink: "https://instagram.com/p/sample2",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure2.jpeg"
+                            media_url: "/images/adventure2.jpeg"
                         },
                         {
                             id: "3",
@@ -456,7 +456,7 @@
                             timestamp: "2024-03-22T09:45:00+0000",
                             permalink: "https://instagram.com/p/sample3",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure3.jpeg"
+                            media_url: "/images/adventure3.jpeg"
                         }
                     ],
                     cities: ["Tokyo", "Kyoto"]
@@ -471,7 +471,7 @@
                             timestamp: "2024-02-14T20:00:00+0000",
                             permalink: "https://instagram.com/p/sample4",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure4.jpeg"
+                            media_url: "/images/adventure4.jpeg"
                         }
                     ],
                     cities: ["Paris"]
@@ -486,7 +486,7 @@
                             timestamp: "2024-05-01T21:00:00+0000",
                             permalink: "https://instagram.com/p/sample5",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure5.jpeg"
+                            media_url: "/images/adventure5.jpeg"
                         }
                     ],
                     cities: ["Taipei"]
@@ -501,7 +501,7 @@
                             timestamp: "2024-06-15T15:30:00+0000",
                             permalink: "https://instagram.com/p/sample6",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure6.jpeg"
+                            media_url: "/images/adventure6.jpeg"
                         }
                     ],
                     cities: ["London"]
@@ -516,13 +516,22 @@
                             timestamp: "2024-04-10T19:30:00+0000",
                             permalink: "https://instagram.com/p/sample7",
                             media_type: "IMAGE",
-                            media_url: "../images/adventure7.jpeg"
+                            media_url: "/images/adventure7.jpeg"
                         }
                     ],
                     cities: ["Bangkok"]
                 }
             }
         };
+
+        // 頁面載入時預先載入 sample 圖片，加速顯示
+        function preloadSampleImages() {
+            for (let i = 1; i <= 7; i++) {
+                const img = new window.Image();
+                img.src = `/images/adventure${i}.jpeg`;
+            }
+        }
+        preloadSampleImages();
 
         // 簡化的世界地圖座標（主要國家輪廓）
         const worldGeometry = {
@@ -677,10 +686,12 @@
             const burst = document.getElementById('photo-burst');
             const mouseX = event.clientX;
             const mouseY = event.clientY;
+            // 放射中心往上偏移 80px，避免 tooltip 擋住
             const centerX = mouseX;
-            const centerY = mouseY;
-            const photos = countryData.posts.slice(0, 8); // 最多8張
-            const radius = 120;
+            const centerY = mouseY - 80;
+            const photos = countryData.posts.slice(0, 10); // 最多10張
+            const radius = 260; // 放射半徑加大
+            const imgSize = 140; // 圖片尺寸加大
             const angleStep = (2 * Math.PI) / photos.length;
             photos.forEach((post, i) => {
                 const angle = i * angleStep - Math.PI/2;
@@ -688,10 +699,13 @@
                 const y = centerY + Math.sin(angle) * radius;
                 const img = document.createElement('img');
                 img.className = 'photo-burst-img';
-                img.src = post.media_url || post.thumbnail_url || 'https://via.placeholder.com/90?text=Photo';
+                // 僅用 Instagram API 回傳的 media_url/thumbnail_url
+                img.src = post.media_url || post.thumbnail_url || '';
                 img.alt = post.caption || '';
-                img.style.left = (x - 45) + 'px';
-                img.style.top = (y - 45) + 'px';
+                img.style.left = (x - imgSize/2) + 'px';
+                img.style.top = (y - imgSize/2) + 'px';
+                img.style.width = img.style.height = imgSize + 'px';
+                img.style.zIndex = 3002;
                 setTimeout(() => img.classList.add('visible'), 10 + i*60);
                 burst.appendChild(img);
             });
