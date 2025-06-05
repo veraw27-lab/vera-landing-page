@@ -570,6 +570,56 @@
             }
         }
 
+        // ISO 3166-1 alpha-3 對應英文國名
+        function getCountryNameMap() {
+            // 擴充常見旅遊國家，加入 Nepal
+            return {
+                '840': 'United States',
+                '392': 'Japan',
+                '250': 'France',
+                '158': 'Taiwan',
+                '826': 'United Kingdom',
+                '764': 'Thailand',
+                '276': 'Germany',
+                '380': 'Italy',
+                '724': 'Spain',
+                '156': 'China',
+                '356': 'India',
+                '036': 'Australia',
+                '076': 'Brazil',
+                '124': 'Canada',
+                '643': 'Russia',
+                '484': 'Mexico',
+                '410': 'South Korea',
+                '578': 'Norway',
+                '752': 'Sweden',
+                '246': 'Finland',
+                '524': 'Nepal', // 新增 Nepal
+                // ...可擴充
+            };
+        }
+
+        // 國家名稱正規化，讓 IG country name 能對應到地圖
+        function normalizeCountryName(name) {
+            if (!name) return '';
+            const map = {
+                'USA': 'United States',
+                'U.S.A.': 'United States',
+                'United States of America': 'United States',
+                'UK': 'United Kingdom',
+                'England': 'United Kingdom',
+                'South Korea': 'South Korea',
+                'Korea, Republic of': 'South Korea',
+                'Republic of Korea': 'South Korea',
+                'Mainland China': 'China',
+                'Hong Kong': 'China',
+                'Nepal': 'Nepal',
+                // ...可擴充
+            };
+            return map[name.trim()] || name.trim();
+        }
+
+        // 載入 travelData 時自動補齊新國家
         async function loadTravelData() {
             try {
                 // 嘗試從後端載入數據
@@ -585,6 +635,33 @@
                 // 使用示例數據
                 travelData = sampleTravelData;
                 console.log('📝 使用示例旅行數據');
+            }
+            // 自動補齊新國家
+            if (travelData && travelData.countries) {
+                Object.values(travelData.countries).forEach(country => {
+                    if (country.posts) {
+                        country.posts.forEach(post => {
+                            if (post.location && post.location.country) {
+                                const norm = normalizeCountryName(post.location.country);
+                                if (!travelData.countries[norm]) {
+                                    // 新增國家
+                                    travelData.countries[norm] = {
+                                        name: norm,
+                                        posts: [],
+                                        cities: []
+                                    };
+                                }
+                                // 避免重複加入
+                                if (!travelData.countries[norm].posts.includes(post)) {
+                                    travelData.countries[norm].posts.push(post);
+                                }
+                                if (post.location.city && !travelData.countries[norm].cities.includes(post.location.city)) {
+                                    travelData.countries[norm].cities.push(post.location.city);
+                                }
+                            }
+                        });
+                    }
+                });
             }
         }
 
@@ -621,9 +698,17 @@
                 .selectAll("path")
                 .data(worldGeoData.features)
                 .join("path")
-                .attr("d", path)
+                .attr("d", d => {
+                    const name = countryNameMap[d.id];
+                    if (!name) {
+                        console.warn('未對應國家代碼:', d.id);
+                        return null; // 不繪製 undefined
+                    }
+                    return path(d);
+                })
                 .attr("class", d => {
                     const name = countryNameMap[d.id];
+                    if (!name) return '';
                     const visited = travelData.countries[name];
                     let className = "country";
                     if (visited) {
@@ -646,34 +731,6 @@
                     const name = countryNameMap[d.id];
                     handleCountryClick(event, d, name);
                 });
-        }
-
-        // ISO 3166-1 alpha-3 對應英文國名
-        function getCountryNameMap() {
-            // 這裡只列出常見旅遊國家，完整可用 https://github.com/datasets/country-codes
-            return {
-                '840': 'United States',
-                '392': 'Japan',
-                '250': 'France',
-                '158': 'Taiwan',
-                '826': 'United Kingdom',
-                '764': 'Thailand',
-                '276': 'Germany',
-                '380': 'Italy',
-                '724': 'Spain',
-                '156': 'China',
-                '356': 'India',
-                '036': 'Australia',
-                '076': 'Brazil',
-                '124': 'Canada',
-                '643': 'Russia',
-                '484': 'Mexico',
-                '410': 'South Korea',
-                '578': 'Norway',
-                '752': 'Sweden',
-                '246': 'Finland',
-                // ...可擴充
-            };
         }
 
         // 放射狀照片顯示
