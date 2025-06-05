@@ -318,11 +318,20 @@
             opacity: 0;
             transform: scale(0.7);
             transition: all 0.5s cubic-bezier(.4,2,.6,1);
+            cursor: pointer;
+            pointer-events: auto;
             /* 移除 box-shadow、border、background，讓圖片更清晰 */
+        }
+        .photo-burst-img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(255,255,255,0.2);
         }
         .photo-burst-img.visible {
             opacity: 1;
             transform: scale(1);
+        }
+        .photo-burst-img.visible:hover {
+            transform: scale(1.1);
         }
 
         @keyframes spin {
@@ -402,6 +411,9 @@
                 <div class="legend-color" style="background: #aaaaaa;"></div>
                 <span style="color: #cccccc;">多次造訪</span>
             </div>
+            <div class="legend-help" style="margin-top: 10px; font-size: 12px; color: #888; text-align: center;">
+                懸停查看照片 • 點擊照片查看詳情
+            </div>
         </div>
     </div>
 
@@ -422,6 +434,7 @@
         let travelData = null;
         let svg, projection, path;
         let worldGeoData = null;
+        let processedCountries = new Set(); // Prevent duplicate clicks
 
         // 簡化的示例旅行數據
         const sampleTravelData = {
@@ -1149,6 +1162,26 @@ let countryCenters = {};
                 img.style.top = (y - imgSize/2) + 'px';
                 img.style.width = img.style.height = imgSize + 'px';
                 img.style.zIndex = 3002;
+                img.style.cursor = 'pointer';
+                img.style.pointerEvents = 'auto';
+                
+                // 添加點擊事件，打開詳細頁面
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log('Photo clicked for country:', countryName);
+                    
+                    // Add visual feedback
+                    img.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        img.style.transform = img.classList.contains('visible') ? 'scale(1)' : 'scale(0.7)';
+                    }, 100);
+                    
+                    // Clear photo burst and show posts
+                    clearPhotoBurst();
+                    showCountryPosts(countryName, countryData);
+                });
+                
                 setTimeout(() => img.classList.add('visible'), 10 + i*60);
                 burst.appendChild(img);
             });
@@ -1192,6 +1225,7 @@ let countryCenters = {};
         }
 
         function showCountryPosts(countryName, countryData) {
+            console.log('showCountryPosts called for:', countryName, countryData);
             const modal = document.getElementById('posts-modal');
             const title = document.getElementById('modal-title');
             const subtitle = document.getElementById('modal-subtitle');
