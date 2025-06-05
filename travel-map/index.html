@@ -118,6 +118,12 @@
             stroke: #cccccc;
         }
 
+        .country.country-highlight {
+            fill: #555555 !important;
+            stroke: #777777 !important;
+            stroke-width: 2 !important;
+        }
+
         .tooltip {
             position: absolute;
             background: rgba(0, 0, 0, 0.9);
@@ -991,6 +997,9 @@ let countryCenters = {};
             // 國家名稱對照表（ISO 3166-1 alpha-3 -> 英文國名）
             const countryNameMap = getCountryNameMap();
 
+            // 創建一個Set來追蹤已經處理過事件綁定的國家，避免重複綁定
+            const processedCountries = new Set();
+
             svg.append("g")
                 .selectAll("path")
                 .data(worldGeoData.features)
@@ -1016,16 +1025,38 @@ let countryCenters = {};
                 .attr("data-country", d => countryNameMap[d.id] || "")
                 .on("mouseover", function(event, d) {
                     const name = countryNameMap[d.id];
+                    if (!name || processedCountries.has(name + '_hover')) return;
+                    
+                    // 高亮同名的所有地理要素
+                    svg.selectAll("path")
+                        .filter(feature => countryNameMap[feature.id] === name)
+                        .classed("country-highlight", true);
+                    
                     handleMouseOver(event, d, name);
                     showPhotoBurst(event, name);
+                    processedCountries.add(name + '_hover');
                 })
                 .on("mouseout", function(event, d) {
+                    const name = countryNameMap[d.id];
+                    if (!name) return;
+                    
+                    // 移除所有同名地理要素的高亮
+                    svg.selectAll("path")
+                        .filter(feature => countryNameMap[feature.id] === name)
+                        .classed("country-highlight", false);
+                    
                     handleMouseOut();
                     clearPhotoBurst();
+                    processedCountries.delete(name + '_hover');
                 })
                 .on("click", function(event, d) {
                     const name = countryNameMap[d.id];
+                    if (!name || processedCountries.has(name + '_click')) return;
+                    
                     handleCountryClick(event, d, name);
+                    // 重置點擊狀態，允許再次點擊
+                    setTimeout(() => processedCountries.delete(name + '_click'), 300);
+                    processedCountries.add(name + '_click');
                 });
 
             // 新增：在每個有照片的國家預先渲染 2~4 張小縮圖
@@ -1060,10 +1091,17 @@ let countryCenters = {};
         }
 
         // 放射狀照片顯示
+        let currentBurstCountry = null; // 追蹤當前顯示照片爆炸的國家
+
         function showPhotoBurst(event, countryName) {
+            // 如果已經在顯示同一個國家的照片，則不重複顯示
+            if (currentBurstCountry === countryName) return;
+            
             clearPhotoBurst();
             const countryData = travelData.countries[countryName];
             if (!countryData || !countryData.posts || countryData.posts.length === 0) return;
+            
+            currentBurstCountry = countryName;
             const burst = document.getElementById('photo-burst');
             const mouseX = event.clientX;
             const mouseY = event.clientY;
@@ -1095,9 +1133,16 @@ let countryCenters = {};
         function clearPhotoBurst() {
             const burst = document.getElementById('photo-burst');
             if (burst) burst.innerHTML = '';
+            currentBurstCountry = null; // 重置當前國家狀態
         }
 
+        let currentTooltipCountry = null; // 追蹤當前顯示tooltip的國家
+
         function handleMouseOver(event, d, countryName) {
+            // 避免同一國家重複顯示tooltip
+            if (!countryName || currentTooltipCountry === countryName) return;
+            
+            currentTooltipCountry = countryName;
             const tooltip = document.getElementById('tooltip');
             const countryData = travelData.countries[countryName];
             let content = `<strong>${countryName}</strong><br>`;
@@ -1114,6 +1159,7 @@ let countryCenters = {};
 
         function handleMouseOut() {
             document.getElementById('tooltip').style.opacity = 0;
+            currentTooltipCountry = null; // 重置當前國家狀態
         }
 
         function handleCountryClick(event, d, countryName) {
