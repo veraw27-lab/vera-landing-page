@@ -951,6 +951,19 @@
                 .attr("viewBox", `0 0 ${width} ${height}`);
             svg.selectAll("*").remove();
             clearPhotoBurst();
+            // 新增：清除舊的國家預覽圖層
+            let previewLayer = document.getElementById('country-preview-layer');
+            if (previewLayer) previewLayer.remove();
+            previewLayer = document.createElement('div');
+            previewLayer.id = 'country-preview-layer';
+            previewLayer.style.position = 'absolute';
+            previewLayer.style.left = '0';
+            previewLayer.style.top = '0';
+            previewLayer.style.width = '100%';
+            previewLayer.style.height = '100%';
+            previewLayer.style.pointerEvents = 'none';
+            previewLayer.style.zIndex = 1002;
+            document.querySelector('.map-container').appendChild(previewLayer);
 
             // 投影
             projection = d3.geoMercator()
@@ -997,6 +1010,50 @@
                     const name = countryNameMap[d.id];
                     handleCountryClick(event, d, name);
                 });
+
+    // 新增：在每個有照片的國家預先渲染 2~4 張小縮圖
+    Object.entries(travelData.countries).forEach(([countryName, countryData]) => {
+        if (!countryData.posts || countryData.posts.length === 0) return;
+        // 取前 3 張有圖的貼文
+        const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 3);
+        if (photos.length === 0) return;
+        // 找該國家地理中心
+        const feature = worldGeoData.features.find(f => (f.properties.name || f.properties.NAME) === countryName);
+        if (!feature) return;
+        const centroid = path.centroid(feature);
+        // 圓形排列
+        const r = 22, imgSize = 38;
+        photos.forEach((post, i) => {
+            const angle = (i / photos.length) * 2 * Math.PI - Math.PI/2;
+            const x = centroid[0] + Math.cos(angle) * r;
+            const y = centroid[1] + Math.sin(angle) * r;
+            const img = document.createElement('img');
+            img.src = post.mediaUrl || post.media_url || post.thumbnail_url;
+            img.alt = post.caption || '';
+            img.style.position = 'absolute';
+            img.style.left = (x - imgSize/2) + 'px';
+            img.style.top = (y - imgSize/2) + 'px';
+            img.style.width = img.style.height = imgSize + 'px';
+            img.style.borderRadius = '10px';
+            img.style.boxShadow = '0 2px 8px #000a';
+            img.style.objectFit = 'cover';
+            img.style.border = '2px solid #fff8';
+            img.style.pointerEvents = 'auto';
+            img.style.cursor = 'pointer';
+            img.title = countryName;
+            img.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showCountryPosts(countryName, countryData);
+            });
+            img.addEventListener('mouseenter', (e) => {
+                showPhotoBurst({clientX: x, clientY: y}, countryName);
+            });
+            img.addEventListener('mouseleave', (e) => {
+                clearPhotoBurst();
+            });
+            previewLayer.appendChild(img);
+        });
+    });
         }
 
         // 放射狀照片顯示
