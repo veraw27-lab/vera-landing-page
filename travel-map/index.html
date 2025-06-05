@@ -827,8 +827,33 @@
         }
 
         // 國家名稱正規化，讓 IG country name 能對應到地圖
-        function normalizeCountryName(name) {
-            if (!name) return '';
+        function normalizeCountryName(name, post) {
+            if (!name || name === 'null' || name === 'undefined' || name.trim() === '') {
+                // 嘗試從 caption 推斷國家
+                if (post && post.caption) {
+                    const caption = post.caption.toLowerCase();
+                    // 常見國家關鍵字
+                    const countryKeywords = [
+                        { key: 'japan', value: 'Japan' },
+                        { key: 'nepal', value: 'Nepal' },
+                        { key: 'france', value: 'France' },
+                        { key: 'portugal', value: 'Portugal' },
+                        { key: 'thailand', value: 'Thailand' },
+                        { key: 'taiwan', value: 'Taiwan' },
+                        { key: 'united kingdom', value: 'United Kingdom' },
+                        { key: 'england', value: 'United Kingdom' },
+                        { key: 'usa', value: 'United States' },
+                        { key: 'america', value: 'United States' },
+                        { key: 'new zealand', value: 'New Zealand' },
+                        { key: 'china', value: 'China' },
+                        // ...可擴充
+                    ];
+                    for (const item of countryKeywords) {
+                        if (caption.includes(item.key)) return item.value;
+                    }
+                }
+                return '';
+            }
             const map = {
                 'USA': 'United States',
                 'U.S.A.': 'United States',
@@ -846,7 +871,7 @@
             return map[name.trim()] || name.trim();
         }
 
-        // 載入 travelData 時自動補齊新國家
+        // 載入 travelData 時自動補齊新國家，並合併所有 posts
         async function loadTravelData() {
             try {
                 // 嘗試從後端載入數據
@@ -863,32 +888,35 @@
                 travelData = sampleTravelData;
                 console.log('📝 使用示例旅行數據');
             }
-            // 自動補齊新國家
+            // 合併所有 posts 到正規化後的國家
             if (travelData && travelData.countries) {
+                const merged = {};
                 Object.values(travelData.countries).forEach(country => {
                     if (country.posts) {
                         country.posts.forEach(post => {
-                            if (post.location && post.location.country) {
-                                const norm = normalizeCountryName(post.location.country);
-                                if (!travelData.countries[norm]) {
-                                    // 新增國家
-                                    travelData.countries[norm] = {
-                                        name: norm,
-                                        posts: [],
-                                        cities: []
-                                    };
-                                }
-                                // 避免重複加入
-                                if (!travelData.countries[norm].posts.includes(post)) {
-                                    travelData.countries[norm].posts.push(post);
-                                }
-                                if (post.location.city && !travelData.countries[norm].cities.includes(post.location.city)) {
-                                    travelData.countries[norm].cities.push(post.location.city);
-                                }
+                            const norm = normalizeCountryName(
+                                post.location && post.location.country,
+                                post
+                            );
+                            if (!norm) return; // 無法判斷國家
+                            if (!merged[norm]) {
+                                merged[norm] = {
+                                    name: norm,
+                                    posts: [],
+                                    cities: []
+                                };
+                            }
+                            // 避免重複加入
+                            if (!merged[norm].posts.some(p => p.id === post.id)) {
+                                merged[norm].posts.push(post);
+                            }
+                            if (post.location && post.location.city && !merged[norm].cities.includes(post.location.city)) {
+                                merged[norm].cities.push(post.location.city);
                             }
                         });
                     }
                 });
+                travelData.countries = merged;
             }
         }
 
