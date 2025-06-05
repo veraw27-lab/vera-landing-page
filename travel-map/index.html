@@ -1012,10 +1012,12 @@
                 });
 
     // 新增：在每個有照片的國家預先渲染 2~4 張小縮圖
+    const renderedCountries = new Set();
     Object.entries(travelData.countries).forEach(([countryName, countryData]) => {
         if (!countryData.posts || countryData.posts.length === 0) return;
-        // 僅渲染一次美國本土（排除阿拉斯加、夏威夷等）
+        // 僅渲染一次美國（排除阿拉斯加、夏威夷等重複）
         if (countryName === 'United States') {
+            if (renderedCountries.has('United States')) return;
             // 找出本土（經度 > -130，緯度 < 50）
             const usMainland = worldGeoData.features.find(f => {
                 const n = (f.properties.name || f.properties.NAME);
@@ -1025,12 +1027,15 @@
             });
             if (!usMainland) return;
             renderCountryPreview(usMainland, countryName, countryData);
+            renderedCountries.add('United States');
             return;
         }
         // 其他國家正常渲染
+        if (renderedCountries.has(countryName)) return;
         const feature = worldGeoData.features.find(f => (f.properties.name || f.properties.NAME) === countryName);
         if (!feature) return;
         renderCountryPreview(feature, countryName, countryData);
+        renderedCountries.add(countryName);
     });
 
     function renderCountryPreview(feature, countryName, countryData) {
