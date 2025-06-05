@@ -942,6 +942,23 @@
             window.worldGeoData = worldGeoData; // 讓 normalizeCountryName 可用
         }
 
+        // 載入國家地理中心表
+let countryCenters = {};
+(async function() {
+  try {
+    const res = await fetch('./js/country-centers.js');
+    if (res.ok) {
+      // 以 ESM 方式動態 import
+      const text = await res.text();
+      // 解析出物件
+      // eslint-disable-next-line no-eval
+      countryCenters = eval(text.replace('export const countryCenters =', ''));
+    }
+  } catch (e) {
+    countryCenters = {};
+  }
+})();
+
         function renderMap() {
             const width = Math.min(window.innerWidth, 1200);
             const height = Math.min(window.innerHeight - 100, 700);
@@ -1042,18 +1059,22 @@
         // 取前 3 張有圖的貼文
         const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 3);
         if (photos.length === 0) return;
-        // 用 d3.geoCentroid 取得經緯度，再用 projection 轉螢幕座標
+        // 優先用國家中心表定位
         let center = null;
-        try {
-            const geoCenter = d3.geoCentroid(feature); // [lng, lat]
-            if (Array.isArray(geoCenter) && geoCenter.length === 2 && isFinite(geoCenter[0]) && isFinite(geoCenter[1])) {
-                center = projection(geoCenter);
+        if (countryCenters && countryCenters[countryName]) {
+            center = projection(countryCenters[countryName]);
+        } else {
+            try {
+                const geoCenter = d3.geoCentroid(feature); // [lng, lat]
+                if (Array.isArray(geoCenter) && geoCenter.length === 2 && isFinite(geoCenter[0]) && isFinite(geoCenter[1])) {
+                    center = projection(geoCenter);
+                }
+            } catch (e) {
+                center = null;
             }
-        } catch (e) {
-            center = null;
-        }
-        if (!center || !Array.isArray(center) || center.some(v => !isFinite(v))) {
-            center = path.centroid(feature);
+            if (!center || !Array.isArray(center) || center.some(v => !isFinite(v))) {
+                center = path.centroid(feature);
+            }
         }
         // 預覽縮圖小尺寸
         const r = 22, imgSize = 38;
