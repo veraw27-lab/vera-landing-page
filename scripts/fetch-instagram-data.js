@@ -127,7 +127,7 @@ class InstagramGraphAPIFetcher {
                     countryCoordinates: null
                 };
             } else {
-                locationInfo = this.extractLocationFromCaption(media.caption);
+                locationInfo = await this.extractLocationFromCaption(media.caption);
             }
 
             if (locationInfo && (locationInfo.city || locationInfo.country)) {
@@ -169,48 +169,16 @@ class InstagramGraphAPIFetcher {
         return travelData;
     }
 
-    extractLocationFromCaption(caption) {
-        if (!caption) return null;
-
-        // 地點提取模式（針對中文和英文）
-        const patterns = [
-            // 明確的地點標記
-            { regex: /📍\s*([^•\n\r#@]+)/i, type: 'explicit' },
-            { regex: /Location:\s*([^\n\r#@]+)/i, type: 'explicit' },
-            { regex: /地點[:：]\s*([^\n\r#@]+)/i, type: 'explicit' },
-            { regex: /在([^#@\n\r]+?)(?=\s*[#@\n\r]|$)/i, type: 'chinese_location' },
-            
-            // 城市, 國家 模式
-            { regex: /([^#@\n\r,]+),\s*(Japan|Nepal|France|UK|United Kingdom|Thailand|Indonesia|Taiwan|Korea|South Korea|USA|United States|Italy|Spain|Germany|Australia|Canada)/i, type: 'city_country' },
-            // 尼泊爾地點
-            { regex: /(Kathmandu|Pokhara|Lukla|Namche|Everest|Annapurna|Manaslu|Nepal|加德滿都|博卡拉|盧卡拉|南崎|聖母峰|安娜普納|馬納斯盧)/i, type: 'nepal_city' },
-            
-            // 直接的城市名稱
-            { regex: /(Tokyo|Kyoto|Osaka|Hiroshima|Paris|London|New York|Bangkok|Bali|Taipei|Seoul|Rome|Barcelona|Berlin|Sydney|Vancouver|Toronto)/i, type: 'city' },
-            
-            // 登山/健行相關地點
-            { regex: /(Everest|Annapurna|Manaslu|富士山|玉山|阿里山)\s*(Base\s*Camp|基地營)?/i, type: 'mountain' },
-            
-            // 台灣地點
-            { regex: /(台北|新北|桃園|新竹|苗栗|台中|彰化|南投|雲林|嘉義|台南|高雄|屏東|宜蘭|花蓮|台東|澎湖|金門|馬祖)/i, type: 'taiwan_city' },
-            
-            // 日本地點
-            { regex: /(東京|京都|大阪|名古屋|神戶|橫濱|札幌|福岡|廣島|奈良)/i, type: 'japan_city' }
-        ];
-
-        for (const pattern of patterns) {
-            const match = caption.match(pattern.regex);
-            if (match) {
-                return this.parseLocationMatch(match, pattern.type);
-            }
-        }
-
-        return null;
+    // 動態讀取國家主要城市映射表
+    static async getCountryCityMap() {
+        const filePath = path.join(__dirname, 'country-cities.json');
+        const data = await fs.readFile(filePath, 'utf-8');
+        return JSON.parse(data);
     }
 
-    parseLocationMatch(match, type) {
-        // 完整的地點映射數據庫
-        const locationMap = {
+    // locationMap 主要城市自動生成（async 版本）
+    static async getLocationMap() {
+        const base = {
             // 日本
             'Tokyo': { city: 'Tokyo', country: 'Japan', coordinates: { lat: 35.6762, lng: 139.6503 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
             '東京': { city: 'Tokyo', country: 'Japan', coordinates: { lat: 35.6762, lng: 139.6503 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
@@ -245,21 +213,69 @@ class InstagramGraphAPIFetcher {
             'Everest Base Camp': { city: 'Everest Base Camp', country: 'Nepal', coordinates: { lat: 28.0026, lng: 86.8528 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } },
             'Annapurna Base Camp': { city: 'Annapurna Base Camp', country: 'Nepal', coordinates: { lat: 28.5314, lng: 83.8731 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } }
         };
+        const cityMap = await this.getCountryCityMap();
+        for (const [country, cities] of Object.entries(cityMap)) {
+            for (const city of cities) {
+                base[city] = { city, country, coordinates: null, countryCoordinates: null };
+            }
+        }
+        return base;
+    }
 
+    // 正則表達式模式表（可擴充）
+    static getLocationPatterns() {
+        const countryList = [
+            'Japan','Nepal','France','UK','United Kingdom','Thailand','Indonesia','Taiwan','Korea','South Korea','USA','United States','Italy','Spain','Germany','Australia','Canada',
+            'New Zealand','Netherlands','Switzerland','Belgium','Portugal'
+        ];
+        return [
+            // 明確的地點標記
+            { regex: /📍\s*([^•\n\r#@]+)/i, type: 'explicit' },
+            { regex: /Location:\s*([^\n\r#@]+)/i, type: 'explicit' },
+            { regex: /地點[:：]\s*([^\n\r#@]+)/i, type: 'explicit' },
+            { regex: /在([^#@\n\r]+?)(?=\s*[#@\n\r]|$)/i, type: 'chinese_location' },
+            // 城市, 國家 模式
+            { regex: new RegExp(`([^#@\\n\\r,]+),\\s*(${countryList.join('|')})`, 'i'), type: 'city_country' },
+            // 尼泊爾地點
+            { regex: /(Kathmandu|Pokhara|Lukla|Namche|Everest|Annapurna|Manaslu|Nepal|加德滿都|博卡拉|盧卡拉|南崎|聖母峰|安娜普納|馬納斯盧)/i, type: 'nepal_city' },
+            
+            // 直接的城市名稱
+            { regex: /(Tokyo|Kyoto|Osaka|Hiroshima|Paris|London|New York|Bangkok|Bali|Taipei|Seoul|Rome|Barcelona|Berlin|Sydney|Vancouver|Toronto)/i, type: 'city' },
+            
+            // 登山/健行相關地點
+            { regex: /(Everest|Annapurna|Manaslu|富士山|玉山|阿里山)\s*(Base\s*Camp|基地營)?/i, type: 'mountain' },
+            
+            // 台灣地點
+            { regex: /(台北|新北|桃園|新竹|苗栗|台中|彰化|南投|雲林|嘉義|台南|高雄|屏東|宜蘭|花蓮|台東|澎湖|金門|馬祖)/i, type: 'taiwan_city' },
+            
+            // 日本地點
+            { regex: /(東京|京都|大阪|名古屋|神戶|橫濱|札幌|福岡|廣島|奈良)/i, type: 'japan_city' }
+        ];
+    }
+
+    async extractLocationFromCaption(caption) {
+        if (!caption) return null;
+        const patterns = this.constructor.getLocationPatterns();
+        for (const pattern of patterns) {
+            const match = caption.match(pattern.regex);
+            if (match) {
+                return await this.parseLocationMatch(match, pattern.type);
+            }
+        }
+        return null;
+    }
+
+    async parseLocationMatch(match, type) {
+        const locationMap = await this.constructor.getLocationMap();
         const text = match[1] ? match[1].trim() : match[0].trim();
-        
-        // 先檢查預定義映射
         for (const [key, location] of Object.entries(locationMap)) {
             if (text.toLowerCase().includes(key.toLowerCase())) {
                 return location;
             }
         }
-
-        // 解析城市,國家格式
         if (type === 'city_country') {
             const city = match[1] ? match[1].trim() : '';
             const country = match[2] ? match[2].trim() : '';
-            
             return {
                 city: city,
                 country: this.normalizeCountryName(country),
@@ -267,8 +283,6 @@ class InstagramGraphAPIFetcher {
                 countryCoordinates: this.getCountryCoordinates(country)
             };
         }
-
-        // 台灣城市處理
         if (type === 'taiwan_city') {
             return {
                 city: text,
@@ -277,8 +291,6 @@ class InstagramGraphAPIFetcher {
                 countryCoordinates: { lat: 23.6978, lng: 120.9605 }
             };
         }
-
-        // 日本城市處理
         if (type === 'japan_city') {
             return {
                 city: text,
@@ -287,8 +299,6 @@ class InstagramGraphAPIFetcher {
                 countryCoordinates: { lat: 36.2048, lng: 138.2529 }
             };
         }
-
-        // 尼泊爾城市處理
         if (type === 'nepal_city') {
             return {
                 city: text,
@@ -297,13 +307,58 @@ class InstagramGraphAPIFetcher {
                 countryCoordinates: { lat: 28.3949, lng: 84.1240 }
             };
         }
-
         return {
             city: text,
             country: null,
             coordinates: null,
             countryCoordinates: null
         };
+    }
+
+    // locationMap 主要城市自動生成
+    static get locationMap() {
+        const base = {
+            // 日本
+            'Tokyo': { city: 'Tokyo', country: 'Japan', coordinates: { lat: 35.6762, lng: 139.6503 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
+            '東京': { city: 'Tokyo', country: 'Japan', coordinates: { lat: 35.6762, lng: 139.6503 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
+            'Kyoto': { city: 'Kyoto', country: 'Japan', coordinates: { lat: 35.0116, lng: 135.7681 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
+            '京都': { city: 'Kyoto', country: 'Japan', coordinates: { lat: 35.0116, lng: 135.7681 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
+            'Osaka': { city: 'Osaka', country: 'Japan', coordinates: { lat: 34.6937, lng: 135.5023 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
+            '大阪': { city: 'Osaka', country: 'Japan', coordinates: { lat: 34.6937, lng: 135.5023 }, countryCoordinates: { lat: 36.2048, lng: 138.2529 } },
+            
+            // 台灣
+            'Taipei': { city: 'Taipei', country: 'Taiwan', coordinates: { lat: 25.0330, lng: 121.5654 }, countryCoordinates: { lat: 23.6978, lng: 120.9605 } },
+            '台北': { city: 'Taipei', country: 'Taiwan', coordinates: { lat: 25.0330, lng: 121.5654 }, countryCoordinates: { lat: 23.6978, lng: 120.9605 } },
+            '台中': { city: 'Taichung', country: 'Taiwan', coordinates: { lat: 24.1477, lng: 120.6736 }, countryCoordinates: { lat: 23.6978, lng: 120.9605 } },
+            '高雄': { city: 'Kaohsiung', country: 'Taiwan', coordinates: { lat: 22.6273, lng: 120.3014 }, countryCoordinates: { lat: 23.6978, lng: 120.9605 } },
+            
+            // 韓國
+            'Seoul': { city: 'Seoul', country: 'South Korea', coordinates: { lat: 37.5665, lng: 126.9780 }, countryCoordinates: { lat: 35.9078, lng: 127.7669 } },
+            
+            // 歐洲
+            'Paris': { city: 'Paris', country: 'France', coordinates: { lat: 48.8566, lng: 2.3522 }, countryCoordinates: { lat: 46.2276, lng: 2.2137 } },
+            'London': { city: 'London', country: 'United Kingdom', coordinates: { lat: 51.5074, lng: -0.1278 }, countryCoordinates: { lat: 55.3781, lng: -3.4360 } },
+            'Rome': { city: 'Rome', country: 'Italy', coordinates: { lat: 41.9028, lng: 12.4964 }, countryCoordinates: { lat: 41.8719, lng: 12.5674 } },
+            'Barcelona': { city: 'Barcelona', country: 'Spain', coordinates: { lat: 41.3851, lng: 2.1734 }, countryCoordinates: { lat: 40.4637, lng: -3.7492 } },
+            
+            // 美洲
+            'New York': { city: 'New York', country: 'United States', coordinates: { lat: 40.7128, lng: -74.0060 }, countryCoordinates: { lat: 37.0902, lng: -95.7129 } },
+            
+            // 東南亞
+            'Bangkok': { city: 'Bangkok', country: 'Thailand', coordinates: { lat: 13.7563, lng: 100.5018 }, countryCoordinates: { lat: 15.8700, lng: 100.9925 } },
+            'Bali': { city: 'Denpasar', country: 'Indonesia', coordinates: { lat: -8.3405, lng: 115.0920 }, countryCoordinates: { lat: -0.7893, lng: 113.9213 } },
+            
+            // 尼泊爾
+            'Everest Base Camp': { city: 'Everest Base Camp', country: 'Nepal', coordinates: { lat: 28.0026, lng: 86.8528 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } },
+            'Annapurna Base Camp': { city: 'Annapurna Base Camp', country: 'Nepal', coordinates: { lat: 28.5314, lng: 83.8731 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } }
+        };
+        const cityMap = this.getCountryCityMap();
+        for (const [country, cities] of Object.entries(cityMap)) {
+            for (const city of cities) {
+                base[city] = { city, country, coordinates: null, countryCoordinates: null };
+            }
+        }
+        return base;
     }
 
     normalizeCountryName(country) {
