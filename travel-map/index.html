@@ -305,15 +305,15 @@
         }
         .photo-burst-img {
             position: absolute;
-            width: 90px;
-            height: 90px;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(124,163,209,0.18);
+            width: 130px;
+            height: 130px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(124,163,209,0.22);
             object-fit: cover;
             opacity: 0;
             transform: scale(0.7);
             transition: all 0.5s cubic-bezier(.4,2,.6,1);
-            border: 2px solid #fff2;
+            border: 2.5px solid #fff3;
             background: #222;
         }
         .photo-burst-img.visible {
@@ -692,8 +692,8 @@
             // 支援 mediaUrl（後端 key）與 media_url（IG API key）
             const photos = countryData.posts.filter(post => post.mediaUrl || post.media_url || post.thumbnail_url).slice(0, 8);
             if (photos.length === 0) return;
-            const radius = 120;
-            const imgSize = 90;
+            const radius = 180; // 恢復第一版大半徑
+            const imgSize = 130; // 恢復第一版大圖
             const angleStep = (2 * Math.PI) / photos.length;
             photos.forEach((post, i) => {
                 const angle = i * angleStep - Math.PI/2;
