@@ -170,6 +170,12 @@
             display: none;
             overflow-y: auto;
             padding: 80px 20px 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .posts-modal.show {
+            opacity: 1;
         }
 
         .posts-content {
@@ -1169,7 +1175,6 @@ let countryCenters = {};
                 img.addEventListener('click', (e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    console.log('Photo clicked for country:', countryName);
                     
                     // Add visual feedback
                     img.style.transform = 'scale(0.95)';
@@ -1225,7 +1230,6 @@ let countryCenters = {};
         }
 
         function showCountryPosts(countryName, countryData) {
-            console.log('showCountryPosts called for:', countryName, countryData);
             const modal = document.getElementById('posts-modal');
             const title = document.getElementById('modal-title');
             const subtitle = document.getElementById('modal-subtitle');
@@ -1242,6 +1246,8 @@ let countryCenters = {};
             });
 
             modal.style.display = 'block';
+            // Add smooth animation
+            setTimeout(() => modal.classList.add('show'), 10);
         }
 
         function createPostCard(post) {
@@ -1303,7 +1309,11 @@ let countryCenters = {};
         }
 
         function closePosts() {
-            document.getElementById('posts-modal').style.display = 'none';
+            const modal = document.getElementById('posts-modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
         }
 
         function updateStats() {
