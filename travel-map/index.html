@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vera's Travel Map</title>
+    <!-- 加入 d3.js 與 topojson CDN -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
     <style>
         * {
             margin: 0;
@@ -414,6 +417,7 @@
     <script>
         let travelData = null;
         let svg, projection, path;
+        let worldGeoData = null;
 
         // 簡化的示例旅行數據
         const sampleTravelData = {
@@ -539,14 +543,12 @@
 
         async function init() {
             console.log('🚀 初始化旅行地圖...');
-            
             try {
                 await loadTravelData();
+                await loadWorldGeoData();
                 renderMap();
                 updateStats();
-                
                 document.getElementById('loading').style.display = 'none';
-                
                 console.log('✅ 地圖載入完成');
             } catch (error) {
                 console.error('❌ 載入失敗:', error);
@@ -572,50 +574,92 @@
             }
         }
 
+        async function loadWorldGeoData() {
+            // 使用 d3 直接載入 world-110m.json（CDN）
+            // 來源: https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json
+            const url = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('World map data load failed');
+            const topo = await res.json();
+            worldGeoData = topojson.feature(topo, topo.objects.countries);
+        }
+
         function renderMap() {
             const width = Math.min(window.innerWidth, 1200);
             const height = Math.min(window.innerHeight - 100, 700);
-
             svg = d3.select("#world-map")
                 .attr("width", width)
                 .attr("height", height)
-                .attr("viewBox", `0 0 1000 500`);
-
-            // 清除現有內容
+                .attr("viewBox", `0 0 ${width} ${height}`);
             svg.selectAll("*").remove();
-
-            // 清除放射狀照片
             clearPhotoBurst();
 
-            // 繪製國家
-            Object.keys(worldGeometry).forEach(countryName => {
-                const pathData = worldGeometry[countryName];
-                const isVisited = travelData.countries[countryName];
-                const postCount = isVisited ? travelData.countries[countryName].posts.length : 0;
-                
-                let className = "country";
-                if (isVisited) {
-                    className += " visited";
-                    if (postCount >= 2) {
-                        className += " high-activity";
-                    }
-                }
+            // 投影
+            projection = d3.geoMercator()
+                .scale(width / 6.5)
+                .translate([width / 2, height / 1.6]);
+            path = d3.geoPath().projection(projection);
 
-                svg.append("path")
-                    .attr("d", pathData)
-                    .attr("class", className)
-                    .attr("data-country", countryName)
-                    .attr("data-posts", postCount)
-                    .on("mouseover", function(event) {
-                        handleMouseOver(event);
-                        showPhotoBurst(event, countryName);
-                    })
-                    .on("mouseout", function(event) {
-                        handleMouseOut();
-                        clearPhotoBurst();
-                    })
-                    .on("click", handleCountryClick);
-            });
+            // 國家名稱對照表（ISO 3166-1 alpha-3 -> 英文國名）
+            const countryNameMap = getCountryNameMap();
+
+            svg.append("g")
+                .selectAll("path")
+                .data(worldGeoData.features)
+                .join("path")
+                .attr("d", path)
+                .attr("class", d => {
+                    const name = countryNameMap[d.id];
+                    const visited = travelData.countries[name];
+                    let className = "country";
+                    if (visited) {
+                        className += " visited";
+                        if (visited.posts.length >= 2) className += " high-activity";
+                    }
+                    return className;
+                })
+                .attr("data-country", d => countryNameMap[d.id] || "")
+                .on("mouseover", function(event, d) {
+                    const name = countryNameMap[d.id];
+                    handleMouseOver(event, d, name);
+                    showPhotoBurst(event, name);
+                })
+                .on("mouseout", function(event, d) {
+                    handleMouseOut();
+                    clearPhotoBurst();
+                })
+                .on("click", function(event, d) {
+                    const name = countryNameMap[d.id];
+                    handleCountryClick(event, d, name);
+                });
+        }
+
+        // ISO 3166-1 alpha-3 對應英文國名
+        function getCountryNameMap() {
+            // 這裡只列出常見旅遊國家，完整可用 https://github.com/datasets/country-codes
+            return {
+                '840': 'United States',
+                '392': 'Japan',
+                '250': 'France',
+                '158': 'Taiwan',
+                '826': 'United Kingdom',
+                '764': 'Thailand',
+                '276': 'Germany',
+                '380': 'Italy',
+                '724': 'Spain',
+                '156': 'China',
+                '356': 'India',
+                '036': 'Australia',
+                '076': 'Brazil',
+                '124': 'Canada',
+                '643': 'Russia',
+                '484': 'Mexico',
+                '410': 'South Korea',
+                '578': 'Norway',
+                '752': 'Sweden',
+                '246': 'Finland',
+                // ...可擴充
+            };
         }
 
         // 放射狀照片顯示
@@ -624,7 +668,6 @@
             const countryData = travelData.countries[countryName];
             if (!countryData || !countryData.posts || countryData.posts.length === 0) return;
             const burst = document.getElementById('photo-burst');
-            const svgRect = document.getElementById('world-map').getBoundingClientRect();
             const mouseX = event.clientX;
             const mouseY = event.clientY;
             const centerX = mouseX;
@@ -651,18 +694,15 @@
             if (burst) burst.innerHTML = '';
         }
 
-        function handleMouseOver(event, d) {
-            const countryName = d3.select(event.target).attr("data-country");
+        function handleMouseOver(event, d, countryName) {
             const tooltip = document.getElementById('tooltip');
             const countryData = travelData.countries[countryName];
-
             let content = `<strong>${countryName}</strong><br>`;
             if (countryData) {
                 content += `${countryData.posts.length} posts, ${countryData.cities.length} cities`;
             } else {
                 content += "Not visited yet";
             }
-
             tooltip.innerHTML = content;
             tooltip.style.opacity = 1;
             tooltip.style.left = (event.pageX + 10) + 'px';
@@ -673,10 +713,8 @@
             document.getElementById('tooltip').style.opacity = 0;
         }
 
-        function handleCountryClick(event, d) {
-            const countryName = d3.select(event.target).attr("data-country");
+        function handleCountryClick(event, d, countryName) {
             const countryData = travelData.countries[countryName];
-
             if (countryData) {
                 showCountryPosts(countryName, countryData);
             }
