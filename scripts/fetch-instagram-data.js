@@ -228,7 +228,23 @@ class InstagramGraphAPIFetcher {
             'Caracas': { city: 'Caracas', country: 'Venezuela', coordinates: { lat: 10.4806, lng: -66.9036 }, countryCoordinates: { lat: 6.4238, lng: -66.5897 } },
             'Quito': { city: 'Quito', country: 'Ecuador', coordinates: { lat: -0.1807, lng: -78.4678 }, countryCoordinates: { lat: -1.8312, lng: -78.1834 } },
             'Montevideo': { city: 'Montevideo', country: 'Uruguay', coordinates: { lat: -34.9011, lng: -56.1645 }, countryCoordinates: { lat: -32.5228, lng: -55.7658 } },
-            'Asunción': { city: 'Asunción', country: 'Paraguay', coordinates: { lat: -25.2637, lng: -57.5759 }, countryCoordinates: { lat: -23.4425, lng: -58.4438 } }
+            'Asunción': { city: 'Asunción', country: 'Paraguay', coordinates: { lat: -25.2637, lng: -57.5759 }, countryCoordinates: { lat: -23.4425, lng: -58.4438 } },
+            
+            // Asian cities
+            'Kuala Lumpur': { city: 'Kuala Lumpur', country: 'Malaysia', coordinates: { lat: 3.1390, lng: 101.6869 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Kapailai': { city: 'Kapailai', country: 'Malaysia', coordinates: { lat: 4.6298, lng: 118.9617 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'George Town': { city: 'George Town', country: 'Malaysia', coordinates: { lat: 5.4164, lng: 100.3327 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Manila': { city: 'Manila', country: 'Philippines', coordinates: { lat: 14.5995, lng: 120.9842 }, countryCoordinates: { lat: 12.8797, lng: 121.7740 } },
+            'Ho Chi Minh City': { city: 'Ho Chi Minh City', country: 'Vietnam', coordinates: { lat: 10.8231, lng: 106.6297 }, countryCoordinates: { lat: 14.0583, lng: 108.2772 } },
+            'Hanoi': { city: 'Hanoi', country: 'Vietnam', coordinates: { lat: 21.0285, lng: 105.8542 }, countryCoordinates: { lat: 14.0583, lng: 108.2772 } },
+            'Phnom Penh': { city: 'Phnom Penh', country: 'Cambodia', coordinates: { lat: 11.5564, lng: 104.9282 }, countryCoordinates: { lat: 12.5657, lng: 104.9910 } },
+            'Siem Reap': { city: 'Siem Reap', country: 'Cambodia', coordinates: { lat: 13.3671, lng: 103.8448 }, countryCoordinates: { lat: 12.5657, lng: 104.9910 } },
+            'Vientiane': { city: 'Vientiane', country: 'Laos', coordinates: { lat: 17.9757, lng: 102.6331 }, countryCoordinates: { lat: 19.8563, lng: 102.4955 } },
+            'Yangon': { city: 'Yangon', country: 'Myanmar', coordinates: { lat: 16.8661, lng: 96.1951 }, countryCoordinates: { lat: 21.9162, lng: 95.9560 } },
+            'Mumbai': { city: 'Mumbai', country: 'India', coordinates: { lat: 19.0760, lng: 72.8777 }, countryCoordinates: { lat: 20.5937, lng: 78.9629 } },
+            'New Delhi': { city: 'New Delhi', country: 'India', coordinates: { lat: 28.6139, lng: 77.2090 }, countryCoordinates: { lat: 20.5937, lng: 78.9629 } },
+            'Beijing': { city: 'Beijing', country: 'China', coordinates: { lat: 39.9042, lng: 116.4074 }, countryCoordinates: { lat: 35.8617, lng: 104.1954 } },
+            'Shanghai': { city: 'Shanghai', country: 'China', coordinates: { lat: 31.2304, lng: 121.4737 }, countryCoordinates: { lat: 35.8617, lng: 104.1954 } }
         };
         const cityMap = await this.getCountryCityMap();
         for (const [country, cities] of Object.entries(cityMap)) {
@@ -260,57 +276,8 @@ class InstagramGraphAPIFetcher {
 
     async parseLocationMatch(match, type) {
         const locationMap = await this.constructor.getLocationMap();
-        const text = match[1] ? match[1].trim() : match[0].trim();
-        for (const [key, location] of Object.entries(locationMap)) {
-            if (text.toLowerCase().includes(key.toLowerCase())) {
-                return location;
-            }
-        }
-        if (type === 'city_country') {
-            const city = match[1] ? match[1].trim() : '';
-            const country = match[2] ? match[2].trim() : '';
-            return {
-                city: city,
-                country: this.normalizeCountryName(country),
-                coordinates: null,
-                countryCoordinates: this.getCountryCoordinates(country)
-            };
-        }
-        // 新增：直接國家名稱
-        if (type === 'country') {
-            const country = this.normalizeCountryName(text);
-            return {
-                city: '',
-                country,
-                coordinates: null,
-                countryCoordinates: this.getCountryCoordinates(country)
-            };
-        }
-        if (type === 'taiwan_city') {
-            return {
-                city: text,
-                country: 'Taiwan',
-                coordinates: null,
-                countryCoordinates: { lat: 23.6978, lng: 120.9605 }
-            };
-        }
-        if (type === 'japan_city') {
-            return {
-                city: text,
-                country: 'Japan',
-                coordinates: null,
-                countryCoordinates: { lat: 36.2048, lng: 138.2529 }
-            };
-        }
-        if (type === 'nepal_city') {
-            return {
-                city: text,
-                country: 'Nepal',
-                coordinates: null,
-                countryCoordinates: { lat: 28.3949, lng: 84.1240 }
-            };
-        }
-        // 新增：國家・地點格式處理
+        
+        // Handle specific pattern types first (before general location map lookup)
         if (type === 'country_dot_city') {
             const country = this.normalizeCountryName(match[1].trim());
             const city = match[2].trim();
@@ -321,6 +288,64 @@ class InstagramGraphAPIFetcher {
                 countryCoordinates: this.getCountryCoordinates(country)
             };
         }
+        
+        if (type === 'city_country') {
+            const city = match[1] ? match[1].trim() : '';
+            const country = match[2] ? match[2].trim() : '';
+            return {
+                city: city,
+                country: this.normalizeCountryName(country),
+                coordinates: null,
+                countryCoordinates: this.getCountryCoordinates(country)
+            };
+        }
+        
+        if (type === 'country') {
+            const country = this.normalizeCountryName(text);
+            return {
+                city: '',
+                country,
+                coordinates: null,
+                countryCoordinates: this.getCountryCoordinates(country)
+            };
+        }
+        
+        if (type === 'taiwan_city') {
+            return {
+                city: text,
+                country: 'Taiwan',
+                coordinates: null,
+                countryCoordinates: { lat: 23.6978, lng: 120.9605 }
+            };
+        }
+        
+        if (type === 'japan_city') {
+            return {
+                city: text,
+                country: 'Japan',
+                coordinates: null,
+                countryCoordinates: { lat: 36.2048, lng: 138.2529 }
+            };
+        }
+        
+        if (type === 'nepal_city') {
+            return {
+                city: text,
+                country: 'Nepal',
+                coordinates: null,
+                countryCoordinates: { lat: 28.3949, lng: 84.1240 }
+            };
+        }
+        
+        // General location map lookup (for explicit markers and city patterns)
+        const text = match[1] ? match[1].trim() : match[0].trim();
+        for (const [key, location] of Object.entries(locationMap)) {
+            if (text.toLowerCase().includes(key.toLowerCase())) {
+                return location;
+            }
+        }
+        
+        // Default fallback
         return {
             city: text,
             country: null,
@@ -522,7 +547,21 @@ class InstagramGraphAPIFetcher {
             'Paraguay': { lat: -23.4425, lng: -58.4438 },
             'Guyana': { lat: 4.8604, lng: -58.9302 },
             'Suriname': { lat: 3.9193, lng: -56.0278 },
-            'French Guiana': { lat: 3.9339, lng: -53.1258 }
+            'French Guiana': { lat: 3.9339, lng: -53.1258 },
+            
+            // Asian countries
+            'Malaysia': { lat: 4.2105, lng: 101.9758 },
+            'Singapore': { lat: 1.3521, lng: 103.8198 },
+            'Philippines': { lat: 12.8797, lng: 121.7740 },
+            'Vietnam': { lat: 14.0583, lng: 108.2772 },
+            'Cambodia': { lat: 12.5657, lng: 104.9910 },
+            'Laos': { lat: 19.8563, lng: 102.4955 },
+            'Myanmar': { lat: 21.9162, lng: 95.9560 },
+            'India': { lat: 20.5937, lng: 78.9629 },
+            'China': { lat: 35.8617, lng: 104.1954 },
+            'Hong Kong': { lat: 22.3193, lng: 114.1694 },
+            'Macau': { lat: 22.1987, lng: 113.5439 },
+            'Brunei': { lat: 4.5353, lng: 114.7277 }
         };
         return countryCoords[this.normalizeCountryName(country)] || null;
     }

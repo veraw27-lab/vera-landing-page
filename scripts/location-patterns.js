@@ -5,7 +5,9 @@ const countryList = [
     'Japan','Nepal','France','UK','United Kingdom','Thailand','Indonesia','Taiwan','Korea','South Korea','USA','United States','Italy','Spain','Germany','Australia','Canada',
     'New Zealand','NZ','Switzerland','Swiss','Sweden','Norway','Portugal','Finland','Denmark','Netherlands','Belgium','Austria','Greece','Turkey','Czech','Czech Republic','Hungary','Poland','Ireland','Russia','Iceland','Estonia','Latvia','Lithuania','Slovakia','Slovenia','Croatia','Serbia','Romania','Bulgaria','Ukraine','Luxembourg','Liechtenstein','Monaco','San Marino','Andorra','Vatican','Malta','Cyprus','Monaco','Montenegro','Bosnia','Herzegovina','Macedonia','Albania','Moldova','Belarus','Georgia','Armenia','Azerbaijan','Portugal','Switzerland','Norway','New Zealand',
     // South American countries
-    'Peru','Bolivia','Chile','Argentina','Brazil','Colombia','Venezuela','Ecuador','Uruguay','Paraguay','Guyana','Suriname','French Guiana'
+    'Peru','Bolivia','Chile','Argentina','Brazil','Colombia','Venezuela','Ecuador','Uruguay','Paraguay','Guyana','Suriname','French Guiana',
+    // Asian countries
+    'Malaysia','Singapore','Philippines','Vietnam','Cambodia','Laos','Myanmar','India','China','Hong Kong','Macau','Brunei'
 ];
 
 const locationPatterns = [
@@ -14,8 +16,8 @@ const locationPatterns = [
     { regex: /Location:\s*([^\n\r#@]+)/i, type: 'explicit' },
     { regex: /地點[:：]\s*([^\n\r#@]+)/i, type: 'explicit' },
     
-    // Country・City format (high priority)
-    { regex: /([A-Za-z ]+)・([A-Za-z ]+)/, type: 'country_dot_city' },
+    // Country•City format (high priority) - Updated to use correct bullet character
+    { regex: /([A-Za-z ]+)\s*•\s*([A-Za-z ]+)/, type: 'country_dot_city' },
     
     // City, Country format (high priority)
     { regex: new RegExp(`([^#@\\n\\r,]+),\\s*(${countryList.join('|')})`, 'i'), type: 'city_country' },
