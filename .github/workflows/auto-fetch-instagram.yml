@@ -1,18 +1,22 @@
 name: Auto Fetch Instagram Data
 
-description: |
-  每天自動執行 scripts/fetch-instagram-data.js，更新 travel-map/data/travel-data.json，並自動 commit/push。
-
 on:
   schedule:
     - cron: '0 2 * * *' # 每天台灣上午10點（UTC+8=2點）
   workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   fetch-and-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -26,11 +30,19 @@ jobs:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
           INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
-        run: node scripts/fetch-instagram-data.js
+        run: |
+          echo "Starting Instagram data fetch..."
+          node scripts/fetch-instagram-data.js || echo "Instagram API fetch failed, continuing with existing data"
+        continue-on-error: true
       - name: Commit and push if changed
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add travel-map/data/
-          git diff --staged --quiet || git commit -m "🗺️ Auto-update travel data $(date)"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "🗺️ Auto-update travel data $(date)"
+            git pull --rebase origin main || true
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi

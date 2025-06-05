@@ -23,6 +23,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -41,12 +42,19 @@ jobs:
         INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
       run: |
         cd scripts
-        node fetch-instagram-data.js
+        echo "Starting Instagram data fetch..."
+        node fetch-instagram-data.js || echo "Instagram API fetch failed, continuing with existing data"
+      continue-on-error: true
     
     - name: Commit and push if data changed
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add travel-map/data/
-        git diff --staged --quiet || git commit -m "🗺️ Auto-update travel data $(date)"
-        git push
+        if ! git diff --staged --quiet; then
+          git commit -m "🗺️ Auto-update travel data $(date)"
+          git pull --rebase origin main || true
+          git push origin main
+        else
+          echo "No changes to commit"
+        fi
