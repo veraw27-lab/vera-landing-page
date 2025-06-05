@@ -212,7 +212,23 @@ class InstagramGraphAPIFetcher {
             
             // 尼泊爾
             'Everest Base Camp': { city: 'Everest Base Camp', country: 'Nepal', coordinates: { lat: 28.0026, lng: 86.8528 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } },
-            'Annapurna Base Camp': { city: 'Annapurna Base Camp', country: 'Nepal', coordinates: { lat: 28.5314, lng: 83.8731 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } }
+            'Annapurna Base Camp': { city: 'Annapurna Base Camp', country: 'Nepal', coordinates: { lat: 28.5314, lng: 83.8731 }, countryCoordinates: { lat: 28.3949, lng: 84.1240 } },
+            
+            // 南美洲
+            'Lima': { city: 'Lima', country: 'Peru', coordinates: { lat: -12.0464, lng: -77.0428 }, countryCoordinates: { lat: -9.1900, lng: -75.0152 } },
+            'Cusco': { city: 'Cusco', country: 'Peru', coordinates: { lat: -13.5319, lng: -71.9675 }, countryCoordinates: { lat: -9.1900, lng: -75.0152 } },
+            'Machu Picchu': { city: 'Machu Picchu', country: 'Peru', coordinates: { lat: -13.1631, lng: -72.5450 }, countryCoordinates: { lat: -9.1900, lng: -75.0152 } },
+            'La Paz': { city: 'La Paz', country: 'Bolivia', coordinates: { lat: -16.5000, lng: -68.1193 }, countryCoordinates: { lat: -16.2902, lng: -63.5887 } },
+            'Uyuni': { city: 'Uyuni', country: 'Bolivia', coordinates: { lat: -20.4586, lng: -66.8250 }, countryCoordinates: { lat: -16.2902, lng: -63.5887 } },
+            'Santiago': { city: 'Santiago', country: 'Chile', coordinates: { lat: -33.4489, lng: -70.6693 }, countryCoordinates: { lat: -35.6751, lng: -71.5430 } },
+            'Buenos Aires': { city: 'Buenos Aires', country: 'Argentina', coordinates: { lat: -34.6118, lng: -58.3960 }, countryCoordinates: { lat: -38.4161, lng: -63.6167 } },
+            'Rio de Janeiro': { city: 'Rio de Janeiro', country: 'Brazil', coordinates: { lat: -22.9068, lng: -43.1729 }, countryCoordinates: { lat: -14.2350, lng: -51.9253 } },
+            'São Paulo': { city: 'São Paulo', country: 'Brazil', coordinates: { lat: -23.5558, lng: -46.6396 }, countryCoordinates: { lat: -14.2350, lng: -51.9253 } },
+            'Bogotá': { city: 'Bogotá', country: 'Colombia', coordinates: { lat: 4.7110, lng: -74.0721 }, countryCoordinates: { lat: 4.5709, lng: -74.2973 } },
+            'Caracas': { city: 'Caracas', country: 'Venezuela', coordinates: { lat: 10.4806, lng: -66.9036 }, countryCoordinates: { lat: 6.4238, lng: -66.5897 } },
+            'Quito': { city: 'Quito', country: 'Ecuador', coordinates: { lat: -0.1807, lng: -78.4678 }, countryCoordinates: { lat: -1.8312, lng: -78.1834 } },
+            'Montevideo': { city: 'Montevideo', country: 'Uruguay', coordinates: { lat: -34.9011, lng: -56.1645 }, countryCoordinates: { lat: -32.5228, lng: -55.7658 } },
+            'Asunción': { city: 'Asunción', country: 'Paraguay', coordinates: { lat: -25.2637, lng: -57.5759 }, countryCoordinates: { lat: -23.4425, lng: -58.4438 } }
         };
         const cityMap = await this.getCountryCityMap();
         for (const [country, cities] of Object.entries(cityMap)) {
@@ -492,6 +508,21 @@ class InstagramGraphAPIFetcher {
             'Georgia': { lat: 42.3154, lng: 43.3569 },
             'Armenia': { lat: 40.0691, lng: 45.0382 },
             'Azerbaijan': { lat: 40.1431, lng: 47.5769 },
+            
+            // South American countries
+            'Peru': { lat: -9.1900, lng: -75.0152 },
+            'Bolivia': { lat: -16.2902, lng: -63.5887 },
+            'Chile': { lat: -35.6751, lng: -71.5430 },
+            'Argentina': { lat: -38.4161, lng: -63.6167 },
+            'Brazil': { lat: -14.2350, lng: -51.9253 },
+            'Colombia': { lat: 4.5709, lng: -74.2973 },
+            'Venezuela': { lat: 6.4238, lng: -66.5897 },
+            'Ecuador': { lat: -1.8312, lng: -78.1834 },
+            'Uruguay': { lat: -32.5228, lng: -55.7658 },
+            'Paraguay': { lat: -23.4425, lng: -58.4438 },
+            'Guyana': { lat: 4.8604, lng: -58.9302 },
+            'Suriname': { lat: 3.9193, lng: -56.0278 },
+            'French Guiana': { lat: 3.9339, lng: -53.1258 }
         };
         return countryCoords[this.normalizeCountryName(country)] || null;
     }
