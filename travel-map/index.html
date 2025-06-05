@@ -1021,45 +1021,57 @@ let countryCenters = {};
                 })
                 .attr("data-country", d => countryNameMap[d.id] || "")
                 .on("mouseover", function(event, d) {
-                    const name = countryNameMap[d.id]; // General name, e.g., "United States"
-                    if (!name) return;
+                    const currentLogicalName = countryNameMap[d.id];
+                    if (!currentLogicalName) return;
 
-                    // 清除之前的高亮
-                    svg.selectAll("path").classed("country-highlight", false);
-                    
-                    // 只高亮當前滑鼠懸停的具體地理要素
-                    d3.select(this).classed("country-highlight", true);
-                    
-                    currentlyHoveredCountry = name;
-                    
-                    // Pass the specific feature 'd' and its general mapped name 'name'
-                    handleMouseOver(event, d, name); 
-                    showPhotoBurst(event, name);   
+                    // Clear all previous highlights first
+                    svg.selectAll("path.country-highlight").classed("country-highlight", false);
+
+                    if (currentLogicalName === "United States") {
+                        svg.selectAll("path")
+                            .filter(f => countryNameMap[f.id] === "United States" && f.properties.name === "United States of America")
+                            .classed("country-highlight", true);
+                    } else if (currentLogicalName === "France") {
+                        // Highlight only mainland France
+                        svg.selectAll("path")
+                            .filter(f => countryNameMap[f.id] === "France" && f.properties.name === "France")
+                            .classed("country-highlight", true);
+                    } else {
+                        // For other countries, highlight the specific part hovered.
+                        d3.select(this).classed("country-highlight", true);
+                    }
+
+                    // Always use the logical name for content
+                    if (currentLogicalName !== currentTooltipCountry) {
+                        handleMouseOver(event, d, currentLogicalName);
+                    }
+                    if (currentLogicalName !== currentBurstCountry) {
+                        showPhotoBurst(event, currentLogicalName);
+                    }
                 })
                 .on("mouseout", function(event, d) {
-                    const name = countryNameMap[d.id]; // General name of the feature being left
-                    if (!name) return;
+                    const currentLogicalName = countryNameMap[d.id];
+                    if (!currentLogicalName) return;
 
-                    // 檢查滑鼠是否移動到同一國家的另一個地理要素
                     const relatedTarget = event.relatedTarget;
-                    let movingToSameCountry = false;
-                    
-                    if (relatedTarget && typeof relatedTarget.getAttribute === 'function') {
-                        const targetCountryName = relatedTarget.getAttribute('data-country');
-                        if (targetCountryName === name) {
-                            movingToSameCountry = true;
+                    let nextLogicalName = null;
+
+                    if (relatedTarget && relatedTarget.tagName === 'path') {
+                        const relatedPathData = d3.select(relatedTarget).datum();
+                        if (relatedPathData && relatedPathData.id && countryNameMap[relatedPathData.id]) {
+                            nextLogicalName = countryNameMap[relatedPathData.id];
                         }
                     }
 
-                    // 如果不是移動到同一國家的其他部分，則清除高亮和其他效果
-                    if (!movingToSameCountry) {
-                        d3.select(this).classed("country-highlight", false);
-                        
-                        handleMouseOut(); 
-                        clearPhotoBurst(); 
-                        
-                        currentlyHoveredCountry = null; 
+                    // If mouse is moving to a different logical country, or off the map
+                    if (currentLogicalName !== nextLogicalName) {
+                        svg.selectAll("path.country-highlight").classed("country-highlight", false);
+                        handleMouseOut();    // Clears tooltip and resets currentTooltipCountry
+                        clearPhotoBurst();   // Clears photos and resets currentBurstCountry
                     }
+                    // If moving to another segment of the same logical country (currentLogicalName === nextLogicalName),
+                    // the mouseover on the new segment will handle updating highlights.
+                    // Tooltip/photoburst will persist due to their internal state (currentTooltipCountry/currentBurstCountry).
                 })
                 .on("click", function(event, d) {
                     const name = countryNameMap[d.id];
