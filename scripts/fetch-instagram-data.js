@@ -244,7 +244,12 @@ class InstagramGraphAPIFetcher {
             'Mumbai': { city: 'Mumbai', country: 'India', coordinates: { lat: 19.0760, lng: 72.8777 }, countryCoordinates: { lat: 20.5937, lng: 78.9629 } },
             'New Delhi': { city: 'New Delhi', country: 'India', coordinates: { lat: 28.6139, lng: 77.2090 }, countryCoordinates: { lat: 20.5937, lng: 78.9629 } },
             'Beijing': { city: 'Beijing', country: 'China', coordinates: { lat: 39.9042, lng: 116.4074 }, countryCoordinates: { lat: 35.8617, lng: 104.1954 } },
-            'Shanghai': { city: 'Shanghai', country: 'China', coordinates: { lat: 31.2304, lng: 121.4737 }, countryCoordinates: { lat: 35.8617, lng: 104.1954 } }
+            'Shanghai': { city: 'Shanghai', country: 'China', coordinates: { lat: 31.2304, lng: 121.4737 }, countryCoordinates: { lat: 35.8617, lng: 104.1954 } },
+            
+            // Mexico cities
+            'Guanajuato': { city: 'Guanajuato', country: 'Mexico', coordinates: { lat: 21.0190, lng: -101.2574 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } },
+            'Mexico City': { city: 'Mexico City', country: 'Mexico', coordinates: { lat: 19.4326, lng: -99.1332 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } },
+            'Cancun': { city: 'Cancun', country: 'Mexico', coordinates: { lat: 21.1619, lng: -86.8515 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } }
         };
         const cityMap = await this.getCountryCityMap();
         for (const [country, cities] of Object.entries(cityMap)) {
@@ -584,6 +589,9 @@ class InstagramGraphAPIFetcher {
             'Suriname': { lat: 3.9193, lng: -56.0278 },
             'French Guiana': { lat: 3.9339, lng: -53.1258 },
             
+            // North American countries
+            'Mexico': { lat: 23.6345, lng: -102.5528 },
+            
             // Asian countries
             'Malaysia': { lat: 4.2105, lng: 101.9758 },
             'Singapore': { lat: 1.3521, lng: 103.8198 },
@@ -755,6 +763,11 @@ class InstagramGraphAPIFetcher {
             'Shanghai': 'China',
             'Hong Kong': 'Hong Kong',
             'Macau': 'Macau',
+            
+            // Mexico cities
+            'Guanajuato': 'Mexico',
+            'Mexico City': 'Mexico',
+            'Cancun': 'Mexico',
             
             // 南美城市
             'La Paz': 'Bolivia',

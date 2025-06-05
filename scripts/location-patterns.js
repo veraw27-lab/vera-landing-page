@@ -6,6 +6,8 @@ const countryList = [
     'New Zealand','NZ','Switzerland','Swiss','Sweden','Norway','Portugal','Finland','Denmark','Netherlands','Belgium','Austria','Greece','Turkey','Czech','Czech Republic','Hungary','Poland','Ireland','Russia','Iceland','Estonia','Latvia','Lithuania','Slovakia','Slovenia','Croatia','Serbia','Romania','Bulgaria','Ukraine','Luxembourg','Liechtenstein','Monaco','San Marino','Andorra','Vatican','Malta','Cyprus','Monaco','Montenegro','Bosnia','Herzegovina','Macedonia','Albania','Moldova','Belarus','Georgia','Armenia','Azerbaijan','Portugal','Switzerland','Norway','New Zealand',
     // South American countries
     'Peru','Bolivia','Chile','Argentina','Brazil','Colombia','Venezuela','Ecuador','Uruguay','Paraguay','Guyana','Suriname','French Guiana',
+    // North American countries
+    'Mexico',
     // Asian countries
     'Malaysia','Singapore','Philippines','Vietnam','Cambodia','Laos','Myanmar','India','China','Hong Kong','Macau','Brunei'
 ];
