@@ -686,12 +686,14 @@
             const burst = document.getElementById('photo-burst');
             const mouseX = event.clientX;
             const mouseY = event.clientY;
-            // 放射中心往上偏移 80px，避免 tooltip 擋住
+            // 放射中心往上偏移 60px，避免 tooltip 擋住
             const centerX = mouseX;
-            const centerY = mouseY - 80;
-            const photos = countryData.posts.slice(0, 10); // 最多10張
-            const radius = 260; // 放射半徑加大
-            const imgSize = 140; // 圖片尺寸加大
+            const centerY = mouseY - 60;
+            // 只顯示有 media_url 或 thumbnail_url 的 post
+            const photos = countryData.posts.filter(post => post.media_url || post.thumbnail_url).slice(0, 8);
+            if (photos.length === 0) return;
+            const radius = 120; // 恢復原本半徑
+            const imgSize = 90; // 恢復原本尺寸
             const angleStep = (2 * Math.PI) / photos.length;
             photos.forEach((post, i) => {
                 const angle = i * angleStep - Math.PI/2;
@@ -699,8 +701,7 @@
                 const y = centerY + Math.sin(angle) * radius;
                 const img = document.createElement('img');
                 img.className = 'photo-burst-img';
-                // 僅用 Instagram API 回傳的 media_url/thumbnail_url
-                img.src = post.media_url || post.thumbnail_url || '';
+                img.src = post.media_url || post.thumbnail_url;
                 img.alt = post.caption || '';
                 img.style.left = (x - imgSize/2) + 'px';
                 img.style.top = (y - imgSize/2) + 'px';
