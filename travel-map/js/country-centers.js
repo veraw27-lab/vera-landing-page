@@ -20,6 +20,9 @@ export const countryCenters = {
   "South Korea": [127.7669, 35.9078],
   "Norway": [8.4689, 60.4720],
   "Sweden": [18.6435, 60.1282],
-  "Finland": [25.7482, 61.9241]
+  "Finland": [25.7482, 61.9241],
+  "Malaysia": [101.9758, 4.2105],
+  "UAE": [53.8478, 23.4241],
+  "United Arab Emirates": [53.8478, 23.4241]
   // ...可持續擴充
 };

@@ -249,7 +249,31 @@ class InstagramGraphAPIFetcher {
             // Mexico cities
             'Guanajuato': { city: 'Guanajuato', country: 'Mexico', coordinates: { lat: 21.0190, lng: -101.2574 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } },
             'Mexico City': { city: 'Mexico City', country: 'Mexico', coordinates: { lat: 19.4326, lng: -99.1332 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } },
-            'Cancun': { city: 'Cancun', country: 'Mexico', coordinates: { lat: 21.1619, lng: -86.8515 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } }
+            'Cancun': { city: 'Cancun', country: 'Mexico', coordinates: { lat: 21.1619, lng: -86.8515 }, countryCoordinates: { lat: 23.6345, lng: -102.5528 } },
+            
+            // UAE cities
+            'Dubai': { city: 'Dubai', country: 'UAE', coordinates: { lat: 25.2048, lng: 55.2708 }, countryCoordinates: { lat: 23.4241, lng: 53.8478 } },
+            '杜拜': { city: 'Dubai', country: 'UAE', coordinates: { lat: 25.2048, lng: 55.2708 }, countryCoordinates: { lat: 23.4241, lng: 53.8478 } },
+            'Abu Dhabi': { city: 'Abu Dhabi', country: 'UAE', coordinates: { lat: 24.4539, lng: 54.3773 }, countryCoordinates: { lat: 23.4241, lng: 53.8478 } },
+            '阿布達比': { city: 'Abu Dhabi', country: 'UAE', coordinates: { lat: 24.4539, lng: 54.3773 }, countryCoordinates: { lat: 23.4241, lng: 53.8478 } },
+            'Sharjah': { city: 'Sharjah', country: 'UAE', coordinates: { lat: 25.3463, lng: 55.4209 }, countryCoordinates: { lat: 23.4241, lng: 53.8478 } },
+            
+            // Malaysia cities  
+            'Kuala Lumpur': { city: 'Kuala Lumpur', country: 'Malaysia', coordinates: { lat: 3.1390, lng: 101.6869 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '吉隆坡': { city: 'Kuala Lumpur', country: 'Malaysia', coordinates: { lat: 3.1390, lng: 101.6869 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Kapailai': { city: 'Kapailai', country: 'Malaysia', coordinates: { lat: 4.6298, lng: 118.9617 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '卡帕萊': { city: 'Kapailai', country: 'Malaysia', coordinates: { lat: 4.6298, lng: 118.9617 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'George Town': { city: 'George Town', country: 'Malaysia', coordinates: { lat: 5.4164, lng: 100.3327 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Penang': { city: 'George Town', country: 'Malaysia', coordinates: { lat: 5.4164, lng: 100.3327 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '檳城': { city: 'George Town', country: 'Malaysia', coordinates: { lat: 5.4164, lng: 100.3327 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Malacca': { city: 'Malacca', country: 'Malaysia', coordinates: { lat: 2.1896, lng: 102.2501 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '馬六甲': { city: 'Malacca', country: 'Malaysia', coordinates: { lat: 2.1896, lng: 102.2501 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Langkawi': { city: 'Langkawi', country: 'Malaysia', coordinates: { lat: 6.3500, lng: 99.8000 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '蘭卡威': { city: 'Langkawi', country: 'Malaysia', coordinates: { lat: 6.3500, lng: 99.8000 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Mabul': { city: 'Mabul', country: 'Malaysia', coordinates: { lat: 4.2394, lng: 118.6286 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '馬布島': { city: 'Mabul', country: 'Malaysia', coordinates: { lat: 4.2394, lng: 118.6286 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            'Sipadan': { city: 'Sipadan', country: 'Malaysia', coordinates: { lat: 4.1103, lng: 118.6281 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } },
+            '詩巴丹': { city: 'Sipadan', country: 'Malaysia', coordinates: { lat: 4.1103, lng: 118.6281 }, countryCoordinates: { lat: 4.2105, lng: 101.9758 } }
         };
         const cityMap = await this.getCountryCityMap();
         for (const [country, cities] of Object.entries(cityMap)) {
@@ -449,11 +473,14 @@ class InstagramGraphAPIFetcher {
             'Indonesia': 'Indonesia',
             'Taiwan': 'Taiwan',
             'Korea': 'South Korea',
+            'korean': 'South Korea',
+            'korea': 'South Korea',
             'Korean': 'South Korea',
             'South Korea': 'South Korea',
             'Korea, Republic of': 'South Korea',
             'Republic of Korea': 'South Korea',
             'USA': 'United States',
+            'usa': 'United States',
             'United States': 'United States',
             'United States of America': 'United States',
             'Italy': 'Italy',
@@ -604,7 +631,10 @@ class InstagramGraphAPIFetcher {
             'China': { lat: 35.8617, lng: 104.1954 },
             'Hong Kong': { lat: 22.3193, lng: 114.1694 },
             'Macau': { lat: 22.1987, lng: 113.5439 },
-            'Brunei': { lat: 4.5353, lng: 114.7277 }
+            'Brunei': { lat: 4.5353, lng: 114.7277 },
+            'Malaysia': { lat: 4.2105, lng: 101.9758 },
+            'UAE': { lat: 23.4241, lng: 53.8478 },
+            'United Arab Emirates': { lat: 23.4241, lng: 53.8478 }
         };
         return countryCoords[this.normalizeCountryName(country)] || null;
     }

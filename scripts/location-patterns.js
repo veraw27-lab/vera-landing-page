@@ -9,7 +9,9 @@ const countryList = [
     // North American countries
     'Mexico',
     // Asian countries
-    'Malaysia','Singapore','Philippines','Vietnam','Cambodia','Laos','Myanmar','India','China','Hong Kong','Macau','Brunei'
+    'Malaysia','Singapore','Philippines','Vietnam','Cambodia','Laos','Myanmar','India','China','Hong Kong','Macau','Brunei',
+    // Middle Eastern countries
+    'UAE','United Arab Emirates','Dubai','Qatar','Kuwait','Bahrain','Oman','Saudi Arabia'
 ];
 
 const locationPatterns = [
@@ -33,7 +35,11 @@ const locationPatterns = [
     { regex: /(Tokyo|Kyoto|Osaka|Hiroshima|Paris|London|New York|Bangkok|Bali|Taipei|Seoul|Rome|Barcelona|Berlin|Sydney|Vancouver|Toronto)/i, type: 'city' },
     { regex: /(Everest|Annapurna|Manaslu|富士山|玉山|阿里山)\s*(Base\s*Camp|基地營)?/i, type: 'mountain' },
     { regex: /(台北|新北|桃園|新竹|苗栗|台中|彰化|南投|雲林|嘉義|台南|高雄|屏東|宜蘭|花蓮|台東|澎湖|金門|馬祖)/i, type: 'taiwan_city' },
-    { regex: /(東京|京都|大阪|名古屋|神戶|橫濱|札幌|福岡|廣島|奈良)/i, type: 'japan_city' }
+    { regex: /(東京|京都|大阪|名古屋|神戶|橫濱|札幌|福岡|廣島|奈良)/i, type: 'japan_city' },
+    // Malaysia specific locations
+    { regex: /(Kuala\s*Lumpur|吉隆坡|Penang|檳城|Malacca|馬六甲|Langkawi|蘭卡威|Kapailai|卡帕萊|Mabul|馬布島|Sipadan|詩巴丹|Sabah|沙巴|Sarawak|砂拉越)/i, type: 'malaysia_city' },
+    // UAE/Dubai specific locations  
+    { regex: /(Dubai|杜拜|Abu\s*Dhabi|阿布達比|Sharjah|沙迦|Ajman|阿治曼|Fujairah|富吉拉|Ras\s*Al\s*Khaimah|哈伊馬角|Umm\s*Al\s*Quwain|烏姆蓋萬)/i, type: 'uae_city' }
 ];
 
 module.exports = { countryList, locationPatterns };
