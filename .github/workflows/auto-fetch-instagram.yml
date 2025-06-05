@@ -29,8 +29,8 @@ jobs:
         run: node scripts/fetch-instagram-data.js
       - name: Commit and push if changed
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add travel-map/data/travel-data.json
-          git diff --cached --quiet || git commit -m "chore: auto-update travel-data.json"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add travel-map/data/
+          git diff --staged --quiet || git commit -m "🗺️ Auto-update travel data $(date)"
           git push
