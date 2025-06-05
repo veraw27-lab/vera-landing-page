@@ -4,6 +4,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const fetch = require('node-fetch');
+const { countryList, locationPatterns } = require('./location-patterns');
 
 class InstagramGraphAPIFetcher {
     constructor() {
@@ -218,39 +219,15 @@ class InstagramGraphAPIFetcher {
             for (const city of cities) {
                 base[city] = { city, country, coordinates: null, countryCoordinates: null };
             }
+            // 新增：將國家名稱本身也加入 key
+            base[country] = { city: '', country, coordinates: null, countryCoordinates: null };
         }
         return base;
     }
 
     // 正則表達式模式表（可擴充）
     static getLocationPatterns() {
-        const countryList = [
-            'Japan','Nepal','France','UK','United Kingdom','Thailand','Indonesia','Taiwan','Korea','South Korea','USA','United States','Italy','Spain','Germany','Australia','Canada',
-            'New Zealand','Netherlands','Switzerland','Belgium','Portugal'
-        ];
-        return [
-            // 明確的地點標記
-            { regex: /📍\s*([^•\n\r#@]+)/i, type: 'explicit' },
-            { regex: /Location:\s*([^\n\r#@]+)/i, type: 'explicit' },
-            { regex: /地點[:：]\s*([^\n\r#@]+)/i, type: 'explicit' },
-            { regex: /在([^#@\n\r]+?)(?=\s*[#@\n\r]|$)/i, type: 'chinese_location' },
-            // 城市, 國家 模式
-            { regex: new RegExp(`([^#@\\n\\r,]+),\\s*(${countryList.join('|')})`, 'i'), type: 'city_country' },
-            // 尼泊爾地點
-            { regex: /(Kathmandu|Pokhara|Lukla|Namche|Everest|Annapurna|Manaslu|Nepal|加德滿都|博卡拉|盧卡拉|南崎|聖母峰|安娜普納|馬納斯盧)/i, type: 'nepal_city' },
-            
-            // 直接的城市名稱
-            { regex: /(Tokyo|Kyoto|Osaka|Hiroshima|Paris|London|New York|Bangkok|Bali|Taipei|Seoul|Rome|Barcelona|Berlin|Sydney|Vancouver|Toronto)/i, type: 'city' },
-            
-            // 登山/健行相關地點
-            { regex: /(Everest|Annapurna|Manaslu|富士山|玉山|阿里山)\s*(Base\s*Camp|基地營)?/i, type: 'mountain' },
-            
-            // 台灣地點
-            { regex: /(台北|新北|桃園|新竹|苗栗|台中|彰化|南投|雲林|嘉義|台南|高雄|屏東|宜蘭|花蓮|台東|澎湖|金門|馬祖)/i, type: 'taiwan_city' },
-            
-            // 日本地點
-            { regex: /(東京|京都|大阪|名古屋|神戶|橫濱|札幌|福岡|廣島|奈良)/i, type: 'japan_city' }
-        ];
+        return locationPatterns;
     }
 
     async extractLocationFromCaption(caption) {
@@ -283,6 +260,16 @@ class InstagramGraphAPIFetcher {
                 countryCoordinates: this.getCountryCoordinates(country)
             };
         }
+        // 新增：直接國家名稱
+        if (type === 'country') {
+            const country = this.normalizeCountryName(text);
+            return {
+                city: '',
+                country,
+                coordinates: null,
+                countryCoordinates: this.getCountryCoordinates(country)
+            };
+        }
         if (type === 'taiwan_city') {
             return {
                 city: text,
@@ -305,6 +292,17 @@ class InstagramGraphAPIFetcher {
                 country: 'Nepal',
                 coordinates: null,
                 countryCoordinates: { lat: 28.3949, lng: 84.1240 }
+            };
+        }
+        // 新增：國家・地點格式處理
+        if (type === 'country_dot_city') {
+            const country = this.normalizeCountryName(match[1].trim());
+            const city = match[2].trim();
+            return {
+                city,
+                country,
+                coordinates: null,
+                countryCoordinates: this.getCountryCoordinates(country)
             };
         }
         return {
@@ -357,6 +355,8 @@ class InstagramGraphAPIFetcher {
             for (const city of cities) {
                 base[city] = { city, country, coordinates: null, countryCoordinates: null };
             }
+            // 新增：將國家名稱本身也加入 key
+            base[country] = { city: '', country, coordinates: null, countryCoordinates: null };
         }
         return base;
     }
@@ -379,9 +379,58 @@ class InstagramGraphAPIFetcher {
             'Spain': 'Spain',
             'Germany': 'Germany',
             'Australia': 'Australia',
-            'Canada': 'Canada'
+            'Canada': 'Canada',
+            'New Zealand': 'New Zealand',
+            'NZ': 'New Zealand',
+            'Switzerland': 'Switzerland',
+            'Swiss': 'Switzerland',
+            'Norway': 'Norway',
+            'Portugal': 'Portugal',
+            'Sweden': 'Sweden',
+            'Finland': 'Finland',
+            'Denmark': 'Denmark',
+            'Netherlands': 'Netherlands',
+            'Belgium': 'Belgium',
+            'Austria': 'Austria',
+            'Greece': 'Greece',
+            'Turkey': 'Turkey',
+            'Czech': 'Czech Republic',
+            'Czech Republic': 'Czech Republic',
+            'Hungary': 'Hungary',
+            'Poland': 'Poland',
+            'Ireland': 'Ireland',
+            'Russia': 'Russia',
+            'Iceland': 'Iceland',
+            'Estonia': 'Estonia',
+            'Latvia': 'Latvia',
+            'Lithuania': 'Lithuania',
+            'Slovakia': 'Slovakia',
+            'Slovenia': 'Slovenia',
+            'Croatia': 'Croatia',
+            'Serbia': 'Serbia',
+            'Romania': 'Romania',
+            'Bulgaria': 'Bulgaria',
+            'Ukraine': 'Ukraine',
+            'Luxembourg': 'Luxembourg',
+            'Liechtenstein': 'Liechtenstein',
+            'Monaco': 'Monaco',
+            'San Marino': 'San Marino',
+            'Andorra': 'Andorra',
+            'Vatican': 'Vatican',
+            'Malta': 'Malta',
+            'Cyprus': 'Cyprus',
+            'Monaco': 'Monaco',
+            'Montenegro': 'Montenegro',
+            'Bosnia': 'Herzegovina',
+            'Herzegovina': 'Herzegovina',
+            'Macedonia': 'North Macedonia',
+            'Albania': 'Albania',
+            'Moldova': 'Moldova',
+            'Belarus': 'Belarus',
+            'Georgia': 'Georgia',
+            'Armenia': 'Armenia',
+            'Azerbaijan': 'Azerbaijan',
         };
-        
         return countryMap[country] || country;
     }
 
@@ -397,9 +446,53 @@ class InstagramGraphAPIFetcher {
             'Nepal': { lat: 28.3949, lng: 84.1240 },
             'United States': { lat: 37.0902, lng: -95.7129 },
             'Italy': { lat: 41.8719, lng: 12.5674 },
-            'Spain': { lat: 40.4637, lng: -3.7492 }
+            'Spain': { lat: 40.4637, lng: -3.7492 },
+            'New Zealand': { lat: -40.9006, lng: 174.8860 },
+            'Switzerland': { lat: 46.8182, lng: 8.2275 },
+            'Norway': { lat: 60.4720, lng: 8.4689 },
+            'Portugal': { lat: 39.3999, lng: -8.2245 },
+            'Sweden': { lat: 60.1282, lng: 18.6435 },
+            'Finland': { lat: 61.9241, lng: 25.7482 },
+            'Denmark': { lat: 56.2639, lng: 9.5018 },
+            'Netherlands': { lat: 52.1326, lng: 5.2913 },
+            'Belgium': { lat: 50.5039, lng: 4.4699 },
+            'Austria': { lat: 47.5162, lng: 14.5501 },
+            'Greece': { lat: 39.0742, lng: 21.8243 },
+            'Turkey': { lat: 38.9637, lng: 35.2433 },
+            'Czech Republic': { lat: 49.8175, lng: 15.4730 },
+            'Hungary': { lat: 47.1625, lng: 19.5033 },
+            'Poland': { lat: 51.9194, lng: 19.1451 },
+            'Ireland': { lat: 53.1424, lng: -7.6921 },
+            'Russia': { lat: 61.5240, lng: 105.3188 },
+            'Iceland': { lat: 64.9631, lng: -19.0208 },
+            'Estonia': { lat: 58.5953, lng: 25.0136 },
+            'Latvia': { lat: 56.8796, lng: 24.6032 },
+            'Lithuania': { lat: 55.1694, lng: 23.8813 },
+            'Slovakia': { lat: 48.6690, lng: 19.6990 },
+            'Slovenia': { lat: 46.1512, lng: 14.9955 },
+            'Croatia': { lat: 45.1000, lng: 15.2000 },
+            'Serbia': { lat: 44.0165, lng: 21.0059 },
+            'Romania': { lat: 45.9432, lng: 24.9668 },
+            'Bulgaria': { lat: 42.7339, lng: 25.4858 },
+            'Ukraine': { lat: 48.3794, lng: 31.1656 },
+            'Luxembourg': { lat: 49.8153, lng: 6.1296 },
+            'Liechtenstein': { lat: 47.1660, lng: 9.5554 },
+            'Monaco': { lat: 43.7384, lng: 7.4246 },
+            'San Marino': { lat: 43.9424, lng: 12.4578 },
+            'Andorra': { lat: 42.5063, lng: 1.5218 },
+            'Vatican': { lat: 41.9029, lng: 12.4534 },
+            'Malta': { lat: 35.9375, lng: 14.3754 },
+            'Cyprus': { lat: 35.1264, lng: 33.4299 },
+            'Montenegro': { lat: 42.7087, lng: 19.3744 },
+            'Bosnia and Herzegovina': { lat: 43.9159, lng: 17.6791 },
+            'North Macedonia': { lat: 41.6086, lng: 21.7453 },
+            'Albania': { lat: 41.1533, lng: 20.1683 },
+            'Moldova': { lat: 47.4116, lng: 28.3699 },
+            'Belarus': { lat: 53.7098, lng: 27.9534 },
+            'Georgia': { lat: 42.3154, lng: 43.3569 },
+            'Armenia': { lat: 40.0691, lng: 45.0382 },
+            'Azerbaijan': { lat: 40.1431, lng: 47.5769 },
         };
-        
         return countryCoords[this.normalizeCountryName(country)] || null;
     }
 
