@@ -1,0 +1,68 @@
+# Netlify 部署配置文件
+# 此文件應放在項目根目錄
+
+[build]
+  # 構建命令（如果需要）
+  command = "echo 'Building static site...'"
+  
+  # 發布目錄
+  publish = "."
+  
+  # Functions 目錄
+  functions = "netlify/functions"
+
+# 環境變量（在 Netlify 控制面板中設置實際值）
+[build.environment]
+  NODE_VERSION = "18"
+
+# 🔒 安全標頭配置
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # 內容安全策略
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://d3js.org https://unpkg.com https://cdnjs.cloudflare.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' https: data: blob:;
+      connect-src 'self' https://graph.instagram.com https://api.instagram.com;
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+    """
+    
+    # 防止點擊劫持
+    X-Frame-Options = "DENY"
+    
+    # 防止 MIME 類型嗅探
+    X-Content-Type-Options = "nosniff"
+    
+    # 引用政策
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # 強制 HTTPS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# API 函數的特殊標頭
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    # 禁用緩存敏感 API 響應
+    Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+    
+    # 額外安全標頭
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+
+# 重定向規則（可選）
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# 錯誤頁面
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404
