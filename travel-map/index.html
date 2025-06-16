@@ -932,6 +932,8 @@
             display: flex;
             gap: 8px;
             flex-shrink: 0;
+            flex-wrap: wrap;
+            max-width: 300px;
         }
 
         .country-preview-photo {
@@ -952,15 +954,19 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 15px;
-            transition: transform 0.2s ease;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .country-preview-view-more:hover {
             transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
         .country-preview-view-more:active {
             transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.2);
         }
 
         /* 手機版地圖優化 */
@@ -999,7 +1005,7 @@
 
             /* 國家預覽抽屜手機版調整 */
             .country-preview {
-                max-height: 50vh;
+                max-height: 60vh;
                 padding: 15px;
             }
 
@@ -1011,6 +1017,8 @@
             .country-preview-photos {
                 justify-content: center;
                 flex-wrap: wrap;
+                max-width: 100%;
+                gap: 6px;
             }
 
             .country-preview-photo {
@@ -1124,7 +1132,7 @@
                 <!-- 照片會動態載入 -->
             </div>
         </div>
-        <button class="country-preview-view-more" onclick="viewCountryDetails()">
+        <button class="country-preview-view-more" onclick="event.stopPropagation(); viewCountryDetails();">
             View All Posts
         </button>
     </div>
@@ -2010,10 +2018,16 @@ let countryCenters = {};
         }
 
         function showCountryPosts(countryName, countryData) {
+            console.log('showCountryPosts called', countryName, countryData);
             const modal = document.getElementById('posts-modal');
             const title = document.getElementById('modal-title');
             const subtitle = document.getElementById('modal-subtitle');
             const grid = document.getElementById('posts-grid');
+
+            if (!modal) {
+                console.error('Modal not found');
+                return;
+            }
 
             title.textContent = `📍 ${countryData.name || countryName}`;
             subtitle.textContent = `${countryData.posts.length} posts from Vera's adventures`;
@@ -2028,6 +2042,7 @@ let countryCenters = {};
             modal.style.display = 'block';
             // Add smooth animation
             setTimeout(() => modal.classList.add('show'), 10);
+            console.log('Modal should be visible now');
         }
 
         function createPostCard(post) {
@@ -2129,9 +2144,9 @@ let countryCenters = {};
                 latest.textContent = '-';
             }
 
-            // 顯示前3張照片
+            // 顯示前8張照片
             photos.innerHTML = '';
-            const photoPosts = countryData.posts.slice(0, 3);
+            const photoPosts = countryData.posts.slice(0, 8);
             photoPosts.forEach(post => {
                 const imgSrc = post.mediaUrl || post.media_url || post.thumbnail_url;
                 if (imgSrc) {
@@ -2157,9 +2172,12 @@ let countryCenters = {};
         }
 
         function viewCountryDetails() {
+            console.log('viewCountryDetails clicked', currentPreviewCountry);
             if (currentPreviewCountry) {
                 closeCountryPreview();
                 showCountryPosts(currentPreviewCountry.name, currentPreviewCountry.data);
+            } else {
+                console.error('No currentPreviewCountry set');
             }
         }
 
