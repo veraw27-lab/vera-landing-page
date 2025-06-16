@@ -44,6 +44,13 @@
     # 強制 HTTPS
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
 
+# JSON 數據文件的緩存控制
+[[headers]]
+  for = "/travel-map/data/*.json"
+  [headers.values]
+    # 短期緩存，確保數據更新及時
+    Cache-Control = "public, max-age=300, s-maxage=300"
+
 # API 函數的特殊標頭
 [[headers]]
   for = "/.netlify/functions/*"

@@ -1433,8 +1433,9 @@
         // 載入 travelData 時自動補齊新國家，並合併所有 posts
         async function loadTravelData() {
             try {
-                // 嘗試從後端載入數據
-                const response = await fetch('./data/travel-data.json');
+                // 嘗試從後端載入數據，添加版本號強制刷新緩存
+                const timestamp = new Date().getTime();
+                const response = await fetch(`./data/travel-data.json?v=${timestamp}`);
                 if (response.ok) {
                     const data = await response.json();
                     travelData = data;
