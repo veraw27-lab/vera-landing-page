@@ -857,6 +857,179 @@
                 stroke-width: 0.75;
             }
         }
+
+        /* 國家預覽抽屜 */
+        .country-preview {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid #333;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 2000;
+            padding: 20px;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        .country-preview.show {
+            transform: translateY(0);
+        }
+
+        .country-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .country-preview-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .country-preview-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .country-preview-content {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .country-preview-stats {
+            flex: 1;
+        }
+
+        .country-preview-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+
+        .country-preview-stat .label {
+            color: #888;
+        }
+
+        .country-preview-stat .value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .country-preview-photos {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .country-preview-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #444;
+        }
+
+        .country-preview-view-more {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        .country-preview-view-more:hover {
+            transform: translateY(-1px);
+        }
+
+        .country-preview-view-more:active {
+            transform: translateY(0);
+        }
+
+        /* 手機版地圖優化 */
+        @media (max-width: 768px) {
+            #world-map {
+                width: 100%;
+                height: 65%;
+                max-height: 450px;
+            }
+
+            .map-container {
+                padding-top: 120px;
+                padding-bottom: 80px;
+            }
+
+            /* 讓地圖可以放大 */
+            .map-container svg {
+                cursor: grab;
+            }
+
+            .map-container svg:active {
+                cursor: grabbing;
+            }
+
+            /* 增大觸控目標 */
+            .country {
+                stroke-width: 1.5;
+            }
+
+            .country:hover, .country:active {
+                stroke-width: 2.5;
+            }
+
+            /* 國家預覽抽屜手機版調整 */
+            .country-preview {
+                max-height: 50vh;
+                padding: 15px;
+            }
+
+            .country-preview-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .country-preview-photos {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .country-preview-photo {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .country-preview-title {
+                font-size: 20px;
+            }
+
+            .country-preview-photo {
+                width: 45px;
+                height: 45px;
+            }
+
+            .country-preview {
+                padding: 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -919,6 +1092,36 @@
             </div>
             <div class="posts-grid" id="posts-grid"></div>
         </div>
+    </div>
+
+    <!-- 國家預覽抽屜 -->
+    <div class="country-preview" id="country-preview">
+        <div class="country-preview-header">
+            <div class="country-preview-title" id="preview-title">國家名稱</div>
+            <button class="country-preview-close" onclick="closeCountryPreview()">×</button>
+        </div>
+        <div class="country-preview-content">
+            <div class="country-preview-stats">
+                <div class="country-preview-stat">
+                    <span class="label">Posts:</span>
+                    <span class="value" id="preview-posts">0</span>
+                </div>
+                <div class="country-preview-stat">
+                    <span class="label">Cities:</span>
+                    <span class="value" id="preview-cities">0</span>
+                </div>
+                <div class="country-preview-stat">
+                    <span class="label">Latest Visit:</span>
+                    <span class="value" id="preview-latest">-</span>
+                </div>
+            </div>
+            <div class="country-preview-photos" id="preview-photos">
+                <!-- 照片會動態載入 -->
+            </div>
+        </div>
+        <button class="country-preview-view-more" onclick="viewCountryDetails()">
+            View All Posts
+        </button>
     </div>
 
     <script>
@@ -1476,11 +1679,32 @@ let countryCenters = {};
                 .translate([width / 2, height / 1.6]);
             path = d3.geoPath().projection(projection);
 
+            // 添加手機觸控縮放支援
+            const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+            if (isMobile) {
+                const zoom = d3.zoom()
+                    .scaleExtent([0.5, 3])  // 允許縮放範圍
+                    .on("zoom", function(event) {
+                        svg.select("g").attr("transform", event.transform);
+                    });
+                
+                svg.call(zoom);
+                
+                // 添加雙擊重置縮放
+                svg.on("dblclick.zoom", function(event) {
+                    svg.transition().duration(750).call(
+                        zoom.transform,
+                        d3.zoomIdentity
+                    );
+                });
+            }
+
             // 國家名稱對照表（ISO 3166-1 alpha-3 -> 英文國名）
             const countryNameMap = getCountryNameMap();
 
-            svg.append("g")
-                .selectAll("path")
+            const mapGroup = svg.append("g");
+            
+            mapGroup.selectAll("path")
                 .data(worldGeoData.features)
                 .join("path")
                 .attr("d", d => {
@@ -1763,7 +1987,14 @@ let countryCenters = {};
         function handleCountryClick(event, d, countryName) {
             const countryData = travelData.countries[countryName];
             if (countryData) {
-                showCountryPosts(countryName, countryData);
+                // 檢測是否為手機設備
+                const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+                
+                if (isMobile) {
+                    showCountryPreview(countryName, countryData);
+                } else {
+                    showCountryPosts(countryName, countryData);
+                }
             }
         }
 
@@ -1855,6 +2086,70 @@ let countryCenters = {};
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 300);
+        }
+
+        // 國家預覽抽屜函數
+        let currentPreviewCountry = null;
+
+        function showCountryPreview(countryName, countryData) {
+            currentPreviewCountry = {name: countryName, data: countryData};
+            
+            const preview = document.getElementById('country-preview');
+            const title = document.getElementById('preview-title');
+            const posts = document.getElementById('preview-posts');
+            const cities = document.getElementById('preview-cities');
+            const latest = document.getElementById('preview-latest');
+            const photos = document.getElementById('preview-photos');
+
+            // 更新內容
+            title.textContent = countryData.name || countryName;
+            posts.textContent = countryData.posts.length;
+            cities.textContent = countryData.cities ? countryData.cities.length : 
+                                [...new Set(countryData.posts.map(p => p.location?.city).filter(Boolean))].length;
+
+            // 找到最新貼文日期
+            if (countryData.posts.length > 0) {
+                const latestPost = countryData.posts.reduce((latest, post) => {
+                    return new Date(post.timestamp) > new Date(latest.timestamp) ? post : latest;
+                });
+                const date = new Date(latestPost.timestamp);
+                latest.textContent = date.getFullYear() + '/' + (date.getMonth() + 1);
+            } else {
+                latest.textContent = '-';
+            }
+
+            // 顯示前3張照片
+            photos.innerHTML = '';
+            const photoPosts = countryData.posts.slice(0, 3);
+            photoPosts.forEach(post => {
+                const imgSrc = post.mediaUrl || post.media_url || post.thumbnail_url;
+                if (imgSrc) {
+                    const img = document.createElement('img');
+                    img.className = 'country-preview-photo';
+                    img.src = imgSrc;
+                    img.alt = post.caption || '';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                    };
+                    photos.appendChild(img);
+                }
+            });
+
+            // 顯示抽屜
+            preview.classList.add('show');
+        }
+
+        function closeCountryPreview() {
+            const preview = document.getElementById('country-preview');
+            preview.classList.remove('show');
+            currentPreviewCountry = null;
+        }
+
+        function viewCountryDetails() {
+            if (currentPreviewCountry) {
+                closeCountryPreview();
+                showCountryPosts(currentPreviewCountry.name, currentPreviewCountry.data);
+            }
         }
 
         function updateStats() {
