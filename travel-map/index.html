@@ -1374,8 +1374,55 @@
             };
         }
 
-        // 國家名稱正規化，讓 IG country name 能對應到地圖
-        function normalizeCountryName(name, post) {
+        // 國家名稱正規化，參考清理過的數據做正確判斷
+        function normalizeCountryName(name, post, cleanedCountries = null) {
+            // 建立標準化對應表，基於我們清理過的數據
+            const countryNormalizationMap = {
+                // 大小寫變體
+                'taiwan': 'Taiwan',
+                'japan': 'Japan',
+                'nepal': 'Nepal',
+                'france': 'France',
+                'portugal': 'Portugal',
+                'thailand': 'Thailand',
+                'peru': 'Peru',
+                'belgium': 'Belgium',
+                'italy': 'Italy',
+                'germany': 'Germany',
+                'sweden': 'Sweden',
+                'norway': 'Norway',
+                'finland': 'Finland',
+                'switzerland': 'Switzerland',
+                'netherlands': 'Netherlands',
+                'luxembourg': 'Luxembourg',
+                'iceland': 'Iceland',
+                'bolivia': 'Bolivia',
+                'mexico': 'Mexico',
+                'cambodia': 'Cambodia',
+                'malaysia': 'Malaysia',
+                
+                // 常見錯誤修正
+                'macus': 'Macau',
+                'xico': 'Mexico',
+                'philippine': 'Philippines',
+                
+                // 地區到國家的映射
+                'toscana': 'Italy',
+                'provence': 'France',
+                'hong kong': 'Hong Kong',
+                
+                // 標準化名稱
+                'USA': 'United States',
+                'US': 'United States',
+                'U.S.A.': 'United States',
+                'United States of America': 'United States',
+                'UK': 'United Kingdom',
+                'England': 'United Kingdom',
+                'South Korea': 'South Korea',
+                'Korea, Republic of': 'South Korea',
+                'Republic of Korea': 'South Korea',
+            };
+            
             // 若有 GPS，優先用經緯度判斷國家
             if (post && post.location && post.location.coordinates && window.worldGeoData) {
                 const [lng, lat] = [post.location.coordinates.lng, post.location.coordinates.lat];
@@ -1386,48 +1433,65 @@
                         break;
                     }
                 }
-                if (foundCountry) return foundCountry;
-                // fallback: 若找不到，繼續用原本的 country name/caption 推斷
+                if (foundCountry) {
+                    // 對GPS推斷的國家也進行標準化
+                    return countryNormalizationMap[foundCountry.toLowerCase()] || foundCountry;
+                }
             }
+            
+            // 處理空值或無效值
             if (!name || name === 'null' || name === 'undefined' || name.trim() === '') {
-                // 嘗試從 caption 推斷國家
-                if (post && post.caption) {
+                // 只有在現有數據中找不到時，才嘗試從 caption 推斷
+                if (post && post.caption && cleanedCountries) {
                     const caption = post.caption.toLowerCase();
-                    // 常見國家關鍵字
-                    const countryKeywords = [
-                        { key: 'japan', value: 'Japan' },
-                        { key: 'nepal', value: 'Nepal' },
-                        { key: 'france', value: 'France' },
-                        { key: 'portugal', value: 'Portugal' },
-                        { key: 'thailand', value: 'Thailand' },
-                        { key: 'taiwan', value: 'Taiwan' },
-                        { key: 'united kingdom', value: 'United Kingdom' },
-                        { key: 'england', value: 'United Kingdom' },
-                        { key: 'usa', value: 'United States' },
-                        { key: 'america', value: 'United States' },
-                        { key: 'new zealand', value: 'New Zealand' },
-                        { key: 'china', value: 'China' },
-                    ];
-                    for (const item of countryKeywords) {
-                        if (caption.includes(item.key)) return item.value;
+                    // 只在已知的清理過的國家中搜索
+                    for (const country of cleanedCountries) {
+                        if (caption.includes(country.toLowerCase())) {
+                            return country;
+                        }
+                    }
+                    // 檢查常見的關鍵詞映射
+                    const keywordMap = {
+                        'england': 'United Kingdom',
+                        'usa': 'United States', 
+                        'america': 'United States',
+                        'china': 'China'
+                    };
+                    for (const [keyword, standardName] of Object.entries(keywordMap)) {
+                        if (caption.includes(keyword) && cleanedCountries.includes(standardName)) {
+                            return standardName;
+                        }
                     }
                 }
                 return '';
             }
-            const map = {
-                'USA': 'United States',
-                'U.S.A.': 'United States',
-                'United States of America': 'United States',
-                'UK': 'United Kingdom',
-                'England': 'United Kingdom',
-                'South Korea': 'South Korea',
-                'Korea, Republic of': 'South Korea',
-                'Republic of Korea': 'South Korea',
-                'Mainland China': 'China',
-                'Hong Kong': 'China',
-                'Nepal': 'Nepal',
-            };
-            return map[name.trim()] || name.trim();
+            
+            // 標準化現有名稱
+            const trimmedName = name.trim();
+            const lowerName = trimmedName.toLowerCase();
+            
+            // 優先使用我們的標準化對應表
+            if (countryNormalizationMap[lowerName]) {
+                return countryNormalizationMap[lowerName];
+            }
+            if (countryNormalizationMap[trimmedName]) {
+                return countryNormalizationMap[trimmedName];
+            }
+            
+            // 如果提供了清理過的國家列表，檢查是否已存在
+            if (cleanedCountries) {
+                // 精確匹配
+                if (cleanedCountries.includes(trimmedName)) {
+                    return trimmedName;
+                }
+                // 大小寫不敏感匹配
+                const matchedCountry = cleanedCountries.find(c => c.toLowerCase() === lowerName);
+                if (matchedCountry) {
+                    return matchedCountry;
+                }
+            }
+            
+            return trimmedName;
         }
 
         // 載入 travelData 時自動補齊新國家，並合併所有 posts
@@ -1440,8 +1504,10 @@
                     const data = await response.json();
                     travelData = data;
                     console.log('✅ 從後端載入旅行數據');
+                    console.log('========== DEBUG: 原始數據 ==========');
                     console.log('📊 原始數據國家數量:', Object.keys(data.countries).length);
                     console.log('📝 原始國家列表:', Object.keys(data.countries));
+                    console.log('=====================================');
                 } else {
                     throw new Error('Backend data not available');
                 }
@@ -1452,13 +1518,16 @@
             }
             // 合併所有 posts 到正規化後的國家
             if (travelData && travelData.countries) {
+                // 獲取已清理的國家列表
+                const cleanedCountries = Object.keys(travelData.countries);
                 const merged = {};
                 Object.values(travelData.countries).forEach(country => {
                     if (country.posts) {
                         country.posts.forEach(post => {
                             const norm = normalizeCountryName(
                                 post.location && post.location.country,
-                                post
+                                post,
+                                cleanedCountries  // 傳入清理過的國家列表
                             );
                             if (!norm) return; // 無法判斷國家
                             if (!merged[norm]) {
@@ -1479,8 +1548,10 @@
                     }
                 });
                 travelData.countries = merged;
+                console.log('========== DEBUG: 合併後數據 ==========');
                 console.log('🔄 數據合併後國家數量:', Object.keys(merged).length);
                 console.log('📝 合併後國家列表:', Object.keys(merged));
+                console.log('=======================================');
             }
         }
 
@@ -1875,12 +1946,14 @@ let countryCenters = {};
                 location = country;
             } else if (post.location && post.location.coordinates && window.worldGeoData) {
                 // GPS 反查國家
-                const normCountry = normalizeCountryName('', post);
+                const cleanedCountries = travelData && travelData.countries ? Object.keys(travelData.countries) : [];
+                const normCountry = normalizeCountryName('', post, cleanedCountries);
                 if (normCountry) location = normCountry;
             }
             if (!location && post.caption) {
                 // 從 caption 推斷
-                const normCountry = normalizeCountryName('', post);
+                const cleanedCountries = travelData && travelData.countries ? Object.keys(travelData.countries) : [];
+                const normCountry = normalizeCountryName('', post, cleanedCountries);
                 if (normCountry) location = normCountry;
             }
             if (!location) {
