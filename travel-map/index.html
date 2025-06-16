@@ -994,7 +994,7 @@
                             timestamp: "2024-05-01T21:00:00+0000",
                             permalink: "https://instagram.com/p/sample5",
                             media_type: "IMAGE",
-                            media_url: "/images/adventure5.jpeg"
+                            media_url: "/images/adventure1.jpeg"  // 重複使用存在的圖片
                         }
                     ],
                     cities: ["Taipei"]
@@ -1009,7 +1009,7 @@
                             timestamp: "2024-06-15T15:30:00+0000",
                             permalink: "https://instagram.com/p/sample6",
                             media_type: "IMAGE",
-                            media_url: "/images/adventure6.jpeg"
+                            media_url: "/images/adventure2.jpeg"  // 重複使用存在的圖片
                         }
                     ],
                     cities: ["London"]
@@ -1024,7 +1024,7 @@
                             timestamp: "2024-04-10T19:30:00+0000",
                             permalink: "https://instagram.com/p/sample7",
                             media_type: "IMAGE",
-                            media_url: "/images/adventure7.jpeg"
+                            media_url: "/images/adventure3.jpeg"  // 重複使用存在的圖片
                         }
                     ],
                     cities: ["Bangkok"]
@@ -1039,9 +1039,12 @@
         
         function preloadSampleImages() {
             // 批次預載入，避免一次性載入造成卡頓
-            for (let i = 1; i <= 7; i++) {
+            // 只載入實際存在的圖片
+            for (let i = 1; i <= 4; i++) {
                 preloadQueue.push(`/images/adventure${i}.jpeg`);
             }
+            // 載入profile圖片
+            preloadQueue.push(`/images/profile.jpeg`);
             processPreloadQueue();
         }
         
@@ -1072,7 +1075,11 @@
                     imageCache.set(src, img);
                     resolve(img);
                 };
-                img.onerror = reject;
+                img.onerror = () => {
+                    // 靜默處理圖片載入失敗，避免Console錯誤
+                    console.warn(`⚠️ 圖片載入失敗: ${src}`);
+                    reject(new Error(`Failed to load image: ${src}`));
+                };
                 img.src = src;
             });
         }
@@ -1504,10 +1511,11 @@
                     const data = await response.json();
                     travelData = data;
                     console.log('✅ 從後端載入旅行數據');
-                    console.log('========== DEBUG: 原始數據 ==========');
+                    console.log('='.repeat(50));
+                    console.log('🚀 DEBUG: 原始數據統計');
                     console.log('📊 原始數據國家數量:', Object.keys(data.countries).length);
-                    console.log('📝 原始國家列表:', Object.keys(data.countries));
-                    console.log('=====================================');
+                    console.log('📝 原始國家列表:', Object.keys(data.countries).sort());
+                    console.log('='.repeat(50));
                 } else {
                     throw new Error('Backend data not available');
                 }
@@ -1548,10 +1556,21 @@
                     }
                 });
                 travelData.countries = merged;
-                console.log('========== DEBUG: 合併後數據 ==========');
+                console.log('='.repeat(50));
+                console.log('🎯 DEBUG: 合併後統計');
                 console.log('🔄 數據合併後國家數量:', Object.keys(merged).length);
-                console.log('📝 合併後國家列表:', Object.keys(merged));
-                console.log('=======================================');
+                console.log('📝 合併後國家列表:', Object.keys(merged).sort());
+                console.log('='.repeat(50));
+                console.log('🎉 國家數量應該顯示:', Object.keys(merged).length);
+                
+                // 提供全局檢查函數
+                window.checkCountryData = () => {
+                    console.clear();
+                    console.log('🔍 當前數據檢查:');
+                    console.log('國家數量:', Object.keys(travelData.countries).length);
+                    console.log('國家列表:', Object.keys(travelData.countries).sort());
+                    return Object.keys(travelData.countries).length;
+                };
             }
         }
 
