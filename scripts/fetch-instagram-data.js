@@ -337,6 +337,9 @@ class InstagramGraphAPIFetcher {
     async parseLocationMatch(match, type) {
         const locationMap = await this.constructor.getLocationMap();
         
+        // Extract text first for use in various conditions
+        const text = match[1] ? match[1].trim() : match[0].trim();
+        
         // Handle specific pattern types first (before general location map lookup)
         if (type === 'country_dot_city') {
             const country = this.normalizeCountryName(match[1].trim());
@@ -398,7 +401,6 @@ class InstagramGraphAPIFetcher {
         }
         
         // General location map lookup (for explicit markers and city patterns)
-        const text = match[1] ? match[1].trim() : match[0].trim();
         for (const [key, location] of Object.entries(locationMap)) {
             if (text.toLowerCase().includes(key.toLowerCase())) {
                 return location;
