@@ -1440,6 +1440,8 @@
                     const data = await response.json();
                     travelData = data;
                     console.log('✅ 從後端載入旅行數據');
+                    console.log('📊 原始數據國家數量:', Object.keys(data.countries).length);
+                    console.log('📝 原始國家列表:', Object.keys(data.countries));
                 } else {
                     throw new Error('Backend data not available');
                 }
@@ -1477,6 +1479,8 @@
                     }
                 });
                 travelData.countries = merged;
+                console.log('🔄 數據合併後國家數量:', Object.keys(merged).length);
+                console.log('📝 合併後國家列表:', Object.keys(merged));
             }
         }
 
