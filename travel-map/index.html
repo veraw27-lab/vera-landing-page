@@ -927,164 +927,8 @@
         let worldGeoData = null;
         let processedCountries = new Set(); // Prevent duplicate clicks
 
-        // 簡化的示例旅行數據
-        const sampleTravelData = {
-            countries: {
-                "United States": {
-                    name: "美國",
-                    posts: [
-                        {
-                            id: "1",
-                            location: { city: "New York", country: "United States" },
-                            caption: "紐約時代廣場的繁華夜景 🏙️",
-                            timestamp: "2024-01-15T10:30:00+0000",
-                            permalink: "https://instagram.com/p/sample1",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure1.jpeg"
-                        }
-                    ],
-                    cities: ["New York"]
-                },
-                "Japan": {
-                    name: "日本",
-                    posts: [
-                        {
-                            id: "2",
-                            location: { city: "Tokyo", country: "Japan" },
-                            caption: "東京櫻花季的美麗時光 🌸",
-                            timestamp: "2024-03-20T14:15:00+0000",
-                            permalink: "https://instagram.com/p/sample2",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure2.jpeg"
-                        },
-                        {
-                            id: "3",
-                            location: { city: "Kyoto", country: "Japan" },
-                            caption: "京都古寺的寧靜午後 ⛩️",
-                            timestamp: "2024-03-22T09:45:00+0000",
-                            permalink: "https://instagram.com/p/sample3",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure3.jpeg"
-                        }
-                    ],
-                    cities: ["Tokyo", "Kyoto"]
-                },
-                "France": {
-                    name: "法國",
-                    posts: [
-                        {
-                            id: "4",
-                            location: { city: "Paris", country: "France" },
-                            caption: "巴黎艾菲爾鐵塔的浪漫夜晚 🗼",
-                            timestamp: "2024-02-14T20:00:00+0000",
-                            permalink: "https://instagram.com/p/sample4",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure4.jpeg"
-                        }
-                    ],
-                    cities: ["Paris"]
-                },
-                "Taiwan": {
-                    name: "台灣",
-                    posts: [
-                        {
-                            id: "5",
-                            location: { city: "Taipei", country: "Taiwan" },
-                            caption: "台北夜市的美食探險 🍜",
-                            timestamp: "2024-05-01T21:00:00+0000",
-                            permalink: "https://instagram.com/p/sample5",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure1.jpeg"  // 重複使用存在的圖片
-                        }
-                    ],
-                    cities: ["Taipei"]
-                },
-                "United Kingdom": {
-                    name: "英國",
-                    posts: [
-                        {
-                            id: "6",
-                            location: { city: "London", country: "United Kingdom" },
-                            caption: "倫敦大本鐘的經典時刻 ⏰",
-                            timestamp: "2024-06-15T15:30:00+0000",
-                            permalink: "https://instagram.com/p/sample6",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure2.jpeg"  // 重複使用存在的圖片
-                        }
-                    ],
-                    cities: ["London"]
-                },
-                "Thailand": {
-                    name: "泰國",
-                    posts: [
-                        {
-                            id: "7",
-                            location: { city: "Bangkok", country: "Thailand" },
-                            caption: "曼谷街頭的熱鬧生活 🍲",
-                            timestamp: "2024-04-10T19:30:00+0000",
-                            permalink: "https://instagram.com/p/sample7",
-                            media_type: "IMAGE",
-                            media_url: "/images/adventure3.jpeg"  // 重複使用存在的圖片
-                        }
-                    ],
-                    cities: ["Bangkok"]
-                }
-            }
-        };
-
-        // 高效能圖片預載入系統
-        const imageCache = new Map();
-        const preloadQueue = [];
-        let isPreloading = false;
-        
-        function preloadSampleImages() {
-            // 批次預載入，避免一次性載入造成卡頓
-            // 只載入實際存在的圖片
-            for (let i = 1; i <= 4; i++) {
-                preloadQueue.push(`/images/adventure${i}.jpeg`);
-            }
-            // 載入profile圖片
-            preloadQueue.push(`/images/profile.jpeg`);
-            processPreloadQueue();
-        }
-        
-        function processPreloadQueue() {
-            if (isPreloading || preloadQueue.length === 0) return;
-            isPreloading = true;
-            
-            const loadBatch = preloadQueue.splice(0, 3); // 每次載入3張
-            const promises = loadBatch.map(src => preloadImage(src));
-            
-            Promise.all(promises).finally(() => {
-                isPreloading = false;
-                if (preloadQueue.length > 0) {
-                    setTimeout(processPreloadQueue, 50); // 延遲50ms載入下一批
-                }
-            });
-        }
-        
-        function preloadImage(src) {
-            return new Promise((resolve, reject) => {
-                if (imageCache.has(src)) {
-                    resolve(imageCache.get(src));
-                    return;
-                }
-                
-                const img = new window.Image();
-                img.onload = () => {
-                    imageCache.set(src, img);
-                    resolve(img);
-                };
-                img.onerror = () => {
-                    // 靜默處理圖片載入失敗，避免Console錯誤
-                    console.warn(`⚠️ 圖片載入失敗: ${src}`);
-                    reject(new Error(`Failed to load image: ${src}`));
-                };
-                img.src = src;
-            });
-        }
-        
-        preloadSampleImages();
+        // 移除示例數據，只使用真實的Instagram數據
+        let processedCountries = new Set(); // Prevent duplicate clicks
 
         // 簡化的世界地圖座標（主要國家輪廓）
         const worldGeometry = {
@@ -1520,9 +1364,11 @@
                     throw new Error('Backend data not available');
                 }
             } catch (error) {
-                // 使用示例數據
-                travelData = sampleTravelData;
-                console.log('📝 使用示例旅行數據');
+                // 沒有數據時顯示錯誤
+                console.error('❌ 無法載入旅行數據:', error);
+                travelData = { countries: {} };
+                showError();
+                return;
             }
             // 合併所有 posts 到正規化後的國家
             if (travelData && travelData.countries) {
