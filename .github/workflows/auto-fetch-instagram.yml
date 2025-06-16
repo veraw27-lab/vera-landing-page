@@ -32,8 +32,10 @@ jobs:
           INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
         run: |
           echo "Starting Instagram data fetch..."
-          node scripts/fetch-instagram-data.js || echo "Instagram API fetch failed, continuing with existing data"
-        continue-on-error: true
+          echo "Testing API connection..."
+          node scripts/test-instagram-api.js
+          echo "Running full data fetch..."
+          node scripts/fetch-instagram-data.js
       - name: Commit and push if changed
         run: |
           git config --local user.email "action@github.com"
