@@ -144,7 +144,8 @@ class InstagramGraphAPIFetcher {
                 };
                 travelData.posts.push(post);
                 const country = locationInfo.country;
-                if (country) {
+                // 只有當國家名稱有效時才處理
+                if (country && country.trim() && country !== 'null') {
                     if (!travelData.countries[country]) {
                         travelData.countries[country] = {
                             name: country,
@@ -344,6 +345,8 @@ class InstagramGraphAPIFetcher {
         if (type === 'country_dot_city') {
             const country = this.normalizeCountryName(match[1].trim());
             const city = match[2].trim();
+            // 只有當國家名稱有效時才返回結果
+            if (!country) return null;
             return {
                 city,
                 country,
@@ -365,6 +368,8 @@ class InstagramGraphAPIFetcher {
         
         if (type === 'country') {
             const country = this.normalizeCountryName(text);
+            // 只有當國家名稱有效時才返回結果
+            if (!country) return null;
             return {
                 city: '',
                 country,
@@ -465,6 +470,21 @@ class InstagramGraphAPIFetcher {
     }
 
     normalizeCountryName(country) {
+        if (!country || typeof country !== 'string') return null;
+        
+        // 過濾掉明顯無效的國家名稱
+        const trimmedCountry = country.trim();
+        if (trimmedCountry.length <= 2 || 
+            trimmedCountry.match(/^[a-z]$/) || 
+            trimmedCountry === 'A' || 
+            trimmedCountry === 'n' || 
+            trimmedCountry === 'Life' ||
+            trimmedCountry === 'LA' ||
+            trimmedCountry === 'xico' ||
+            trimmedCountry.match(/^[0-9]+$/)) {
+            return null;
+        }
+        
         const countryMap = {
             'Japan': 'Japan',
             'Nepal': 'Nepal',
@@ -483,6 +503,7 @@ class InstagramGraphAPIFetcher {
             'Republic of Korea': 'South Korea',
             'USA': 'United States',
             'usa': 'United States',
+            'US': 'United States',
             'United States': 'United States',
             'United States of America': 'United States',
             'Italy': 'Italy',
@@ -540,8 +561,118 @@ class InstagramGraphAPIFetcher {
             'Georgia': 'Georgia',
             'Armenia': 'Armenia',
             'Azerbaijan': 'Azerbaijan',
+            'Mexico': 'Mexico',
+            'Peru': 'Peru',
+            'Bolivia': 'Bolivia',
+            'Chile': 'Chile',
+            'Argentina': 'Argentina',
+            'Brazil': 'Brazil',
+            'Colombia': 'Colombia',
+            'Ecuador': 'Ecuador',
+            'Venezuela': 'Venezuela',
+            'Uruguay': 'Uruguay',
+            'Paraguay': 'Paraguay',
+            'Cambodia': 'Cambodia',
+            'Vietnam': 'Vietnam',
+            'Laos': 'Laos',
+            'Myanmar': 'Myanmar',
+            'Malaysia': 'Malaysia',
+            'Singapore': 'Singapore',
+            'Philippines': 'Philippines',
+            'Philippine': 'Philippines',
+            'Hong Kong': 'Hong Kong',
+            'Macau': 'Macau',
+            'Macus': 'Macau',
+            'China': 'China',
+            'India': 'India',
+            'Sri Lanka': 'Sri Lanka',
+            'Bangladesh': 'Bangladesh',
+            'Pakistan': 'Pakistan',
+            'Afghanistan': 'Afghanistan',
+            'Mongolia': 'Mongolia',
+            'Kazakhstan': 'Kazakhstan',
+            'Uzbekistan': 'Uzbekistan',
+            'Kyrgyzstan': 'Kyrgyzstan',
+            'Tajikistan': 'Tajikistan',
+            'Turkmenistan': 'Turkmenistan',
+            'United Arab Emirates': 'United Arab Emirates',
+            'UAE': 'United Arab Emirates',
+            'Saudi Arabia': 'Saudi Arabia',
+            'Qatar': 'Qatar',
+            'Kuwait': 'Kuwait',
+            'Bahrain': 'Bahrain',
+            'Oman': 'Oman',
+            'Yemen': 'Yemen',
+            'Jordan': 'Jordan',
+            'Lebanon': 'Lebanon',
+            'Syria': 'Syria',
+            'Iraq': 'Iraq',
+            'Iran': 'Iran',
+            'Israel': 'Israel',
+            'Palestine': 'Palestine',
+            'Egypt': 'Egypt',
+            'Libya': 'Libya',
+            'Tunisia': 'Tunisia',
+            'Algeria': 'Algeria',
+            'Morocco': 'Morocco',
+            'Sudan': 'Sudan',
+            'South Sudan': 'South Sudan',
+            'Ethiopia': 'Ethiopia',
+            'Kenya': 'Kenya',
+            'Tanzania': 'Tanzania',
+            'Uganda': 'Uganda',
+            'Rwanda': 'Rwanda',
+            'Burundi': 'Burundi',
+            'Democratic Republic of Congo': 'Democratic Republic of Congo',
+            'Congo': 'Congo',
+            'Central African Republic': 'Central African Republic',
+            'Chad': 'Chad',
+            'Niger': 'Niger',
+            'Nigeria': 'Nigeria',
+            'Cameroon': 'Cameroon',
+            'Equatorial Guinea': 'Equatorial Guinea',
+            'Gabon': 'Gabon',
+            'São Tomé and Príncipe': 'São Tomé and Príncipe',
+            'Ghana': 'Ghana',
+            'Togo': 'Togo',
+            'Benin': 'Benin',
+            'Burkina Faso': 'Burkina Faso',
+            'Mali': 'Mali',
+            'Senegal': 'Senegal',
+            'Guinea': 'Guinea',
+            'Guinea-Bissau': 'Guinea-Bissau',
+            'Sierra Leone': 'Sierra Leone',
+            'Liberia': 'Liberia',
+            'Côte d\'Ivoire': 'Côte d\'Ivoire',
+            'Mauritania': 'Mauritania',
+            'South Africa': 'South Africa',
+            'Namibia': 'Namibia',
+            'Botswana': 'Botswana',
+            'Zimbabwe': 'Zimbabwe',
+            'Zambia': 'Zambia',
+            'Malawi': 'Malawi',
+            'Mozambique': 'Mozambique',
+            'Madagascar': 'Madagascar',
+            'Mauritius': 'Mauritius',
+            'Seychelles': 'Seychelles',
+            'Comoros': 'Comoros'
         };
-        return countryMap[country] || country;
+        
+        const normalized = countryMap[trimmedCountry];
+        
+        // 只返回有效的國家名稱
+        if (normalized) {
+            return normalized;
+        }
+        
+        // 如果不在地圖中，檢查是否是合理的國家名稱
+        if (trimmedCountry.length >= 3 && 
+            /^[A-Za-z\s\-'\.]+$/.test(trimmedCountry) &&
+            !trimmedCountry.match(/\b(Tomorrowland|Provence|Toscana|Life)\b/i)) {
+            return trimmedCountry;
+        }
+        
+        return null;
     }
 
     getCountryCoordinates(country) {
