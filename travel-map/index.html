@@ -232,6 +232,29 @@
             color: #888888;
         }
 
+        .post-image.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 2px solid #ff4444;
+            color: #ff6666;
+            font-size: 16px;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .error-photo {
+            position: absolute;
+            background: rgba(255, 68, 68, 0.3) !important;
+            border: 2px solid #ff4444 !important;
+            border-radius: 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #fff !important;
+            font-size: 12px !important;
+            text-align: center !important;
+            font-weight: bold !important;
+        }
+
         .post-content {
             padding: 15px;
         }
@@ -1711,6 +1734,31 @@ let countryCenters = {};
                 img.style.cursor = 'pointer';
                 img.style.pointerEvents = 'auto';
                 
+                // 添加圖片載入錯誤處理
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'photo-burst-img error-photo';
+                    errorDiv.style.left = this.style.left;
+                    errorDiv.style.top = this.style.top;
+                    errorDiv.style.width = this.style.width;
+                    errorDiv.style.height = this.style.height;
+                    errorDiv.style.zIndex = this.style.zIndex;
+                    errorDiv.style.background = 'rgba(255, 0, 0, 0.3)';
+                    errorDiv.style.border = '2px solid #ff4444';
+                    errorDiv.style.borderRadius = '8px';
+                    errorDiv.style.display = 'flex';
+                    errorDiv.style.alignItems = 'center';
+                    errorDiv.style.justifyContent = 'center';
+                    errorDiv.style.color = '#fff';
+                    errorDiv.style.fontSize = '12px';
+                    errorDiv.style.textAlign = 'center';
+                    errorDiv.style.cursor = 'pointer';
+                    errorDiv.style.pointerEvents = 'auto';
+                    errorDiv.innerHTML = '❌<br>圖片<br>過期';
+                    this.parentNode.replaceChild(errorDiv, this);
+                };
+                
                 // 添加點擊事件，打開詳細頁面
                 img.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1807,7 +1855,8 @@ let countryCenters = {};
             let imgHtml = '';
             const imgSrc = post.mediaUrl || post.media_url || post.thumbnail_url;
             if (imgSrc) {
-                imgHtml = `<img src="${imgSrc}" alt="" style="width:100%;height:180px;object-fit:cover;">`;
+                imgHtml = `<img src="${imgSrc}" alt="" style="width:100%;height:180px;object-fit:cover;" 
+                    onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\\'post-image error\\'>❌ 圖片載入失敗<br><small>URL已過期</small></div>';">`;
             } else {
                 imgHtml = `<div class="post-image">${post.media_type === 'VIDEO' ? '🎥' : '📷'}</div>`;
             }
