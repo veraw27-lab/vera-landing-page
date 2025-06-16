@@ -967,13 +967,16 @@
         @media (max-width: 768px) {
             #world-map {
                 width: 100%;
-                height: 65%;
-                max-height: 450px;
+                height: 70vh;
+                min-height: 500px;
+                max-height: none;
             }
 
             .map-container {
-                padding-top: 120px;
-                padding-bottom: 80px;
+                padding-top: 100px;
+                padding-bottom: 20px;
+                height: 100vh;
+                align-items: flex-start;
             }
 
             /* 讓地圖可以放大 */
@@ -1060,7 +1063,6 @@
 
     <div class="map-container">
         <svg id="world-map"></svg>
-        <div class="photo-burst" id="photo-burst"></div>
         <div class="legend">
             <div class="legend-title">Legend</div>
             <div class="legend-item">
@@ -1082,6 +1084,9 @@
     </div>
 
     <div class="tooltip" id="tooltip"></div>
+
+    <!-- 桌面版爆破照片容器 -->
+    <div class="photo-burst" id="photo-burst"></div>
 
     <div class="posts-modal" id="posts-modal">
         <button class="close-btn" onclick="closePosts()">×</button>
@@ -1751,7 +1756,9 @@ let countryCenters = {};
                     if (currentLogicalName !== currentTooltipCountry) {
                         handleMouseOver(event, d, currentLogicalName);
                     }
-                    if (currentLogicalName !== currentBurstCountry) {
+                    // 只在桌面版顯示爆破效果
+                    const isMobileDevice = window.innerWidth <= 768 || 'ontouchstart' in window;
+                    if (!isMobileDevice && currentLogicalName !== currentBurstCountry) {
                         showPhotoBurst(event, currentLogicalName);
                     }
                 })
@@ -1773,7 +1780,11 @@ let countryCenters = {};
                     if (currentLogicalName !== nextLogicalName) {
                         svg.selectAll("path.country-highlight").classed("country-highlight", false);
                         handleMouseOut();    // Clears tooltip and resets currentTooltipCountry
-                        clearPhotoBurst();   // Clears photos and resets currentBurstCountry
+                        // 只在桌面版清理爆破效果
+                        const isMobileDevice = window.innerWidth <= 768 || 'ontouchstart' in window;
+                        if (!isMobileDevice) {
+                            clearPhotoBurst();   // Clears photos and resets currentBurstCountry
+                        }
                     }
                     // If moving to another segment of the same logical country (currentLogicalName === nextLogicalName),
                     // the mouseover on the new segment will handle updating highlights.
