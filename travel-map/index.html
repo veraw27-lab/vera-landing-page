@@ -685,11 +685,44 @@
             
             .posts-modal {
                 padding: 100px 10px 10px;
+                padding-top: 80px;
+            }
+            
+            .posts-content {
+                max-width: 100%;
             }
             
             .posts-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
+            }
+            
+            .post-card {
+                border-radius: 12px;
+                overflow: hidden;
+            }
+            
+            .post-image {
+                height: 200px;
+            }
+            
+            .post-content {
+                padding: 12px;
+            }
+            
+            .post-location {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            
+            .post-date {
+                font-size: 10px;
+                margin-bottom: 6px;
+            }
+            
+            .post-caption {
+                font-size: 11px;
+                line-height: 1.3;
             }
             
             .posts-title {
@@ -942,6 +975,17 @@
             border-radius: 8px;
             object-fit: cover;
             border: 2px solid #444;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .country-preview-photo:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .country-preview-photo:active {
+            transform: scale(0.95);
         }
 
         .country-preview-view-more {
@@ -1131,8 +1175,11 @@
             <div class="country-preview-photos" id="preview-photos">
                 <!-- 照片會動態載入 -->
             </div>
+            <div class="country-preview-hint" style="text-align: center; font-size: 11px; color: #888; margin-top: 8px;">
+                點擊任一照片查看全部貼文
+            </div>
         </div>
-        <button class="country-preview-view-more" onclick="event.stopPropagation(); viewCountryDetails();">
+        <button class="country-preview-view-more" id="view-all-posts-btn">
             View All Posts
         </button>
     </div>
@@ -2154,9 +2201,25 @@ let countryCenters = {};
                     img.className = 'country-preview-photo';
                     img.src = imgSrc;
                     img.alt = post.caption || '';
+                    img.style.cursor = 'pointer';
                     img.onerror = function() {
                         this.style.display = 'none';
                     };
+                    // 點擊照片直接進入國家貼文集
+                    img.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // 添加點擊動畫效果
+                        img.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            img.style.transform = 'scale(1)';
+                        }, 150);
+                        
+                        // 延遲一點點讓動畫完成
+                        setTimeout(() => {
+                            closeCountryPreview();
+                            showCountryPosts(countryName, countryData);
+                        }, 100);
+                    });
                     photos.appendChild(img);
                 }
             });
